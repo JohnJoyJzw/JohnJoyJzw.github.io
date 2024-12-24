@@ -1,0 +1,885 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="ArrayList1、ArrayList的底层 – 数组 数组结构的优缺点： 数组查询块，根据地址和索引直接获取元素 数组增删改慢，每次都需要创建新数组。且移动元素位置  2、ArrayList继承关系1234public class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;        implements List&lt;E&gt;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ArrayList源码">
+<meta property="og:url" content="http://example.com/2020/02/08/ArrayList%E6%BA%90%E7%A0%81/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="ArrayList1、ArrayList的底层 – 数组 数组结构的优缺点： 数组查询块，根据地址和索引直接获取元素 数组增删改慢，每次都需要创建新数组。且移动元素位置  2、ArrayList继承关系1234public class ArrayList&lt;E&gt; extends AbstractList&lt;E&gt;        implements List&lt;E&gt;">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200919161607291.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200919161551541.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200919161459628.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-02-08T07:38:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:00:27.538Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="容器">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200919161607291.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+  
+  
+  
+  <title>ArrayList源码 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/code-wallpaper-22.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="ArrayList源码"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-02-08 15:38" pubdate>
+          February 8, 2020 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          19k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          158 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">ArrayList源码</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h2><h3 id="1、ArrayList的底层-–-数组"><a href="#1、ArrayList的底层-–-数组" class="headerlink" title="1、ArrayList的底层 – 数组"></a>1、ArrayList的底层 – 数组</h3><blockquote>
+<p>数组结构的优缺点：</p>
+<p>数组查询块，根据地址和索引直接获取元素</p>
+<p>数组增删改慢，每次都需要创建新数组。且移动元素位置</p>
+</blockquote>
+<h3 id="2、ArrayList继承关系"><a href="#2、ArrayList继承关系" class="headerlink" title="2、ArrayList继承关系"></a>2、ArrayList继承关系</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ArrayList</span>&lt;E&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title class_">AbstractList</span>&lt;E&gt;<br>        <span class="hljs-keyword">implements</span> <span class="hljs-title class_">List</span>&lt;E&gt;, RandomAccess, Cloneable, java.io.Serializable<br>&#123;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="2-1、Serializable标记性接口"><a href="#2-1、Serializable标记性接口" class="headerlink" title="2.1、Serializable标记性接口"></a>2.1、Serializable标记性接口</h4><p>1、介绍</p>
+<p>类的序列化有实现java.io.Serializable接口的类启用。不实现此接口的类将不会使任何状态序列化或反序列化。可序列化类的所有子类型都是可序列化的。序列化接口没有方法或字段，仅用于标识可串行化的语义。</p>
+<p>序列化：将对象的数据写入到文件。</p>
+<p>反序列化：将文件中对象的数据读取出来。</p>
+<p>2、java.io.Serializable源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Serializable</span> &#123;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>3、 Serializable的使用：</p>
+<p>创建一个Student类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Student</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">java</span>.io.Serializable&#123;<br>    <span class="hljs-keyword">private</span> String name;<br>    <span class="hljs-keyword">private</span> Integer age;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Student</span><span class="hljs-params">()</span> &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Student</span><span class="hljs-params">(String name, Integer age)</span> &#123;<br>        <span class="hljs-built_in">this</span>.name = name;<br>        <span class="hljs-built_in">this</span>.age = age;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Student&#123;&quot;</span> +<br>                <span class="hljs-string">&quot;name=&#x27;&quot;</span> + name + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> +<br>                <span class="hljs-string">&quot;, age=&quot;</span> + age +<br>                <span class="hljs-string">&#x27;&#125;&#x27;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>一个测试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> IOException, ClassNotFoundException &#123;<br>    <span class="hljs-comment">//调用方法</span><br>    writeObject();<br><br>    readObject();<br>&#125;<br><br><span class="hljs-comment">//定义一个方法，将对象写入文件中</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">writeObject</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> IOException &#123;<br>    <span class="hljs-comment">//创建对象操作流---&gt; 序列化，将对象写入文件</span><br>    <span class="hljs-type">ObjectOutputStream</span> <span class="hljs-variable">objectOutputStream</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectOutputStream</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">FileOutputStream</span>(<span class="hljs-string">&quot;obj.txt&quot;</span>));<br>    <span class="hljs-comment">//创建需要写入的对象</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Student</span>(<span class="hljs-string">&quot;j&quot;</span>, <span class="hljs-number">32</span>);<br>    <span class="hljs-comment">//调用对象操作流写对象的方法。</span><br>    objectOutputStream.writeObject(student1);<br>    <span class="hljs-comment">//关闭流</span><br>    objectOutputStream.close();<br>&#125;<br><span class="hljs-comment">//定义一个方法，将文件中的数据读取出来</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">readObject</span><span class="hljs-params">()</span><span class="hljs-keyword">throws</span> IOException,ClassNotFoundException&#123;<br>    <span class="hljs-comment">//创建对象操作流----&gt;反序列化，将数据从文件中读取出来</span><br>    <span class="hljs-type">ObjectInput</span> <span class="hljs-variable">objectInput</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ObjectInputStream</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">FileInputStream</span>(<span class="hljs-string">&quot;obj.txt&quot;</span>));<br>    <span class="hljs-comment">//调用方法读取对象</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">o</span> <span class="hljs-operator">=</span> (Student)objectInput.readObject();<br>    <span class="hljs-comment">//关闭流</span><br>    objectInput.close();<br>    <span class="hljs-comment">//打印对象</span><br>    System.out.println(o);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>结果：</p>
+<p>在控制台中打印出对象<br><img src="https://img-blog.csdnimg.cn/20200919161607291.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center" srcset="/img/loading.gif" lazyload alt="反序列化结果"></p>
+<p>我们可以测试，如果Student对象不继承Serializable接口，结果会怎样。</p>
+<p>明显看出：NotSerializableException，没有序列化接口<br><img src="https://img-blog.csdnimg.cn/20200919161551541.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center" srcset="/img/loading.gif" lazyload alt="NotSerializableException异常"></p>
+<h4 id="2-2、Cloneable标记性接口"><a href="#2-2、Cloneable标记性接口" class="headerlink" title="2.2、Cloneable标记性接口"></a>2.2、Cloneable标记性接口</h4><p>1、介绍</p>
+<p>一个类实现Cloneable接口来指示Object.clone()方法。该方法对于该类的实例进行字段的复制时合法的。</p>
+<p>在不实现Cloneable接口的实例上调用对象的克隆方法会导致异常CloneNotSupportedException。</p>
+<p>克隆就是依据已经有的数据，创造一份新的完全一样的数据拷贝</p>
+<p>2、Cloneable源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">Cloneable</span> &#123;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>3、克隆的前提条件</p>
+<ul>
+<li>被克隆对象所在的类必须实现Cloneable接口</li>
+<li>必须重写clone方法</li>
+</ul>
+<p>4、clone的基本使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span>&#123;<br><br>    ArrayList&lt;String&gt; strings1 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>    strings1.add(<span class="hljs-string">&quot;1&quot;</span>);<br>    strings1.add(<span class="hljs-string">&quot;2&quot;</span>);<br>    strings1.add(<span class="hljs-string">&quot;3&quot;</span>);<br>    strings1.add(<span class="hljs-string">&quot;4&quot;</span>);<br>    strings1.add(<span class="hljs-string">&quot;5&quot;</span>);<br><br>    <span class="hljs-type">Object</span> <span class="hljs-variable">strings2</span> <span class="hljs-operator">=</span> strings1.clone();<br><br>    System.out.println(strings1 == strings2);   <span class="hljs-comment">//false</span><br>    System.out.println(strings1);   <span class="hljs-comment">//[1, 2, 3, 4, 5]</span><br>    System.out.println(strings2);   <span class="hljs-comment">//[1, 2, 3, 4, 5]</span><br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>5、clone底层实现</p>
+<p>在ArrayList中克隆函数的重写：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> Object <span class="hljs-title function_">clone</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-keyword">try</span> &#123;<br>        ArrayList&lt;?&gt; v = (ArrayList&lt;?&gt;) <span class="hljs-built_in">super</span>.clone();<br>        v.elementData = Arrays.copyOf(elementData, size);<br>        v.modCount = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">return</span> v;<br>    &#125; <span class="hljs-keyword">catch</span> (CloneNotSupportedException e) &#123;<br>        <span class="hljs-comment">// this shouldn&#x27;t happen, since we are Cloneable</span><br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InternalError</span>(e);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>  ArrayList继承AbstractList，但super.clone()；并不是AbstractList类中的，他是Object中的克隆方法，而这个方法的底层时通过C来写的</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">native</span> Object <span class="hljs-title function_">clone</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>下面这句是克隆的主体：copyof是Arrays中的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">v.elementData = Arrays.copyOf(elementData, size);<br></code></pre></td></tr></table></figure>
+
+<p>我们具体来看copyof()方法：它返回了一个数组，调用重载函数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T&gt; T[] copyOf(T[] original, <span class="hljs-type">int</span> newLength) &#123;<br>    <span class="hljs-keyword">return</span> (T[]) copyOf(original, newLength, original.getClass());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>copyof()的重载函数：</p>
+<p>如果(Object)newType &#x3D;&#x3D; (Object)Object[].class  为 true，直接创建一个数组，如果不为真，调用</p>
+<p>Array.newInstance()方法创建具有指定组件类型和尺寸的新数组。</p>
+<p>System.arraycopy()方法：将指定源数组中的数组从指定位置复制到目标数组位置</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> &lt;T,U&gt; T[] copyOf(U[] original, <span class="hljs-type">int</span> newLength, Class&lt;? <span class="hljs-keyword">extends</span> <span class="hljs-title class_">T</span>[]&gt; newType) &#123;<br>    <span class="hljs-meta">@SuppressWarnings(&quot;unchecked&quot;)</span><br>    T[] copy = ((Object)newType == (Object)Object[].class)<br>        ? (T[]) <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[newLength]<br>        : (T[]) Array.newInstance(newType.getComponentType(), newLength);<br>    System.arraycopy(original, <span class="hljs-number">0</span>, copy, <span class="hljs-number">0</span>,<br>                     Math.min(original.length, newLength));<br>    <span class="hljs-keyword">return</span> copy;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<p>6、案例：学生1姓名A，年龄18，将该对象的数据复制到另一个对象学生2中，并且此后学生1，2两个对象的数据不会互相影响。</p>
+<p>方法一：浅拷贝：</p>
+<p>在Student类中重写clone方法</p>
+<p>注意：需要将权限修饰符改为public，将返回对象改为Student</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> Student <span class="hljs-title function_">clone</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br>    <span class="hljs-keyword">return</span> (Student) <span class="hljs-built_in">super</span>.clone();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br>    <span class="hljs-comment">//创建一个对象</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Student</span>(<span class="hljs-string">&quot;A&quot;</span>,<span class="hljs-number">18</span>);<br>    <span class="hljs-comment">//克隆</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student1</span> <span class="hljs-operator">=</span> student.clone();<br>    <span class="hljs-comment">//比较两个学生的地址是否一项</span><br>    System.out.println(student.hashCode() == student1.hashCode());   <span class="hljs-comment">//false</span><br>    <span class="hljs-comment">//比较两个学生的数据是否一样</span><br>    System.out.println(student);      <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18&#125;</span><br>    System.out.println(student1);     <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18&#125;</span><br>    <span class="hljs-comment">//改变一个学生数据，看是否影响另一个学生</span><br>    student1.setName(<span class="hljs-string">&quot;C&quot;</span>);<br>    System.out.println(student);      <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18&#125;</span><br>    System.out.println(student1);     <span class="hljs-comment">//Student&#123;name=&#x27;C&#x27;, age=18&#125;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>浅拷贝的局限性：</p>
+<p>基本数据类型可以达到完全复制，而引用数据类型不可以</p>
+<p>原因：在学生对象student被克隆的时候，引用数据类型仅仅是拷贝了一份引用，因此当克隆对象引用数据类型的值发生改变时，被克隆对象student的引用数据类型的值也会跟随改变。</p>
+<p>也就是说，浅拷贝只是克隆了引用数据类型的地址。</p>
+<p>我们新写一个类：Book类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Book</span>&#123;<br>    <span class="hljs-keyword">private</span> String bookName;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Book</span><span class="hljs-params">(String bookName)</span> &#123;<br>        <span class="hljs-built_in">this</span>.bookName = bookName;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getBookName</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> bookName;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setBookName</span><span class="hljs-params">(String bookName)</span> &#123;<br>        <span class="hljs-built_in">this</span>.bookName = bookName;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Book&#123;&quot;</span> +<br>                <span class="hljs-string">&quot;bookName=&#x27;&quot;</span> + bookName + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> +<br>                <span class="hljs-string">&#x27;&#125;&#x27;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在Student类中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Student</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Cloneable</span> &#123;<br>    <span class="hljs-keyword">private</span> String name;<br>    <span class="hljs-keyword">private</span> Integer age;<br>    <span class="hljs-keyword">private</span> Book book;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Student</span><span class="hljs-params">()</span> &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Student</span><span class="hljs-params">(String name, Integer age, Book book)</span> &#123;<br>        <span class="hljs-built_in">this</span>.name = name;<br>        <span class="hljs-built_in">this</span>.age = age;<br>        <span class="hljs-built_in">this</span>.book = book;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;Student&#123;&quot;</span> +<br>                <span class="hljs-string">&quot;name=&#x27;&quot;</span> + name + <span class="hljs-string">&#x27;\&#x27;&#x27;</span> +<br>                <span class="hljs-string">&quot;, age=&quot;</span> + age +<br>                <span class="hljs-string">&quot;, book=&quot;</span> + book +<br>                <span class="hljs-string">&#x27;&#125;&#x27;</span>;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> Student <span class="hljs-title function_">clone</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br>        <span class="hljs-keyword">return</span> (Student) <span class="hljs-built_in">super</span>.clone();<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>测试：我们发现修改Book的名称，两个学生的Book数据都会改变</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br>    <span class="hljs-type">Book</span> <span class="hljs-variable">chineseBook</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Book</span>(<span class="hljs-string">&quot;Chinese&quot;</span>);<br>    <span class="hljs-comment">//创建一个对象</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Student</span>(<span class="hljs-string">&quot;A&quot;</span>,<span class="hljs-number">18</span>,chineseBook);<br>    <span class="hljs-comment">//克隆</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student1</span> <span class="hljs-operator">=</span> student.clone();<br>    <span class="hljs-comment">//比较两个学生的地址是否一项</span><br>    System.out.println(student.hashCode() == student1.hashCode());   <span class="hljs-comment">//false</span><br>    <span class="hljs-comment">//比较两个学生的数据是否一样</span><br>    System.out.println(student);      <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese&#x27;&#125;&#125;</span><br>    System.out.println(student1);     <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese&#x27;&#125;&#125;</span><br>    <span class="hljs-comment">//改变一个学生数据，看是否影响另一个学生</span><br>    chineseBook.setBookName(<span class="hljs-string">&quot;Chinese1&quot;</span>);<br>    System.out.println(student);      <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese1&#x27;&#125;&#125;</span><br>    System.out.println(student1);     <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese1&#x27;&#125;&#125;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<p>方法二：深拷贝：重写clone()方法</p>
+<p>在Book中继承Cloneable接口：在Book类中重写clone方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br><span class="hljs-keyword">protected</span> Object <span class="hljs-title function_">clone</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-built_in">super</span>.clone();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>在Student类中重写Clone方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java">    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> Student <span class="hljs-title function_">clone</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br><span class="hljs-comment">//        return (Student) super.clone();</span><br><br>        <span class="hljs-type">Student</span> <span class="hljs-variable">stu</span> <span class="hljs-operator">=</span> (Student) <span class="hljs-built_in">super</span>.clone();<br><br>        <span class="hljs-type">Book</span> <span class="hljs-variable">book</span> <span class="hljs-operator">=</span> (Book)<span class="hljs-built_in">this</span>.book.clone();<br><br>        stu.setBook(book);<br><br>        <span class="hljs-keyword">return</span> stu;<br><br>    &#125;<br></code></pre></td></tr></table></figure>
+
+<p>测试：同样一段代码：student的Book数据改变，但student1没有改变</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> CloneNotSupportedException &#123;<br>    <span class="hljs-type">Book</span> <span class="hljs-variable">chineseBook</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Book</span>(<span class="hljs-string">&quot;Chinese&quot;</span>);<br>    <span class="hljs-comment">//创建一个对象</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Student</span>(<span class="hljs-string">&quot;A&quot;</span>,<span class="hljs-number">18</span>,chineseBook);<br>    <span class="hljs-comment">//克隆</span><br>    <span class="hljs-type">Student</span> <span class="hljs-variable">student1</span> <span class="hljs-operator">=</span> student.clone();<br>    <span class="hljs-comment">//比较两个学生的地址是否一项</span><br>    System.out.println(student.hashCode() == student1.hashCode());   <span class="hljs-comment">//false</span><br>    <span class="hljs-comment">//比较两个学生的数据是否一样</span><br>    System.out.println(student);      <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese&#x27;&#125;&#125;</span><br>    System.out.println(student1);     <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese&#x27;&#125;&#125;</span><br>    <span class="hljs-comment">//改变一个学生数据，看是否影响另一个学生</span><br>    chineseBook.setBookName(<span class="hljs-string">&quot;Chinese1&quot;</span>);<br>    System.out.println(student);      <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese1&#x27;&#125;&#125;</span><br>    System.out.println(student1);     <br>    <span class="hljs-comment">//Student&#123;name=&#x27;A&#x27;, age=18, book=Book&#123;bookName=&#x27;Chinese&#x27;&#125;&#125;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="2-3、RandomAccess标记接口"><a href="#2-3、RandomAccess标记接口" class="headerlink" title="2.3、RandomAccess标记接口"></a>2.3、RandomAccess标记接口</h4><p>标记接口有List实现，以表明它们支持快速（通常为恒定时间）随机访问。</p>
+<p>此接口的主要目的时允许通用算法更改其行为，以便应用于随机访问列表或顺序访问列表时提供良好的性能。</p>
+<h4 id="2-4、AbstractList类"><a href="#2-4、AbstractList类" class="headerlink" title="2.4、AbstractList类"></a>2.4、AbstractList类</h4><p>该类提供的骨干实现的List接口以最小化来实现该接口由一个“随机访问”数据存储备份所需的工作。</p>
+<h3 id="3、ArrayList源码"><a href="#3、ArrayList源码" class="headerlink" title="3、ArrayList源码"></a>3、ArrayList源码</h3><h4 id="3-1、构造函数"><a href="#3-1、构造函数" class="headerlink" title="3.1、构造函数"></a>3.1、构造函数</h4><p>1、空参构造</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//elementData    集合真正存储数据的容器</span><br><span class="hljs-comment">//DEFAULTCAPACITY_EMPTY_ELEMENTDATA;   默认空容量的数组</span><br><span class="hljs-keyword">public</span> <span class="hljs-title function_">ArrayList</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-built_in">this</span>.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>2、构造具有指定初始容量的空列表</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-title function_">ArrayList</span><span class="hljs-params">(<span class="hljs-type">int</span> initialCapacity)</span> &#123;<br>    <span class="hljs-comment">//如果大于0，创建指定长度的数组</span><br>    <span class="hljs-keyword">if</span> (initialCapacity &gt; <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-built_in">this</span>.elementData = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>[initialCapacity];<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (initialCapacity == <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-comment">//如果等于0，不需要创建新数组，ArrayList提供了一个空数组</span><br>        <span class="hljs-built_in">this</span>.elementData = EMPTY_ELEMENTDATA;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">//如果小于0，异常</span><br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalArgumentException</span>(<span class="hljs-string">&quot;Illegal Capacity: &quot;</span>+<br>                                           initialCapacity);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>3、构造一个包含指定集合的元素的列表，按照它们由集合的迭代器返回的顺序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-title function_">ArrayList</span><span class="hljs-params">(Collection&lt;? extends E&gt; c)</span> &#123;<br>    <span class="hljs-comment">//将参数中的集合转变为数组，并赋值给数组a</span><br>    Object[] a = c.toArray();<br>    <span class="hljs-comment">//判断，</span><br>    <span class="hljs-keyword">if</span> ((size = a.length) != <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-comment">//判断类型</span><br>        <span class="hljs-keyword">if</span> (c.getClass() == ArrayList.class) &#123;<br>            <span class="hljs-comment">//赋值给ArrayList中的数组</span><br>            elementData = a;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-comment">//否则复制指定的数组，并传入ArrayList中的数组中</span><br>            elementData = Arrays.copyOf(a, size, Object[].class);<br>        &#125;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">// replace with empty array.替代为一个空数组</span><br>        elementData = EMPTY_ELEMENTDATA;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-2、add方法"><a href="#3-2、add方法" class="headerlink" title="3.2、add方法"></a>3.2、add方法</h4><p>1、将指定的元素追加到此列表的末尾</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;(<span class="hljs-number">5</span>);<br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">add</span><span class="hljs-params">(E e)</span> &#123;<br>    <span class="hljs-comment">//数组是否需要扩容，</span><br>    ensureCapacityInternal(size + <span class="hljs-number">1</span>);  <span class="hljs-comment">// Increments modCount!!</span><br>    elementData[size++] = e;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//ensureCapacityInternal()方法</span><br><span class="hljs-comment">//elementData是当前ArrayList中元素</span><br><span class="hljs-comment">//minCapacity是当前ArrayList中最少的空间</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">ensureCapacityInternal</span><span class="hljs-params">(<span class="hljs-type">int</span> minCapacity)</span> &#123;<br>    ensureExplicitCapacity(calculateCapacity(elementData, minCapacity));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//调用calculateCapacity()方法</span><br><span class="hljs-comment">//得到当前的最小的空间。</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-type">int</span> <span class="hljs-title function_">calculateCapacity</span><span class="hljs-params">(Object[] elementData, <span class="hljs-type">int</span> minCapacity)</span> &#123;<br>    <span class="hljs-keyword">if</span> (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) &#123;<br>        <span class="hljs-keyword">return</span> Math.max(DEFAULT_CAPACITY, minCapacity);<br>    &#125;<br>    <span class="hljs-keyword">return</span> minCapacity;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">ensureExplicitCapacity</span><span class="hljs-params">(<span class="hljs-type">int</span> minCapacity)</span> &#123;<br>    modCount++;  <span class="hljs-comment">//记录着集合的修改次数</span><br>	<br>    <span class="hljs-comment">// overflow-conscious code</span><br>    <span class="hljs-comment">//如果需要的最小空间比当前空间大，需要扩容</span><br>    <span class="hljs-keyword">if</span> (minCapacity - elementData.length &gt; <span class="hljs-number">0</span>)<br>        grow(minCapacity);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//minCapacity是当前需要的最小空间</span><br><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">grow</span><span class="hljs-params">(<span class="hljs-type">int</span> minCapacity)</span> &#123;<br>    <span class="hljs-comment">// overflow-conscious code</span><br>    <span class="hljs-comment">//得到原来的arrayList的长度</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">oldCapacity</span> <span class="hljs-operator">=</span> elementData.length;<br>    <span class="hljs-comment">//一个新的长度，是原数组长度的1.5倍</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">newCapacity</span> <span class="hljs-operator">=</span> oldCapacity + (oldCapacity &gt;&gt; <span class="hljs-number">1</span>);<br>    <span class="hljs-comment">//如果新数组的长度比需要的最小长度还要小，则直接将最小长度赋值给新数组的长度</span><br>    <span class="hljs-keyword">if</span> (newCapacity - minCapacity &lt; <span class="hljs-number">0</span>)<br>        newCapacity = minCapacity;<br>    <span class="hljs-keyword">if</span> (newCapacity - MAX_ARRAY_SIZE &gt; <span class="hljs-number">0</span>)<br>        newCapacity = hugeCapacity(minCapacity);<br>    <span class="hljs-comment">// minCapacity is usually close to size, so this is a win:</span><br>    <br>    <span class="hljs-comment">//将数组复制到arrayList中的数组</span><br>    elementData = Arrays.copyOf(elementData, newCapacity);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>我们在回到add()方法的源码中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">add</span><span class="hljs-params">(E e)</span> &#123;<br>    ensureCapacityInternal(size + <span class="hljs-number">1</span>);  <span class="hljs-comment">// Increments modCount!!</span><br>    <span class="hljs-comment">//arrayList中数组的长度为10</span><br>    <span class="hljs-comment">//Size是数组中元素的个数</span><br>    <span class="hljs-comment">//size++：元素个数加1</span><br>    <span class="hljs-comment">//将数据存储到小标为size的位置</span><br>    elementData[size++] = e;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>2、在此列表的指定位置插入指定元素</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><span class="hljs-comment">//在位置1插入D   1是指数组的下标</span><br>str.add(<span class="hljs-number">1</span>,<span class="hljs-string">&quot;D&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">add</span><span class="hljs-params">(<span class="hljs-type">int</span> index, E element)</span> &#123;<br>    <span class="hljs-comment">//检查是否越界</span><br>    rangeCheckForAdd(index);<br>	<span class="hljs-comment">//判断是否需要扩容，上文以详细介绍</span><br>    ensureCapacityInternal(size + <span class="hljs-number">1</span>);  <span class="hljs-comment">// Increments modCount!!</span><br>    <span class="hljs-comment">//没有元素都向后移动一位</span><br>    System.arraycopy(elementData, index, elementData, index + <span class="hljs-number">1</span>,<br>                     size - index);<br>    <span class="hljs-comment">//将下标为index的位置赋值为element</span><br>    elementData[index] = element;<br>    <span class="hljs-comment">//数组元素个数加1</span><br>    size++;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">rangeCheckForAdd</span><span class="hljs-params">(<span class="hljs-type">int</span> index)</span> &#123;<br>    <span class="hljs-keyword">if</span> (index &gt; size || index &lt; <span class="hljs-number">0</span>)<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IndexOutOfBoundsException</span>(outOfBoundsMsg(index));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>关于System.arraycopy()方法，我们无法读到源码，但我们可以写一些例子来了解这个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">int</span>[] ints = &#123;<span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>,<span class="hljs-number">0</span>&#125;;<br>System.arraycopy(ints,<span class="hljs-number">1</span>,ints,<span class="hljs-number">2</span>,<span class="hljs-number">2</span>);<br><br><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> anInt : ints) &#123;<br>    System.out.print(anInt + <span class="hljs-string">&quot;\t&quot;</span>);  <span class="hljs-comment">//1	2	2	3	0	0	</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>3、按指定集合的Iterator返回的顺序将指定集合中的元素追加到此列表的末尾</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>ArrayList&lt;String&gt; str1 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str1.add(<span class="hljs-string">&quot;D&quot;</span>);<br>str1.add(<span class="hljs-string">&quot;E&quot;</span>);<br>str1.add(<span class="hljs-string">&quot;F&quot;</span>);<br><br>str.addAll(str1);<br></code></pre></td></tr></table></figure>
+
+
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">addAll</span><span class="hljs-params">(Collection&lt;? extends E&gt; c)</span> &#123;<br>    <span class="hljs-comment">//将需要添加的集合转变成数组</span><br>    Object[] a = c.toArray();<br>    <span class="hljs-comment">//得到该数组的长度</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">numNew</span> <span class="hljs-operator">=</span> a.length;<br>    <span class="hljs-comment">//判断是否需要扩容</span><br>    ensureCapacityInternal(size + numNew);  <span class="hljs-comment">// Increments modCount</span><br>    <span class="hljs-comment">//将a中的元素从0开始赋值给elementData中，且elementData是从size开始。</span><br>    <span class="hljs-comment">//共赋值numNew次</span><br>    System.arraycopy(a, <span class="hljs-number">0</span>, elementData, size, numNew);<br>    size += numNew;<br>    <span class="hljs-keyword">return</span> numNew != <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>4、将指定集合中的元素插入此列表中，从指定的位置开始。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>ArrayList&lt;String&gt; str1 = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str1.add(<span class="hljs-string">&quot;D&quot;</span>);<br>str1.add(<span class="hljs-string">&quot;E&quot;</span>);<br>str1.add(<span class="hljs-string">&quot;F&quot;</span>);<br><br>str.addAll(<span class="hljs-number">1</span>,str1);<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">addAll</span><span class="hljs-params">(<span class="hljs-type">int</span> index, Collection&lt;? extends E&gt; c)</span> &#123;<br>    <span class="hljs-comment">//检查是否越界</span><br>    rangeCheckForAdd(index);<br>	<span class="hljs-comment">//转变为数组</span><br>    Object[] a = c.toArray();<br>    <span class="hljs-comment">//该数组的长度</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">numNew</span> <span class="hljs-operator">=</span> a.length;<br>    <span class="hljs-comment">//判断是否需要扩容</span><br>    ensureCapacityInternal(size + numNew);  <span class="hljs-comment">// Increments modCount</span><br>	<span class="hljs-comment">//需要移动的次数</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">numMoved</span> <span class="hljs-operator">=</span> size - index;<br>    <span class="hljs-comment">//将arrayList中的数据，从第index个开始，向后移动numNew个位置</span><br>    <span class="hljs-keyword">if</span> (numMoved &gt; <span class="hljs-number">0</span>)<br>        System.arraycopy(elementData, index, elementData, index + numNew,<br>                         numMoved);<br>	<span class="hljs-comment">//将需要添加的元素赋给arrayList中的数组</span><br>    System.arraycopy(a, <span class="hljs-number">0</span>, elementData, index, numNew);<br>    size += numNew;<br>    <span class="hljs-keyword">return</span> numNew != <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-3、set方法"><a href="#3-3、set方法" class="headerlink" title="3.3、set方法"></a>3.3、set方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str.set(<span class="hljs-number">1</span>,<span class="hljs-string">&quot;D&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> E <span class="hljs-title function_">set</span><span class="hljs-params">(<span class="hljs-type">int</span> index, E element)</span> &#123;<br>    <span class="hljs-comment">//检查是否越界</span><br>    rangeCheck(index);<br>	<span class="hljs-comment">//得到下标为index的元素</span><br>    <span class="hljs-type">E</span> <span class="hljs-variable">oldValue</span> <span class="hljs-operator">=</span> elementData(index);<br>    <br>   	<span class="hljs-comment">//下标为index处赋新值</span><br>    elementData[index] = element;<br>    <span class="hljs-comment">//返回原来的元素</span><br>    <span class="hljs-keyword">return</span> oldValue;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-4、get方法"><a href="#3-4、get方法" class="headerlink" title="3.4、get方法"></a>3.4、get方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str.get(<span class="hljs-number">1</span>);<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> E <span class="hljs-title function_">get</span><span class="hljs-params">(<span class="hljs-type">int</span> index)</span> &#123;<br>    rangeCheck(index);<br><br>    <span class="hljs-keyword">return</span> elementData(index);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="3-5、toString方法"><a href="#3-5、toString方法" class="headerlink" title="3.5、toString方法"></a>3.5、toString方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str.toString();<br></code></pre></td></tr></table></figure>
+
+<p>toString()方法是AbstractCollection类中的方法，它是AbstractList是父类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> String <span class="hljs-title function_">toString</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">//获取迭代器</span><br>    Iterator&lt;E&gt; it = iterator();<br>    <span class="hljs-comment">//如果迭代器为空，直接返回[]</span><br>    <span class="hljs-keyword">if</span> (! it.hasNext())<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;[]&quot;</span>;<br>	<br>    <span class="hljs-comment">//创建StringBuilder</span><br>    <span class="hljs-type">StringBuilder</span> <span class="hljs-variable">sb</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StringBuilder</span>();<br>    <span class="hljs-comment">//先添加一个[</span><br>    sb.append(<span class="hljs-string">&#x27;[&#x27;</span>);<br>    <span class="hljs-keyword">for</span> (;;) &#123;<br>        <span class="hljs-type">E</span> <span class="hljs-variable">e</span> <span class="hljs-operator">=</span> it.next();<br>        sb.append(e == <span class="hljs-built_in">this</span> ? <span class="hljs-string">&quot;(this Collection)&quot;</span> : e);<br>        <span class="hljs-comment">//没有元素了，就不再添加‘，’,直接返回</span><br>        <span class="hljs-keyword">if</span> (! it.hasNext())<br>            <span class="hljs-keyword">return</span> sb.append(<span class="hljs-string">&#x27;]&#x27;</span>).toString();<br>        sb.append(<span class="hljs-string">&#x27;,&#x27;</span>).append(<span class="hljs-string">&#x27; &#x27;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-6、迭代器"><a href="#3-6、迭代器" class="headerlink" title="3.6、迭代器"></a>3.6、迭代器</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>Iterator&lt;String&gt; it = str.iterator();<br><br><span class="hljs-keyword">while</span>(it.hasNext())&#123;<br>    System.out.println(it.next());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> Iterator&lt;E&gt; <span class="hljs-title function_">iterator</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">//返回一个Itr()对象</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Itr</span>();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//arrayList中的内部类</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Itr</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Iterator</span>&lt;E&gt; &#123;<br>    <span class="hljs-comment">//光标，默认为0</span><br>    <span class="hljs-type">int</span> cursor;       <span class="hljs-comment">// index of next element to return</span><br>    <span class="hljs-comment">//最后一次移动的光标的位置</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">lastRet</span> <span class="hljs-operator">=</span> -<span class="hljs-number">1</span>; <span class="hljs-comment">// index of last element returned; -1 if no such</span><br>    <span class="hljs-comment">//将集合实际修改的次数赋值给预期修改的次数</span><br>    <span class="hljs-type">int</span> <span class="hljs-variable">expectedModCount</span> <span class="hljs-operator">=</span> modCount;<br><br>    Itr() &#123;&#125;<br>	<span class="hljs-comment">//判断当前光标与arrayList中元素个数</span><br>    <span class="hljs-comment">//如果相等，返回false，如果不等返回true</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">hasNext</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> cursor != size;<br>    &#125;<br><br>    <br>    <span class="hljs-meta">@SuppressWarnings(&quot;unchecked&quot;)</span><br>    <span class="hljs-keyword">public</span> E <span class="hljs-title function_">next</span><span class="hljs-params">()</span> &#123;<br>        checkForComodification();<br>        <span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> cursor;<br>        <span class="hljs-keyword">if</span> (i &gt;= size)<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">NoSuchElementException</span>();<br>        Object[] elementData = ArrayList.<span class="hljs-built_in">this</span>.elementData;<br>        <span class="hljs-keyword">if</span> (i &gt;= elementData.length)<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcurrentModificationException</span>();<br>        <span class="hljs-comment">//光标向下移动。</span><br>        cursor = i + <span class="hljs-number">1</span>;<br>        <span class="hljs-keyword">return</span> (E) elementData[lastRet = i];<br>    &#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>在迭代器中checkForComodification();方法有什么用呢？</p>
+<p>下面举一个例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>Iterator&lt;String&gt; it = str.iterator();<br><br><span class="hljs-keyword">while</span>(it.hasNext())&#123;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> it.next();<br>    <span class="hljs-comment">//当等于A是，删除这个元素</span><br>    <span class="hljs-keyword">if</span>(s.equals(<span class="hljs-string">&quot;A&quot;</span>))&#123;<br>        str.remove(<span class="hljs-string">&quot;A&quot;</span>);<br>    &#125;<br>&#125;<br><br>System.out.println(str);<br></code></pre></td></tr></table></figure>
+
+<p>运行结果：<br><img src="https://img-blog.csdnimg.cn/20200919161459628.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center" srcset="/img/loading.gif" lazyload alt="ConcurrentModificationException"></p>
+<p>我们在api文档中查看这个异常：</p>
+<p><strong>当不允许这样的修改时，可以通过检测到对象的并发修改的方法来抛出此异常。</strong> </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//在进入迭代器之前，expectedModCount就被赋值为modCount，</span><br><span class="hljs-comment">//我们直到，modCount是指修改的次数，调用remove方法，modCount就会改变</span><br><span class="hljs-comment">//判断，如果两个不等，返回ConcurrentModificationException</span><br><span class="hljs-keyword">final</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">checkForComodification</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-keyword">if</span> (modCount != expectedModCount)<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcurrentModificationException</span>();<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//remove方法</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">remove</span><span class="hljs-params">(Object o)</span> &#123;<br>    <span class="hljs-comment">//如果删除元素为空</span><br>    <span class="hljs-keyword">if</span> (o == <span class="hljs-literal">null</span>) &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">index</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; index &lt; size; index++)<br>            <span class="hljs-keyword">if</span> (elementData[index] == <span class="hljs-literal">null</span>) &#123;<br>                <span class="hljs-comment">//调用fastMove方法</span><br>                fastRemove(index);<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>            &#125;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">//否则，遍历整个arrayList，找到o</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">index</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; index &lt; size; index++)<br>            <span class="hljs-keyword">if</span> (o.equals(elementData[index])) &#123;<br>                <span class="hljs-comment">//调用fastMove方法</span><br>                fastRemove(index);<br>                <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>            &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">fastRemove</span><span class="hljs-params">(<span class="hljs-type">int</span> index)</span> &#123;<br>    <span class="hljs-comment">//修改次数加1</span><br>    modCount++;<br>    <span class="hljs-type">int</span> <span class="hljs-variable">numMoved</span> <span class="hljs-operator">=</span> size - index - <span class="hljs-number">1</span>;<br>    <span class="hljs-keyword">if</span> (numMoved &gt; <span class="hljs-number">0</span>)<br>        <span class="hljs-comment">//上文已经介绍，前移一位</span><br>        System.arraycopy(elementData, index+<span class="hljs-number">1</span>, elementData, index,<br>                         numMoved);<br>    <span class="hljs-comment">//arrayList中元素个数减1</span><br>    elementData[--size] = <span class="hljs-literal">null</span>; <span class="hljs-comment">// clear to let GC do its work</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>但是：值得注意的是，如果我们删除的是倒数第二个元素：不会抛出异常。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>Iterator&lt;String&gt; it = str.iterator();<br><br><span class="hljs-keyword">while</span>(it.hasNext())&#123;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">s</span> <span class="hljs-operator">=</span> it.next();<br>    <span class="hljs-keyword">if</span>(s.equals(<span class="hljs-string">&quot;B&quot;</span>))&#123;<br>            str.remove(<span class="hljs-string">&quot;B&quot;</span>);<br>    &#125;<br>&#125;<br><br>System.out.println(str);   <span class="hljs-comment">//[A, C]</span><br></code></pre></td></tr></table></figure>
+
+<p>这是因为在删除完后，arrayList中的长度变为了：2，在进行下一次迭代时，需要判断size和光标的大小：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//此时光标为2，size也为2，返回false，因此不会循环了</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">hasNext</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-keyword">return</span> cursor != size;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>那么如果删除元素？</p>
+<p>迭代器为我们提供了一个方法：remove()：</p>
+<p>从底层集合删除此迭代器返回的最后一个元素</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">remove</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">//最后一次迭代的下标</span><br>    <span class="hljs-keyword">if</span> (lastRet &lt; <span class="hljs-number">0</span>)<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalStateException</span>();<br>    <span class="hljs-comment">//上文已介绍</span><br>    checkForComodification();<br><br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-comment">//删除上一个迭代的元素</span><br>        ArrayList.<span class="hljs-built_in">this</span>.remove(lastRet);<br>        cursor = lastRet;<br>        lastRet = -<span class="hljs-number">1</span>;<br>        <span class="hljs-comment">////////*********将实际修改的次数赋给预期修改次数</span><br>        <span class="hljs-comment">//我们发现，迭代器中的删除元素的方法实际上还是arrayList中的方法</span><br>        <span class="hljs-comment">//但是这一步保证了程序不会出现异常</span><br>        expectedModCount = modCount;<br>    &#125; <span class="hljs-keyword">catch</span> (IndexOutOfBoundsException ex) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcurrentModificationException</span>();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-7、clear方法"><a href="#3-7、clear方法" class="headerlink" title="3.7、clear方法"></a>3.7、clear方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str.clear();<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">clear</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">//修改次数加1</span><br>    modCount++;<br><br>    <span class="hljs-comment">// clear to let GC do its work</span><br>    <span class="hljs-comment">//将所有元素置为null</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; size; i++)<br>        elementData[i] = <span class="hljs-literal">null</span>;<br>	<br>    <span class="hljs-comment">//将size置为0</span><br>    size = <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-8、contains方法"><a href="#3-8、contains方法" class="headerlink" title="3.8、contains方法"></a>3.8、contains方法</h4><p>如果此列表包含指定元素，则返回true</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str.contains(<span class="hljs-string">&quot;A&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//调用indexof()方法</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">contains</span><span class="hljs-params">(Object o)</span> &#123;<br>    <span class="hljs-keyword">return</span> indexOf(o) &gt;= <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">indexOf</span><span class="hljs-params">(Object o)</span> &#123;<br>    <span class="hljs-keyword">if</span> (o == <span class="hljs-literal">null</span>) &#123;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; size; i++)<br>            <span class="hljs-keyword">if</span> (elementData[i]==<span class="hljs-literal">null</span>)<br>                <span class="hljs-keyword">return</span> i;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">//遍历找到o</span><br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; size; i++)<br>            <span class="hljs-keyword">if</span> (o.equals(elementData[i]))<br>                <span class="hljs-keyword">return</span> i;<br>    &#125;<br>    <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3-9、isEmpty方法"><a href="#3-9、isEmpty方法" class="headerlink" title="3.9、isEmpty方法"></a>3.9、isEmpty方法</h4><p>如果此列表不包含元素，返回true</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java">ArrayList&lt;String&gt; str = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br><br>str.add(<span class="hljs-string">&quot;A&quot;</span>);<br>str.add(<span class="hljs-string">&quot;B&quot;</span>);<br>str.add(<span class="hljs-string">&quot;C&quot;</span>);<br><br>str.isEmpty();<br></code></pre></td></tr></table></figure>
+
+<p>源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//如果arrayList中数组长度为空，返回true</span><br><span class="hljs-keyword">public</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isEmpty</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-keyword">return</span> size == <span class="hljs-number">0</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%AE%B9%E5%99%A8/">#容器</a>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>ArrayList源码</div>
+      <div>http://example.com/2020/02/08/ArrayList源码/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>February 8, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/03/08/HashMap%E6%BA%90%E7%A0%81/" title="HashMap源码">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">HashMap源码</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/02/08/Servlet/" title="Servlet 编程">
+                        <span class="hidden-mobile">Servlet 编程</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,724 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="微服务组件： Hystrix一、Hystrix 简介1、为什么需要容错保护在微服务架构中，我们将系统的按功能拆分了很多服务单元，各个服务单元都被注册在注册中心中。通过从注册中心获取的其他服务地址，来调用其他服务。实现服务之间的调用。 比如：在一个电商网站中，我们可能将系统拆分为用户、订单、积分等服务单元。当用户创建一个订单的时候，  各个服务单元相互调用，相互依赖。由于每个服务单元都在不同的进">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务组件 -- 服务容错保护">
+<meta property="og:url" content="http://example.com/2021/07/14/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E5%AE%B9%E9%94%99%E4%BF%9D%E6%8A%A4/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="微服务组件： Hystrix一、Hystrix 简介1、为什么需要容错保护在微服务架构中，我们将系统的按功能拆分了很多服务单元，各个服务单元都被注册在注册中心中。通过从注册中心获取的其他服务地址，来调用其他服务。实现服务之间的调用。 比如：在一个电商网站中，我们可能将系统拆分为用户、订单、积分等服务单元。当用户创建一个订单的时候，  各个服务单元相互调用，相互依赖。由于每个服务单元都在不同的进">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210713014739.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105933.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105928.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105918.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105914.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105905.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105850.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105843.png">
+<meta property="article:published_time" content="2021-07-14T02:57:32.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:08:51.673Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="微服务">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210713014739.png">
+  
+  
+  
+  <title>微服务组件 -- 服务容错保护 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="微服务组件 -- 服务容错保护"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-07-14 10:57" pubdate>
+          July 14, 2021 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.3k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          36 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">微服务组件 -- 服务容错保护</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="微服务组件：-Hystrix"><a href="#微服务组件：-Hystrix" class="headerlink" title="微服务组件： Hystrix"></a>微服务组件： Hystrix</h2><h3 id="一、Hystrix-简介"><a href="#一、Hystrix-简介" class="headerlink" title="一、Hystrix 简介"></a>一、Hystrix 简介</h3><h4 id="1、为什么需要容错保护"><a href="#1、为什么需要容错保护" class="headerlink" title="1、为什么需要容错保护"></a>1、为什么需要容错保护</h4><p>在微服务架构中，我们将系统的按功能拆分了很多服务单元，各个服务单元都被注册在注册中心中。通过从注册中心获取的其他服务地址，来调用其他服务。实现服务之间的调用。</p>
+<p>比如：在一个电商网站中，我们可能将系统拆分为用户、订单、积分等服务单元。当用户创建一个订单的时候，</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210713014739.png" srcset="/img/loading.gif" lazyload alt="微服务架构简单模型"></p>
+<p>各个服务单元相互调用，相互依赖。由于每个服务单元都在不同的进程中运行，依赖通过远程调用的方式执行，这样就有可能因为各种原因导致出现延迟，出现调用故障等。而这些问题直接导致调用方的对外服务出现延迟或故障。</p>
+<p>比如：在电商网站中，用户服务和订单服务相互调用，当用户创建一个订单时，客户端将调用订单服务的创建订单接口，如果此时创建订单时由于自身的逻辑等原因造成响应缓慢，会导致创建订单服务的线程被挂起，只能等待创建订单的响应，甚至可能导致调用失败。在高并发的情况下，这些挂起的线程没有响应，并且后续有大量的请求被阻塞，最终导致订单服务也不可能用。</p>
+<p>在微服务架构中，有这么多的服务单元，且服务之间需要相互调用，如果一个单元出现故障，就可能因依赖关系引发故障的蔓延，最终道中整个系统的瘫痪。</p>
+<p>因此，我们需要引入服务容错保护组件 — <code>Hystrix</code>。</p>
+<h4 id="2、什么是-Hystrix"><a href="#2、什么是-Hystrix" class="headerlink" title="2、什么是 Hystrix"></a>2、什么是 Hystrix</h4><p><code>Spring Cloud Hystrix </code>实现了断路器、线程隔离等一系列服务保护功能。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 什么是 断路器</span><br><br>断路器是一种 “开关” 装置。<br>用于在电路上保护线路过载，当线路中有电器发生短路时，“断路器”能够及时切断故障电路。<br>防止发生过载、发热甚至起火等严重后果。<br><br></code></pre></td></tr></table></figure>
+
+<p>在分布式架构中，断路器模式的作用也类似的，当某个服务单元发生故障（类似于电器发生短路）之后，通过断路器的故障监控（类似于熔断保险丝），向调用方返回一个错误响应，而不是长时间的等待。这样就不会使得线程一直被挂起。避免的之后的调用被阻塞。</p>
+<p><code>Hystrix</code>组件的目的在于通过控制那些访问远程系统、服务和第三方库的节点，从而对延迟和故障提供更强大的容错能力。</p>
+<p><code>Hystrix</code>组件具备服务降级、服务熔断、线程和信号隔离、请求缓存、请求合并以及服务监控等功能。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 服务熔断</span><br><br>服务熔断的作用类似于保险丝，当某个服务出现不可用时或响应超时时<br>为了防止 “服务雪崩” 暂停对该服务的调用<br><br><br><span class="hljs-section"># 服务降级：</span><br>为了预防某些服务出现负荷过载或者响应慢的情况，我们舍弃一些边缘服务（非核心业务或功能）。<br>直接返回一个提前准备号的fallback错误信息。<br><br><br><span class="hljs-section"># 相同点</span><br>防止系统的整体缓慢甚至崩溃，采用的技术手段；<br>最终让用户体验到的是某些功能暂时不可达或不可用；<br><br><span class="hljs-section"># 不同点</span><br>服务熔断一般是某个服务（下游服务）故障引起，而服务降级一般是从整体负荷考虑<br><br><span class="hljs-section"># 注意</span><br>熔断必会触发降级,所以熔断也是降级一种。<br>区别在于熔断是对调用链路的保护,而降级是对系统过载的一种保护处理<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="二、Hystrix-实例-–-服务熔断"><a href="#二、Hystrix-实例-–-服务熔断" class="headerlink" title="二、Hystrix 实例 – 服务熔断"></a>二、Hystrix 实例 – 服务熔断</h3><p>注册中心为<code>Consul</code>，使用声明式调用组件<code>OpenFeign</code>。</p>
+<p>两个服务，具体的服务实例查看另一篇博客。<a target="_blank" rel="noopener" href="https://johnjoy.top/2021/07/12/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/">服务调用组件。</a></p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs ada">商品服务 <span class="hljs-comment">-- 端口号8882      product</span><br>用户服务 <span class="hljs-comment">-- 端口号8881		 user</span><br><br>用户服务调用商品服务<br></code></pre></td></tr></table></figure>
+
+
+
+<p>添加<code>Hystrix</code>依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--引入hystrix--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-hystrix<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>添加注解</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-meta">@EnableDiscoveryClient</span><br><span class="hljs-meta">@EnableFeignClients</span><br><span class="hljs-meta">@EnableCircuitBreaker</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Products8882Application</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        SpringApplication.run(Products8882Application.class, args);<br>    &#125;<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@Slf4j</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ProductsController</span> &#123;<br><br>    <span class="hljs-meta">@GetMapping(&quot;/product/break&quot;)</span><br>    <span class="hljs-meta">@HystrixCommand(fallbackMethod = &quot;testBreakFall&quot;)</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">testBreak</span><span class="hljs-params">(Integer id)</span>&#123;<br>        log.info(<span class="hljs-string">&quot;接受商品的id&quot;</span> + id);<br><br>        <span class="hljs-keyword">if</span>(id &lt; <span class="hljs-number">0</span>)&#123;<br>            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;数据不合法&quot;</span>);<br>        &#125;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;当前接受商品id:&quot;</span> + id;<br>    &#125;<br><br>    <span class="hljs-comment">//设置 返回响应</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">testBreakFall</span><span class="hljs-params">(Integer id)</span>&#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;对不起，当前数据不合法: &quot;</span> + id + <span class="hljs-string">&quot;请重新输入&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>用户服务通过<code>OpenFeign</code>来调用商品服务。</p>
+<p>接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@FeignClient(&quot;PRODUCT&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ProductClient</span> &#123;<br><br>    <span class="hljs-meta">@GetMapping(&quot;/product/break&quot;)</span><br>    String <span class="hljs-title function_">testBreak</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam(&quot;id&quot;)</span> Integer id)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RestController</span><br><span class="hljs-meta">@Slf4j</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserController</span> &#123;<br>	<span class="hljs-meta">@GetMapping(&quot;/user/break&quot;)</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">breakTest</span><span class="hljs-params">(Integer id)</span>&#123;<br>        <span class="hljs-keyword">return</span> productClient.testBreak(id);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>当我们输入正确的数值：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105933.png" srcset="/img/loading.gif" lazyload alt="image-20210713154013962"></p>
+<p>当我们输入错误的数值：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105928.png" srcset="/img/loading.gif" lazyload alt="image-20210713153959709"></p>
+<p>我们可以看到，当我们使用异常来模拟，出现异常时，断路器打开，此时出现服务熔断。那么就会调用设置的响应内容。</p>
+<h3 id="三、Hystrix实例-–-服务降级"><a href="#三、Hystrix实例-–-服务降级" class="headerlink" title="三、Hystrix实例 – 服务降级"></a>三、Hystrix实例 – 服务降级</h3><p>服务熔断的实现是在被调用方，是服务端。而服务降级是在调用方，属于客户端。</p>
+<p>可以通过<code>OpenFeign</code>和<code>Hystrix</code>实现服务降级。</p>
+<p>引入依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--引入hystrix--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.cloud<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-cloud-starter-netflix-hystrix<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>加入注解</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-meta">@EnableFeignClients</span><br><span class="hljs-meta">@EnableHystrix</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User8881Application</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        SpringApplication.run(User8881Application.class, args);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>开启<code>OpenFeign</code>支持服务降级</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs properties"><span class="hljs-attr">feign.hystrix.enabled</span>=<span class="hljs-string">true</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>开发<code>fallback</code>处理类，并继承接口，不要忘记加入<code>@Component</code>注解</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ProductFallBack</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">ProductClient</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">testBreak</span><span class="hljs-params">(Integer id)</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;fallback 处理方法&quot;</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>在接口上加入被调用方的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@FeignClient(value = &quot;PRODUCT&quot;,fallback = .class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ProductClient</span> &#123;<br>    <span class="hljs-meta">@GetMapping(&quot;/product/break&quot;)</span><br>    String <span class="hljs-title function_">testBreak</span><span class="hljs-params">(<span class="hljs-meta">@RequestParam(&quot;id&quot;)</span> Integer id)</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>我们正常访问<code>localhost:8881/user/break?id=1</code></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105918.png" srcset="/img/loading.gif" lazyload alt="image-20210713230644894"></p>
+<p>我们商品服务<strong>关闭</strong>，再次访问<code>localhost:8881/user/break?id=1</code></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105914.png" srcset="/img/loading.gif" lazyload alt="image-20210713230833652"></p>
+<p>此时，服务端商品服务已经宕机了，但是我们进行了服务降级处理，让客户端在服务端不可用时也会获得提示信息而不会挂起耗死服务器。</p>
+<h3 id="四、使用细节"><a href="#四、使用细节" class="headerlink" title="四、使用细节"></a>四、使用细节</h3><p>断路器打开的条件：</p>
+<p><a target="_blank" rel="noopener" href="https://cloud.spring.io/spring-cloud-netflix/2.2.x/reference/html/#circuit-breaker-spring-cloud-circuit-breaker-with-hystrix">https://cloud.spring.io/spring-cloud-netflix/2.2.x/reference/html/#circuit-breaker-spring-cloud-circuit-breaker-with-hystrix</a></p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 原文翻译之后,总结打开关闭的条件:</span><br><span class="hljs-bullet">-</span> 1、  当满足一定的阀值的时候（默认10秒内超过20个请求次数）<br><span class="hljs-bullet">-</span> 2、  当失败率达到一定的时候（默认10秒内超过50%的请求失败）<br><span class="hljs-bullet">-</span> 3、  到达以上阀值，断路器将会开启<br><span class="hljs-bullet">-</span> 4、  当开启的时候，所有请求都不会进行转发<br><span class="hljs-bullet">-</span> 5、  一段时间之后（默认是5秒），这个时候断路器是半开状态，会让其中一个请求进行转发。<br><span class="hljs-code">	如果成功，断路器会关闭，若失败，继续开启。重复4和5。</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>我们做一个服务熔断中断路器的打开与关闭的实例：</p>
+<p>我们访问<code>http://localhost:8881/user/break?id=-2</code>。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105905.png" srcset="/img/loading.gif" lazyload alt="image-20210713231928800"></p>
+<p>然后，疯狂刷新，10秒内刷新20个请求。</p>
+<p>访问地址<code>http://localhost:8881/user/break?id=9</code></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105850.png" srcset="/img/loading.gif" lazyload alt="image-20210713232035675"></p>
+<p>可以看到，数据合法，但断路器依旧打开了。5 s之后再次访问，恢复正常。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210714105843.png" srcset="/img/loading.gif" lazyload alt="image-20210713232153354"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>微服务组件 -- 服务容错保护</div>
+      <div>http://example.com/2021/07/14/微服务组件-服务容错保护/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>July 14, 2021</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/07/15/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E7%BD%91%E5%85%B3/" title="微服务组件 -- 网关">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">微服务组件 -- 网关</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/07/12/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/" title="微服务组件 -- 服务调用">
+                        <span class="hidden-mobile">微服务组件 -- 服务调用</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

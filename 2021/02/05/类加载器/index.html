@@ -1,0 +1,758 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="类加载器1.类加载器概述​		类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。 ClassLoader的作用123#">
+<meta property="og:type" content="article">
+<meta property="og:title" content="类加载器">
+<meta property="og:url" content="http://example.com/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="类加载器1.类加载器概述​		类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。 ClassLoader的作用123#">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416184233.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416192539.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416195107.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416195133.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416195459.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416200839.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416201450.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416202239.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416202956.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416204503.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416204424.png">
+<meta property="article:published_time" content="2021-02-05T07:30:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:07:13.225Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210416184233.png">
+  
+  
+  
+  <title>类加载器 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/code_by_rasmusir-d4a4dj2.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="类加载器"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-02-05 15:30" pubdate>
+          February 5, 2021 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.5k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          55 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">类加载器</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h2><h3 id="1-类加载器概述"><a href="#1-类加载器概述" class="headerlink" title="1.类加载器概述"></a>1.类加载器概述</h3><p>​		<code>类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。</code></p>
+<h4 id="ClassLoader的作用"><a href="#ClassLoader的作用" class="headerlink" title="ClassLoader的作用"></a>ClassLoader的作用</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># ClassLoader的作用</span><br>ClassLoader是Java的核心组件，所有的Class都是由ClassLoader进行加载的。<br>ClassLoader负责通过各种方式将Class信息的二进制数据流读入JVM内部，转换为一个于目标类对应的java.lang.Class对象实例。然后交给Java虚拟机进行链接、初始化等操作。因此，ClassLoader在整个装载阶段，只能影响到类的加载，而无法通过ClassLoader去改变类的链接和初始化行为。至于他是否可以运行，则由Execution Engine决定。<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># Class、ClassLoader和实例对象的关系</span><br>在下图中：<br>类模板数据User Class 和ClassLoader之间是相互引用的关系。<br>在ClassLoader中，记录了加载类的集合，有那些类是由这个ClassLoader加载的。<br>我们可以通过Class创建实例对象<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416184233.png" srcset="/img/loading.gif" lazyload alt="image-20210416184151816"></p>
+<h4 id="类加载的命名空间"><a href="#类加载的命名空间" class="headerlink" title="类加载的命名空间"></a>类加载的命名空间</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 何为类的唯一性</span><br>对于任意一个类，都需要由加载它的类加载器和这个类本身一同确认其在Java虚拟机中的唯一性。<br><br>每一个类加载器，都会拥有一个独立的类名称空间:<br>比较两个类是否相等，只有在这两个类是由同一类加载器加载的前提下才有意义。<br>否则即使这两个类源自同一Class文件，被同一个虚拟机加载，只要加载他们类加载器不同，那这两个类就必定不相等。<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 命名空间</span><br><span class="hljs-bullet">-</span> 每一个类加载器都有自己命名空间，命名空间由该加载器及所有的父加载器锁加载的类组成。<br><span class="hljs-bullet">-</span> 在同一命名空间中，不会出现类的完整名字(包括类的包名)相同的两个类，只加载一次类。<br><span class="hljs-bullet">-</span> 在不同的命名空间中，有可能会出现类的完整名字(包括类的包名)相同的两个类，可以加载多次。<br></code></pre></td></tr></table></figure>
+
+<h4 id="类加载机制的特征"><a href="#类加载机制的特征" class="headerlink" title="类加载机制的特征"></a>类加载机制的特征</h4><ol>
+<li><p>双亲委派机制</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs markdown">双亲委派模型，不是所有的类加载都遵守这个模型。<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>可见性</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs markdown">子类加载器可以访问父加载器加载的类型，但是反过来是不允许的。<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>单一性</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs markdown">由于父加载器的类型对于子加载器是可见的，所以父加载器中加载过的类型，就不会在子加载器中重复加载。<br>但是，类加载器&quot;邻居&quot;间，同一类型仍然可以被加载多次，因为互相并不可见。<br></code></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="2-类加载分类"><a href="#2-类加载分类" class="headerlink" title="2.类加载分类"></a>2.类加载分类</h3><p>​		<code>JVM支持两种类型的类加载器，分别是启动类加载器(Bootstrap ClassLoader)和自定义类加载器(User-Defined ClassLoader)。</code></p>
+<p>​		<code>从概念上讲，自定义类加载器一般指的是程序中由开发人员自定义的一类加载器，但是Java虚拟机规范却没有这么定义，而是将所有派生于抽象类ClassLoader的类加载器都划分为自定义类加载器。无论类加载器的类型如何划分，在程序中我们最常见的类加载结构主要是如下情况:</code></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416192539.png" srcset="/img/loading.gif" lazyload alt="image-20210416192532384"></p>
+<ul>
+<li>除了顶层的启动类加载器，其余的类加载应当有自己的”父类“加载器。</li>
+<li>不同类加载看似是继承关系，<code>实际上是包含关系。在下层加载器中，包含上层加载器的引用</code></li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">ClassLoader</span>&#123;<br>    ClassLoader parent;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">ClassLoader</span><span class="hljs-params">(ClassLoader parent)</span>&#123;<br>        <span class="hljs-built_in">this</span>.parent = parent;<br>    &#125;<br>    <br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">ParentClassLoader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ClassLoader</span>&#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">ParentClassLoader</span><span class="hljs-params">(ClassLoader parent)</span>&#123;<br>        <span class="hljs-built_in">super</span>(parent);<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">ChildClassLoader</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">ClassLoader</span>&#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">ChildClassLoader</span><span class="hljs-params">(ClassLoader parent)</span>&#123;<br>        <span class="hljs-built_in">super</span>(parent);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="启动类加载器"><a href="#启动类加载器" class="headerlink" title="启动类加载器"></a>启动类加载器</h4><ul>
+<li><p>这个类加载使用C&#x2F;C++语言实现，嵌套在JVM内部。</p>
+</li>
+<li><p>用来加载Java核心库(JAVA_HOME&#x2F;jre&#x2F;lib&#x2F;rt.jar或sun.boot.class.path路径下的内容)，用于<code>提供JVM自身需要的类。</code></p>
+</li>
+<li><p><code>并不继承自java.lang.ClassLoader，没有所谓的父加载器</code></p>
+</li>
+<li><p>出于安全考虑，Bootstrap启动类加载器只加载包名为java、javax、sun等开头的类</p>
+</li>
+<li><p>启动类加载器还用于去加载扩展类加载器和应用程序类加载器，并指定为他们的父类加载器。</p>
+</li>
+</ul>
+<p>我们去加载这个一个类，去看一下它的ClassLoader</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416195107.png" srcset="/img/loading.gif" lazyload alt="image-20210416195107806"></p>
+<p>加载ClassLoader</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416195133.png" srcset="/img/loading.gif" lazyload alt="image-20210416195133745"></p>
+<p>加载自定义类加载器</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416195459.png" srcset="/img/loading.gif" lazyload alt="image-20210416195458986"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">ClassLoader</span> <span class="hljs-variable">classLoader</span> <span class="hljs-operator">=</span> Provider.class.getClassLoader();<br>        System.out.println(classLoader);<span class="hljs-comment">//null</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="扩展类加载器"><a href="#扩展类加载器" class="headerlink" title="扩展类加载器"></a>扩展类加载器</h4><ul>
+<li><p>有Java语言编写，由sun.misc.Launcher$ExtClassLoader实现</p>
+</li>
+<li><p>继承于ClassLoader类</p>
+</li>
+<li><p>父类加载器为启动类加载器</p>
+</li>
+<li><p>从java.ext.dirs系统属性所指定的目录中加载类库，或从JDK的安装目录的jre&#x2F;lib&#x2F;ext子目录下加载类库。如果用户创建的jar放在目录下，也会自动有扩展类加载器加载。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">ClassLoader</span> <span class="hljs-variable">classLoader</span> <span class="hljs-operator">=</span> SunEC.class.getClassLoader();<br>        System.out.println(classLoader);   <br>        System.out.println(classLoader.getParent());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416200839.png" srcset="/img/loading.gif" lazyload alt="image-20210416200839429"></p>
+<h4 id="系统类加载器"><a href="#系统类加载器" class="headerlink" title="系统类加载器"></a>系统类加载器</h4><ul>
+<li><p>Java语言编写，由sun.misc.Launcher$AppClassLoader实现</p>
+</li>
+<li><p>继承于ClassLoader类</p>
+</li>
+<li><p>父类加载器为启动类加载器</p>
+</li>
+<li><p>它负责加载环境变量classpath或系统属性java.class.path指定路径下的类库</p>
+</li>
+<li><p>应用程序中的类加载器默认是系统类加载器。</p>
+</li>
+<li><p>它是用户自定义类加载器的默认父加载器。</p>
+</li>
+<li><p>通过ClassLoader的getSystemClassLoader()方法可以获取到该类加载器。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">ClassLoader</span> <span class="hljs-variable">classLoader</span> <span class="hljs-operator">=</span> Test.class.getClassLoader();<br>        System.out.println(classLoader);<br>        <span class="hljs-type">ClassLoader</span> <span class="hljs-variable">loader</span> <span class="hljs-operator">=</span> classLoader;<br>        <span class="hljs-keyword">while</span>(loader != <span class="hljs-literal">null</span>)&#123;<br>            System.out.println(loader.getParent());<br>            loader = loader.getParent();<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416201450.png" srcset="/img/loading.gif" lazyload alt="image-20210416201450867"></p>
+<h4 id="用户自定义加载器"><a href="#用户自定义加载器" class="headerlink" title="用户自定义加载器"></a>用户自定义加载器</h4><p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416202239.png" srcset="/img/loading.gif" lazyload alt="image-20210416202239533"></p>
+<h3 id="3-ClassLoader源码分析"><a href="#3-ClassLoader源码分析" class="headerlink" title="3. ClassLoader源码分析"></a>3. ClassLoader源码分析</h3><p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416202956.png" srcset="/img/loading.gif" lazyload alt="image-20210416202956662"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ClassLoader</span> &#123;<br><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">native</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">registerNatives</span><span class="hljs-params">()</span>;<br>    <span class="hljs-keyword">static</span> &#123;<br>        registerNatives();<br>    &#125;<br><br>	<span class="hljs-comment">//该类的父类加载器</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> ClassLoader parent;<br><br>   <br>	<span class="hljs-comment">//加载名称为name的类，返回结果为java.lang.Class类的实例。</span><br>    <span class="hljs-comment">//该方法时双亲委派机制的实现。下文详细解析</span><br>    <span class="hljs-keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="hljs-type">boolean</span> resolve)<br>        <span class="hljs-keyword">throws</span> ClassNotFoundException&#123;<br>    &#125;<br>    <br>    <span class="hljs-comment">//根据名称读取文件存入字节数组</span><br>    <span class="hljs-keyword">protected</span> Class&lt;?&gt; findClass(String name) <span class="hljs-keyword">throws</span> ClassNotFoundException &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ClassNotFoundException</span>(name);<br>    &#125;<br><br> <br>	<span class="hljs-comment">//查找二进制名称为name的类，返回结果为java.lang.Class实例。这是一个受保护的方法，</span><br>    <span class="hljs-comment">//jvm鼓励我们重写此方法，需要自定义加载器遵循双亲委派机制，该方法会在检查完父类加载器之后被loadClass()方法调用。</span><br>    <br>    <span class="hljs-comment">//转换从Byte到类的实例</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">final</span> Class&lt;?&gt; defineClass(String name, <span class="hljs-type">byte</span>[] b, <span class="hljs-type">int</span> off, <span class="hljs-type">int</span> len,<br>                                         ProtectionDomain protectionDomain)<br>        <span class="hljs-keyword">throws</span> ClassFormatError<br>    &#123;<br>        protectionDomain = preDefineClass(name, protectionDomain);<br>        <span class="hljs-type">String</span> <span class="hljs-variable">source</span> <span class="hljs-operator">=</span> defineClassSourceLocation(protectionDomain);<br>        Class&lt;?&gt; c = defineClass1(name, b, off, len, protectionDomain, source);<br>        postDefineClass(c, protectionDomain);<br>        <span class="hljs-keyword">return</span> c;<br>    &#125;<br><br>    <span class="hljs-comment">//返回父类加载器进行委派</span><br>    <span class="hljs-meta">@CallerSensitive</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">final</span> ClassLoader <span class="hljs-title function_">getParent</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">if</span> (parent == <span class="hljs-literal">null</span>)<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>        <span class="hljs-type">SecurityManager</span> <span class="hljs-variable">sm</span> <span class="hljs-operator">=</span> System.getSecurityManager();<br>        <span class="hljs-keyword">if</span> (sm != <span class="hljs-literal">null</span>) &#123;<br>            checkClassLoaderPermission(parent, Reflection.getCallerClass());<br>        &#125;<br>        <span class="hljs-keyword">return</span> parent;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-双亲委派模型"><a href="#4-双亲委派模型" class="headerlink" title="4. 双亲委派模型"></a>4. 双亲委派模型</h3><p><code>类加载器用来把来加载到Java虚拟机中，从jdk1.2开始，类加载过程采用双亲委派机制，这种机制能更好地保证Java平台的安全。</code></p>
+<h4 id="什么是双亲委派模型"><a href="#什么是双亲委派模型" class="headerlink" title="什么是双亲委派模型"></a>什么是双亲委派模型</h4><p><code>如果一个类加载器在接到加载类的请求时，它首先不会自己尝试去加载这个类，而是把这个类请求任务委托给父类加载器去完成，依次递归，如果父类加载器可以完成类加载任务，就成功返回。只有父类加载器无法完成此加载任务时，才自己去加载。</code></p>
+<p>实质上:<code>规定了类加载的顺序是:引导类加载器先加载，若加载不到，由扩展类加载器加载，若还加载不到，才会由系统类加载器或自定义的类加载器进行加载。</code></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416204503.png" srcset="/img/loading.gif" lazyload alt="image-20210416204503607"></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210416204424.png" srcset="/img/loading.gif" lazyload alt="image-20210416204424305"></p>
+<h4 id="双亲委派机制的优势和劣势"><a href="#双亲委派机制的优势和劣势" class="headerlink" title="双亲委派机制的优势和劣势"></a>双亲委派机制的优势和劣势</h4><h5 id="优势："><a href="#优势：" class="headerlink" title="优势："></a>优势：</h5><ul>
+<li><p>避免了类的重复加载，确保一个类的全局唯一性</p>
+<p>Java类随着它的类加载器一起具备了一种带有优先级的层级关系，通过这种层级关系可以避免类的重复加载，<code>当父加载器已经加载了该类时，就没有必要子加载器再加载一次。</code></p>
+</li>
+<li><p>保护程序安全，防止核心API被随意篡改。</p>
+</li>
+</ul>
+<h6 id="源码解释："><a href="#源码解释：" class="headerlink" title="源码解释："></a>源码解释：</h6><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> Class&lt;?&gt; loadClass(String name, <span class="hljs-type">boolean</span> resolve)<br>    <span class="hljs-keyword">throws</span> ClassNotFoundException<br>&#123;<br>    <span class="hljs-keyword">synchronized</span> (getClassLoadingLock(name)) &#123;  <span class="hljs-comment">//同步操作</span><br>        <span class="hljs-comment">// 首先，检查当前加载器的缓存中有无目标类。</span><br>        Class&lt;?&gt; c = findLoadedClass(name);<br>        <span class="hljs-comment">//如果没有</span><br>        <span class="hljs-keyword">if</span> (c == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-type">long</span> <span class="hljs-variable">t0</span> <span class="hljs-operator">=</span> System.nanoTime();<br>            <span class="hljs-keyword">try</span> &#123;<br>                <span class="hljs-comment">//判断当前加载器的父类加载器是否是空</span><br>                <span class="hljs-keyword">if</span> (parent != <span class="hljs-literal">null</span>) &#123;<br>                    <span class="hljs-comment">//如果不是，调用父类加载器的loadClass()</span><br>                    c = parent.loadClass(name, <span class="hljs-literal">false</span>);<br>                &#125; <span class="hljs-keyword">else</span> &#123;<br>                    <span class="hljs-comment">//如果为空，让引导类加载器进行加载</span><br>                    c = findBootstrapClassOrNull(name);<br>                &#125;<br>            &#125; <span class="hljs-keyword">catch</span> (ClassNotFoundException e) &#123;<br>            &#125;<br><br>            <span class="hljs-comment">//如果还是为空，调用findClass()进行加载</span><br>            <span class="hljs-comment">//最终会调用defineClass系列的native接口加载目标类。</span><br>            <span class="hljs-keyword">if</span> (c == <span class="hljs-literal">null</span>) &#123;<br>                <span class="hljs-type">long</span> <span class="hljs-variable">t1</span> <span class="hljs-operator">=</span> System.nanoTime();<br>                c = findClass(name);<br><br>                sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);<br>                sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);<br>                sun.misc.PerfCounter.getFindClasses().increment();<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (resolve) &#123;<br>            resolveClass(c);<br>        &#125;<br>        <span class="hljs-keyword">return</span> c;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs markdown">//双亲委派模型就隐藏在第2步和第3步上<br><span class="hljs-bullet">1.</span> 先在当前加载器的缓存中查找有无目标类，如果有，直接返回。<br><span class="hljs-bullet">2.</span> 判断当前加载器的父加载器是否为空，如果不为空，调用parent.loadClass(name,false)<br><span class="hljs-bullet">3.</span> 如果为空，调用引导类加载器加载<br><span class="hljs-bullet">4.</span> 如果还没有加载成功，调用findClass(name)接口进行加载，最终会调用defineClass加载目标类<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 问题</span><br>如果在自定义的类加载中重写java.lang.ClassLoader.loadClass(String)或java.lang.ClassLoader.loadClass(String,boolean)方法，<br>抹去其中的双亲委派机制，仅保留上面的第一步和第四步，是不是就能够加载类库了?<br><br>不行，因为JDK还为核心类库提供了一层保护机制。不管是自定义的类加载器，还是系统类加载器，最终都必须调用java.lang.ClassLoader.defineClass(String,byte[],int,int,ProtectDomain)方法，<br>而该方法会执行preDefineClass()接口，该接口中提供了对JDK核心类库的保护。<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="劣势"><a href="#劣势" class="headerlink" title="劣势"></a>劣势</h5><ul>
+<li>顶层的ClassLoader无法访问到底层的ClassLoader所加载的类</li>
+</ul>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p><code>Java虚拟机规范并没有明确要求类加载的加载机制一定要使用双亲委派机制</code>，只是建议采用这种方式而已。</p>
+<p>在Tomcat中，类加载器所采用的加载机制和传统的双亲委派机制有一定的区别，当缺省的类加载器接受到一个类的加载任务时，<code>首先会由它自行加载</code>，当他加载失败时，才会将类的加载任务委派给它的超类加载器去执行，这同时也是Servlet规范推荐的一种做法。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+        <a href="/tags/JVM/">#JVM</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>类加载器</div>
+      <div>http://example.com/2021/02/05/类加载器/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>February 5, 2021</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" title="类加载机制">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">类加载机制</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/02/01/CAS%E9%97%AE%E9%A2%98/" title="CAS问题">
+                        <span class="hidden-mobile">CAS问题</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

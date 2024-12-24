@@ -1,0 +1,700 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Redis实现-整数集合一、整数集合在Redis中的使用整数集合(intset)是集合键的底层实现之一。当一个集合只包含整数值元素，并且这个集合的元素数量不多时，Redis就会使用整数集合作为集合键的底层实现。 12345678127.0.0.1:6379&gt; sadd members 1 3 5 7 9(integer) 5127.0.0.1:6379&gt; smembers memb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis实现-整数集合">
+<meta property="og:url" content="http://example.com/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Redis实现-整数集合一、整数集合在Redis中的使用整数集合(intset)是集合键的底层实现之一。当一个集合只包含整数值元素，并且这个集合的元素数量不多时，Redis就会使用整数集合作为集合键的底层实现。 12345678127.0.0.1:6379&gt; sadd members 1 3 5 7 9(integer) 5127.0.0.1:6379&gt; smembers memb">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210910045820.png">
+<meta property="article:published_time" content="2021-09-10T06:12:32.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:02:54.904Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210910045820.png">
+  
+  
+  
+  <title>Redis实现-整数集合 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Redis实现-整数集合"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-09-10 14:12" pubdate>
+          September 10, 2021 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          65 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Redis实现-整数集合</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="Redis实现-整数集合"><a href="#Redis实现-整数集合" class="headerlink" title="Redis实现-整数集合"></a>Redis实现-整数集合</h2><h3 id="一、整数集合在Redis中的使用"><a href="#一、整数集合在Redis中的使用" class="headerlink" title="一、整数集合在Redis中的使用"></a>一、整数集合在Redis中的使用</h3><p>整数集合<code>(intset)</code>是集合键的底层实现之一。当一个集合只包含整数值元素，并且这个集合的元素数量不多时，Redis就会使用整数集合作为集合键的底层实现。</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs markdown">127.0.0.1:6379&gt; sadd members 1 3 5 7 9<br>(integer) 5<br>127.0.0.1:6379&gt; smembers members<br>1) &quot;1&quot;<br>2) &quot;3&quot;<br>3) &quot;5&quot;<br>4) &quot;7&quot;<br>5) &quot;9&quot;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="二、整数集合的实现"><a href="#二、整数集合的实现" class="headerlink" title="二、整数集合的实现"></a>二、整数集合的实现</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-keyword">typedef</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">intset</span> &#123;</span><br>    <span class="hljs-comment">// 编码方式</span><br>    <span class="hljs-type">uint32_t</span> encoding;<br>    <span class="hljs-comment">// 集合包含的元素数量</span><br>    <span class="hljs-type">uint32_t</span> length;<br>    <span class="hljs-comment">// 保存元素的数组</span><br>    <span class="hljs-type">int8_t</span> contents[];<br>&#125; intset;<br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><p>contents</p>
+<p><code>contents</code>数组是整数集合的底层实现：整数集合的每个元素都是contents数组的一个数组项，各个项在数组中按值的大小从小到大地排序，并且不包含任何重复项</p>
+</li>
+<li><p>length</p>
+<p>记录整合集合中包含的元素数量，即contents数组的长度</p>
+</li>
+<li><p>encoding</p>
+<p>虽然<code>intset</code>在声明是将<code>contents[]</code>中的数组项设置为<code>int8_t</code>类型。但在分配内存时，需要根据<code>encoding</code>的值来设置。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-meta">#<span class="hljs-keyword">define</span> INTSET_ENC_INT16 (sizeof(int16_t))</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> INTSET_ENC_INT32 (sizeof(int32_t))</span><br><span class="hljs-meta">#<span class="hljs-keyword">define</span> INTSET_ENC_INT64 (sizeof(int64_t))</span><br></code></pre></td></tr></table></figure>
+
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 不同encoding的不同范围</span><br>int16<span class="hljs-emphasis">_t   MIN:-32768    MAX:32767</span><br><span class="hljs-emphasis">int32_</span>t   MIN:-2147483648     MAX:2147483647<br>int64<span class="hljs-emphasis">_t   MIN:-9223372036854775808   MAX:9223372036854775807</span><br></code></pre></td></tr></table></figure></li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210910045820.png" srcset="/img/loading.gif" lazyload alt="整合集合结构"></p>
+<p>我们在创建这个整数集合时，就确定了数组中数组项的大小。是int16_t、int32_t或者int64_t。</p>
+<p>当我们向整数集合添加元素时，发现这个元素超过了这个数组能存储的最大值。</p>
+<p>这时候需要对数组进行升级。将int16_t升级int32_t。</p>
+<p>比如：在上图中，contents数组中数组项的大小时int16_t。此时如果添加一个整数6379，因此需要将数组项大小由int16_t升级为int32_t。</p>
+<h3 id="三、升级"><a href="#三、升级" class="headerlink" title="三、升级"></a>三、升级</h3><p>当我们将一个新元素添加到整数集合里面，并且新元素的类型比整合集合现有所有元素类型都要长时，整数集合需要先进行升级，然后才能将新元素添加到整数集合里面。</p>
+<h4 id="1、升级的步骤"><a href="#1、升级的步骤" class="headerlink" title="1、升级的步骤"></a>1、升级的步骤</h4><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-section"># 升级的步骤</span><br><br><span class="hljs-bullet">1.</span> 根据新元素的类型，扩展整数集合底层数组的空间大小，并为新元素分配空间<br><br><span class="hljs-bullet">2.</span> 将底层数组现有的所有元素都转换成与新元素相同的类型。<br><span class="hljs-code">	将类型转换后的元素放置到正确位置上，并且保证有序</span><br><span class="hljs-code"></span><br><span class="hljs-bullet">3.</span> 将新元素添加到底层数组里面<br></code></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p> 升级之后新元素的摆放位置：</p>
+<p> 要想数组升级，那么新添加的元素值的长度一定比现有所有元素的长度都大。</p>
+<p> 所以这个元素的值要么大于所有的现有元素，要么小于所有的现有元素。</p>
+<p> 当添加元素的值大于所有的现有元素：将元素放置在最末尾contents[0]</p>
+<p> 当添加元素的值小于所有的现有元素：将元素放置在最开头contents[length - 1]</p>
+</blockquote>
+<h4 id="2、升级的好处"><a href="#2、升级的好处" class="headerlink" title="2、升级的好处"></a>2、升级的好处</h4><ul>
+<li><p>提高灵活性</p>
+<p>因为C语言是静态类型语言，为了避免类型错误，我们通常不会将两种不同类型的值放在同一数据结构里面。</p>
+<p>而整数集合可以自动升级底层数组来适应新元素，我们不必担心出现类型错误。</p>
+</li>
+<li><p>节约内存</p>
+<p>如果所有的都以int64_t的类型来保存，太浪费内存了，将数值小的整数集合全部由int_16或者int32_t来表示，可以节约内存。</p>
+</li>
+</ul>
+<h3 id="四、源码"><a href="#四、源码" class="headerlink" title="四、源码"></a>四、源码</h3><h4 id="创建并返回一个新的空整数集合"><a href="#创建并返回一个新的空整数集合" class="headerlink" title="创建并返回一个新的空整数集合"></a>创建并返回一个新的空整数集合</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Create an empty intset. </span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 创建并返回一个新的空整数集合</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * T = O(1)</span><br><span class="hljs-comment"> */</span><br>intset *<span class="hljs-title function_">intsetNew</span><span class="hljs-params">(<span class="hljs-type">void</span>)</span> &#123;<br><br>    <span class="hljs-comment">// 为整数集合结构分配空间</span><br>    intset *is = zmalloc(<span class="hljs-keyword">sizeof</span>(intset));<br><br>    <span class="hljs-comment">// 设置初始编码</span><br>    is-&gt;encoding = intrev32ifbe(INTSET_ENC_INT16);<br><br>    <span class="hljs-comment">// 初始化元素数量</span><br>    is-&gt;length = <span class="hljs-number">0</span>;<br><br>    <span class="hljs-keyword">return</span> is;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="将元素-value-添加到整数集合中"><a href="#将元素-value-添加到整数集合中" class="headerlink" title="将元素 value 添加到整数集合中"></a>将元素 value 添加到整数集合中</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Insert an integer in the intset </span><br><span class="hljs-comment"> * </span><br><span class="hljs-comment"> * 尝试将元素 value 添加到整数集合中。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * *success 的值指示添加是否成功：</span><br><span class="hljs-comment"> * - 如果添加成功，那么将 *success 的值设为 1 。</span><br><span class="hljs-comment"> * - 因为元素已存在而造成添加失败时，将 *success 的值设为 0 。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * T = O(N)</span><br><span class="hljs-comment"> */</span><br>intset *<span class="hljs-title function_">intsetAdd</span><span class="hljs-params">(intset *is, <span class="hljs-type">int64_t</span> value, <span class="hljs-type">uint8_t</span> *success)</span> &#123;<br><br>    <span class="hljs-comment">// 计算编码 value 所需的长度</span><br>    <span class="hljs-type">uint8_t</span> valenc = _intsetValueEncoding(value);<br>    <span class="hljs-type">uint32_t</span> pos;<br><br>    <span class="hljs-comment">// 默认设置插入为成功</span><br>    <span class="hljs-keyword">if</span> (success) *success = <span class="hljs-number">1</span>;<br><br>    <span class="hljs-comment">// 如果 value 的编码比整数集合现在的编码要大</span><br>    <span class="hljs-comment">// 那么表示 value 必然可以添加到整数集合中</span><br>    <span class="hljs-comment">// 并且整数集合需要对自身进行升级，才能满足 value 所需的编码</span><br>    <span class="hljs-keyword">if</span> (valenc &gt; intrev32ifbe(is-&gt;encoding)) &#123;<br>        <span class="hljs-comment">/* This always succeeds, so we don&#x27;t need to curry *success. */</span><br>        <span class="hljs-comment">// T = O(N)</span><br>        <span class="hljs-keyword">return</span> intsetUpgradeAndAdd(is,value);<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">// 运行到这里，表示整数集合现有的编码方式适用于 value</span><br><br>        <span class="hljs-comment">// 在整数集合中查找 value ，看他是否存在：</span><br>        <span class="hljs-comment">// - 如果存在，那么将 *success 设置为 0 ，并返回未经改动的整数集合</span><br>        <span class="hljs-comment">// - 如果不存在，那么可以插入 value 的位置将被保存到 pos 指针中</span><br>        <span class="hljs-comment">//   等待后续程序使用</span><br>        <span class="hljs-keyword">if</span> (intsetSearch(is,value,&amp;pos)) &#123;<br>            <span class="hljs-keyword">if</span> (success) *success = <span class="hljs-number">0</span>;<br>            <span class="hljs-keyword">return</span> is;<br>        &#125;<br><br>        <span class="hljs-comment">// 运行到这里，表示 value 不存在于集合中</span><br>        <span class="hljs-comment">// 程序需要将 value 添加到整数集合中</span><br>    <br>        <span class="hljs-comment">// 为 value 在集合中分配空间</span><br>        is = intsetResize(is,intrev32ifbe(is-&gt;length)+<span class="hljs-number">1</span>);<br>        <span class="hljs-comment">// 如果新元素不是被添加到底层数组的末尾</span><br>        <span class="hljs-comment">// 那么需要对现有元素的数据进行移动，空出 pos 上的位置，用于设置新值</span><br>        <span class="hljs-comment">// 举个例子</span><br>        <span class="hljs-comment">// 如果数组为：</span><br>        <span class="hljs-comment">// | x | y | z | ? |</span><br>        <span class="hljs-comment">//     |&lt;-----&gt;|</span><br>        <span class="hljs-comment">// 而新元素 n 的 pos 为 1 ，那么数组将移动 y 和 z 两个元素</span><br>        <span class="hljs-comment">// | x | y | y | z |</span><br>        <span class="hljs-comment">//         |&lt;-----&gt;|</span><br>        <span class="hljs-comment">// 这样就可以将新元素设置到 pos 上了：</span><br>        <span class="hljs-comment">// | x | n | y | z |</span><br>        <span class="hljs-comment">// T = O(N)</span><br>        <span class="hljs-keyword">if</span> (pos &lt; intrev32ifbe(is-&gt;length)) intsetMoveTail(is,pos,pos+<span class="hljs-number">1</span>);<br>    &#125;<br><br>    <span class="hljs-comment">// 将新值设置到底层数组的指定位置中</span><br>    _intsetSet(is,pos,value);<br><br>    <span class="hljs-comment">// 增一集合元素数量的计数器</span><br>    is-&gt;length = intrev32ifbe(intrev32ifbe(is-&gt;length)+<span class="hljs-number">1</span>);<br><br>    <span class="hljs-comment">// 返回添加新元素后的整数集合</span><br>    <span class="hljs-keyword">return</span> is;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="将底层数组在-pos-位置上的值设为-value"><a href="#将底层数组在-pos-位置上的值设为-value" class="headerlink" title="将底层数组在 pos 位置上的值设为 value"></a>将底层数组在 pos 位置上的值设为 value</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Set the value at pos, using the configured encoding. </span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 根据集合的编码方式，将底层数组在 pos 位置上的值设为 value 。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * T = O(1)</span><br><span class="hljs-comment"> */</span><br><span class="hljs-type">static</span> <span class="hljs-type">void</span> _intsetSet(intset *is, <span class="hljs-type">int</span> pos, <span class="hljs-type">int64_t</span> value) &#123;<br><br>    <span class="hljs-comment">// 取出集合的编码方式</span><br>    <span class="hljs-type">uint32_t</span> encoding = intrev32ifbe(is-&gt;encoding);<br><br>    <span class="hljs-comment">// 根据编码 ((Enc_t*)is-&gt;contents) 将数组转换回正确的类型</span><br>    <span class="hljs-comment">// 然后 ((Enc_t*)is-&gt;contents)[pos] 定位到数组索引上</span><br>    <span class="hljs-comment">// 接着 ((Enc_t*)is-&gt;contents)[pos] = value 将值赋给数组</span><br>    <span class="hljs-comment">// 最后， ((Enc_t*)is-&gt;contents)+pos 定位到刚刚设置的新值上 </span><br>    <span class="hljs-comment">// 如果有需要的话， memrevEncifbe 将对值进行大小端转换</span><br>    <span class="hljs-keyword">if</span> (encoding == INTSET_ENC_INT64) &#123;<br>        ((<span class="hljs-type">int64_t</span>*)is-&gt;contents)[pos] = value;<br>        memrev64ifbe(((<span class="hljs-type">int64_t</span>*)is-&gt;contents)+pos);<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (encoding == INTSET_ENC_INT32) &#123;<br>        ((<span class="hljs-type">int32_t</span>*)is-&gt;contents)[pos] = value;<br>        memrev32ifbe(((<span class="hljs-type">int32_t</span>*)is-&gt;contents)+pos);<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        ((<span class="hljs-type">int16_t</span>*)is-&gt;contents)[pos] = value;<br>        memrev16ifbe(((<span class="hljs-type">int16_t</span>*)is-&gt;contents)+pos);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="返回集合的底层数组在-pos-索引上的元素"><a href="#返回集合的底层数组在-pos-索引上的元素" class="headerlink" title="返回集合的底层数组在 pos 索引上的元素"></a>返回集合的底层数组在 pos 索引上的元素</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Return the value at pos, given an encoding. </span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 根据给定的编码方式 enc ，返回集合的底层数组在 pos 索引上的元素。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * T = O(1)</span><br><span class="hljs-comment"> */</span><br><span class="hljs-type">static</span> <span class="hljs-type">int64_t</span> _intsetGetEncoded(intset *is, <span class="hljs-type">int</span> pos, <span class="hljs-type">uint8_t</span> enc) &#123;<br>    <span class="hljs-type">int64_t</span> v64;<br>    <span class="hljs-type">int32_t</span> v32;<br>    <span class="hljs-type">int16_t</span> v16;<br><br>    <span class="hljs-comment">// ((ENCODING*)is-&gt;contents) 首先将数组转换回被编码的类型</span><br>    <span class="hljs-comment">// 然后 ((ENCODING*)is-&gt;contents)+pos 计算出元素在数组中的正确位置</span><br>    <span class="hljs-comment">// 之后 member(&amp;vEnc, ..., sizeof(vEnc)) 再从数组中拷贝出正确数量的字节</span><br>    <span class="hljs-comment">// 如果有需要的话， memrevEncifbe(&amp;vEnc) 会对拷贝出的字节进行大小端转换</span><br>    <span class="hljs-comment">// 最后将值返回</span><br>    <span class="hljs-keyword">if</span> (enc == INTSET_ENC_INT64) &#123;<br>        <span class="hljs-built_in">memcpy</span>(&amp;v64,((<span class="hljs-type">int64_t</span>*)is-&gt;contents)+pos,<span class="hljs-keyword">sizeof</span>(v64));<br>        memrev64ifbe(&amp;v64);<br>        <span class="hljs-keyword">return</span> v64;<br>    &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (enc == INTSET_ENC_INT32) &#123;<br>        <span class="hljs-built_in">memcpy</span>(&amp;v32,((<span class="hljs-type">int32_t</span>*)is-&gt;contents)+pos,<span class="hljs-keyword">sizeof</span>(v32));<br>        memrev32ifbe(&amp;v32);<br>        <span class="hljs-keyword">return</span> v32;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-built_in">memcpy</span>(&amp;v16,((<span class="hljs-type">int16_t</span>*)is-&gt;contents)+pos,<span class="hljs-keyword">sizeof</span>(v16));<br>        memrev16ifbe(&amp;v16);<br>        <span class="hljs-keyword">return</span> v16;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="在集合-is-的底层数组中查找值-value-所在的索引"><a href="#在集合-is-的底层数组中查找值-value-所在的索引" class="headerlink" title="在集合 is 的底层数组中查找值 value 所在的索引"></a>在集合 is 的底层数组中查找值 value 所在的索引</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/*</span><br><span class="hljs-comment"> * 在集合 is 的底层数组中查找值 value 所在的索引。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 成功找到 value 时，函数返回 1 ，并将 *pos 的值设为 value 所在的索引。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 当在数组中没找到 value 时，返回 0 。</span><br><span class="hljs-comment"> * 并将 *pos 的值设为 value 可以插入到数组中的位置。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * T = O(log N)</span><br><span class="hljs-comment"> */</span><br><span class="hljs-type">static</span> <span class="hljs-type">uint8_t</span> <span class="hljs-title function_">intsetSearch</span><span class="hljs-params">(intset *is, <span class="hljs-type">int64_t</span> value, <span class="hljs-type">uint32_t</span> *pos)</span> &#123;<br>    <span class="hljs-type">int</span> min = <span class="hljs-number">0</span>, max = intrev32ifbe(is-&gt;length)<span class="hljs-number">-1</span>, mid = <span class="hljs-number">-1</span>;<br>    <span class="hljs-type">int64_t</span> cur = <span class="hljs-number">-1</span>;<br><br>    <span class="hljs-comment">/* The value can never be found when the set is empty */</span><br>    <span class="hljs-comment">// 处理 is 为空时的情况</span><br>    <span class="hljs-keyword">if</span> (intrev32ifbe(is-&gt;length) == <span class="hljs-number">0</span>) &#123;<br>        <span class="hljs-keyword">if</span> (pos) *pos = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">// 因为底层数组是有序的，如果 value 比数组中最后一个值都要大</span><br>        <span class="hljs-comment">// 那么 value 肯定不存在于集合中，</span><br>        <span class="hljs-comment">// 并且应该将 value 添加到底层数组的最末端</span><br>        <span class="hljs-keyword">if</span> (value &gt; _intsetGet(is,intrev32ifbe(is-&gt;length)<span class="hljs-number">-1</span>)) &#123;<br>            <span class="hljs-keyword">if</span> (pos) *pos = intrev32ifbe(is-&gt;length);<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>        <span class="hljs-comment">// 因为底层数组是有序的，如果 value 比数组中最前一个值都要小</span><br>        <span class="hljs-comment">// 那么 value 肯定不存在于集合中，</span><br>        <span class="hljs-comment">// 并且应该将它添加到底层数组的最前端</span><br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (value &lt; _intsetGet(is,<span class="hljs-number">0</span>)) &#123;<br>            <span class="hljs-keyword">if</span> (pos) *pos = <span class="hljs-number">0</span>;<br>            <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 在有序数组中进行二分查找</span><br>    <span class="hljs-comment">// T = O(log N)</span><br>    <span class="hljs-keyword">while</span>(max &gt;= min) &#123;<br>        mid = (min+max)/<span class="hljs-number">2</span>;<br>        cur = _intsetGet(is,mid);<br>        <span class="hljs-keyword">if</span> (value &gt; cur) &#123;<br>            min = mid+<span class="hljs-number">1</span>;<br>        &#125; <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (value &lt; cur) &#123;<br>            max = mid<span class="hljs-number">-1</span>;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-keyword">break</span>;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 检查是否已经找到了 value</span><br>    <span class="hljs-keyword">if</span> (value == cur) &#123;<br>        <span class="hljs-keyword">if</span> (pos) *pos = mid;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">1</span>;<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-keyword">if</span> (pos) *pos = min;<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">0</span>;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<h4 id="升级"><a href="#升级" class="headerlink" title="升级"></a>升级</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><code class="hljs c"><span class="hljs-comment">/* Upgrades the intset to a larger encoding and inserts the given integer. </span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 根据值 value 所使用的编码方式，对整数集合的编码进行升级，</span><br><span class="hljs-comment"> * 并将值 value 添加到升级后的整数集合中。</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * 返回值：添加新元素之后的整数集合</span><br><span class="hljs-comment"> *</span><br><span class="hljs-comment"> * T = O(N)</span><br><span class="hljs-comment"> */</span><br><span class="hljs-type">static</span> intset *<span class="hljs-title function_">intsetUpgradeAndAdd</span><span class="hljs-params">(intset *is, <span class="hljs-type">int64_t</span> value)</span> &#123;<br>    <br>    <span class="hljs-comment">// 当前的编码方式</span><br>    <span class="hljs-type">uint8_t</span> curenc = intrev32ifbe(is-&gt;encoding);<br><br>    <span class="hljs-comment">// 新值所需的编码方式</span><br>    <span class="hljs-type">uint8_t</span> newenc = _intsetValueEncoding(value);<br><br>    <span class="hljs-comment">// 当前集合的元素数量</span><br>    <span class="hljs-type">int</span> length = intrev32ifbe(is-&gt;length);<br><br>    <span class="hljs-comment">// 根据 value 的值，决定是将它添加到底层数组的最前端还是最后端</span><br>    <span class="hljs-comment">// 注意，因为 value 的编码比集合原有的其他元素的编码都要大</span><br>    <span class="hljs-comment">// 所以 value 要么大于集合中的所有元素，要么小于集合中的所有元素</span><br>    <span class="hljs-comment">// 因此，value 只能添加到底层数组的最前端或最后端</span><br>    <span class="hljs-type">int</span> prepend = value &lt; <span class="hljs-number">0</span> ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>;<br><br>    <span class="hljs-comment">/* First set new encoding and resize */</span><br>    <span class="hljs-comment">// 更新集合的编码方式</span><br>    is-&gt;encoding = intrev32ifbe(newenc);<br>    <span class="hljs-comment">// 根据新编码对集合（的底层数组）进行空间调整</span><br>    <span class="hljs-comment">// T = O(N)</span><br>    is = intsetResize(is,intrev32ifbe(is-&gt;length)+<span class="hljs-number">1</span>);<br><br>    <span class="hljs-comment">// 根据集合原来的编码方式，从底层数组中取出集合元素</span><br>    <span class="hljs-comment">// 然后再将元素以新编码的方式添加到集合中</span><br>    <span class="hljs-comment">// 当完成了这个步骤之后，集合中所有原有的元素就完成了从旧编码到新编码的转换</span><br>    <span class="hljs-comment">// 因为新分配的空间都放在数组的后端，所以程序先从后端向前端移动元素</span><br>    <span class="hljs-comment">// 举个例子，假设原来有 curenc 编码的三个元素，它们在数组中排列如下：</span><br>    <span class="hljs-comment">// | x | y | z | </span><br>    <span class="hljs-comment">// 当程序对数组进行重分配之后，数组就被扩容了（符号 ？ 表示未使用的内存）：</span><br>    <span class="hljs-comment">// | x | y | z | ? |   ?   |   ?   |</span><br>    <span class="hljs-comment">// 这时程序从数组后端开始，重新插入元素：</span><br>    <span class="hljs-comment">// | x | y | z | ? |   z   |   ?   |</span><br>    <span class="hljs-comment">// | x | y |   y   |   z   |   ?   |</span><br>    <span class="hljs-comment">// |   x   |   y   |   z   |   ?   |</span><br>    <span class="hljs-comment">// 最后，程序可以将新元素添加到最后 ？ 号标示的位置中：</span><br>    <span class="hljs-comment">// |   x   |   y   |   z   |  new  |</span><br>    <span class="hljs-comment">// 上面演示的是新元素比原来的所有元素都大的情况，也即是 prepend == 0</span><br>    <span class="hljs-comment">// 当新元素比原来的所有元素都小时（prepend == 1），调整的过程如下：</span><br>    <span class="hljs-comment">// | x | y | z | ? |   ?   |   ?   |</span><br>    <span class="hljs-comment">// | x | y | z | ? |   ?   |   z   |</span><br>    <span class="hljs-comment">// | x | y | z | ? |   y   |   z   |</span><br>    <span class="hljs-comment">// | x | y |   x   |   y   |   z   |</span><br>    <span class="hljs-comment">// 当添加新值时，原本的 | x | y | 的数据将被新值代替</span><br>    <span class="hljs-comment">// |  new  |   x   |   y   |   z   |</span><br>    <span class="hljs-comment">// T = O(N)</span><br>    <span class="hljs-keyword">while</span>(length--)<br>        _intsetSet(is,length+prepend,_intsetGetEncoded(is,length,curenc));<br><br>    <span class="hljs-comment">/* Set the value at the beginning or the end. */</span><br>    <span class="hljs-comment">// 设置新值，根据 prepend 的值来决定是添加到数组头还是数组尾</span><br>    <span class="hljs-keyword">if</span> (prepend)<br>        _intsetSet(is,<span class="hljs-number">0</span>,value);<br>    <span class="hljs-keyword">else</span><br>        _intsetSet(is,intrev32ifbe(is-&gt;length),value);<br><br>    <span class="hljs-comment">// 更新整数集合的元素数量</span><br>    is-&gt;length = intrev32ifbe(intrev32ifbe(is-&gt;length)+<span class="hljs-number">1</span>);<br><br>    <span class="hljs-keyword">return</span> is;<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Redis/">#Redis</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Redis实现-整数集合</div>
+      <div>http://example.com/2021/09/10/Redis实现-整数集合/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>September 10, 2021</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8/" title="Redis实现-压缩列表">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Redis实现-压缩列表</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E8%B7%B3%E8%B7%83%E8%A1%A8/" title="Redis实现-跳跃表">
+                        <span class="hidden-mobile">Redis实现-跳跃表</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

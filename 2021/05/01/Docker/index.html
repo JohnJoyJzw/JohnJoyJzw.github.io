@@ -1,0 +1,1020 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Dockerdocker中文网：https:&#x2F;&#x2F;vuepress.mirror.docker-practice.com&#x2F; 1、 什么是Docker什么是Docker 官方介绍： We have a complete container solution for you no matter who you are and where you are on your containerizatio">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker">
+<meta property="og:url" content="http://example.com/2021/05/01/Docker/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Dockerdocker中文网：https:&#x2F;&#x2F;vuepress.mirror.docker-practice.com&#x2F; 1、 什么是Docker什么是Docker 官方介绍： We have a complete container solution for you no matter who you are and where you are on your containerizatio">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527201910.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527133415.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527133809.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527134104.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527135624.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527141036.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527151007.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527153012.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527153517.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527145515.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527160713.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527160916.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527161639.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527162033.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527204555.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528125334.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528132841.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528133928.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528134124.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528134204.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528135042.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140034.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140149.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140405.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140654.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528141026.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528141428.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528142409.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528142453.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528193314.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528194234.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528194827.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528195619.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528200352.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528200907.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528201243.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528202247.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528202552.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210528203139.png">
+<meta property="article:published_time" content="2021-05-01T07:38:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:01:03.741Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="容器">
+<meta property="article:tag" content="工具">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210527201910.png">
+  
+  
+  
+  <title>Docker - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Docker"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-05-01 15:38" pubdate>
+          May 1, 2021 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.7k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          56 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Docker</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="Docker"><a href="#Docker" class="headerlink" title="Docker"></a>Docker</h2><p>docker中文网：<a target="_blank" rel="noopener" href="https://vuepress.mirror.docker-practice.com/">https://vuepress.mirror.docker-practice.com/</a></p>
+<h4 id="1、-什么是Docker"><a href="#1、-什么是Docker" class="headerlink" title="1、 什么是Docker"></a>1、 什么是Docker</h4><h5 id="什么是Docker"><a href="#什么是Docker" class="headerlink" title="什么是Docker"></a>什么是Docker</h5><blockquote>
+<p>官方介绍：</p>
+<p>We have a complete container solution for you no matter who you are and where you are on your containerization journey</p>
+<p>我们为你提供了一个完整的容器解决方案，不管你是谁，不管你在哪，你都可以开启你的容器旅程。</p>
+<p>Docker就是容器技术</p>
+</blockquote>
+<h5 id="docker的作用"><a href="#docker的作用" class="headerlink" title="docker的作用"></a>docker的作用</h5><ol>
+<li><p>在开发的时候，在本地测试环境可以跑，生产环境跑不起来。</p>
+<p>我们在一个Java web应用程序涉及很多东西，比如jdk，tomcat，mysql等软件环境。当这些软件的某一项版本不一致时候，可能就会导致应用程序跑不起来。Docker则将程序以及使用软件环境直接打包在一起，无论在哪个机器上保证了环境的一致。</p>
+<p><code>一致的运行环境，更轻松的迁移</code></p>
+</li>
+<li><p>服务器自己的程序挂了，结果发现是别人的程序出了问题把内存吃完了，自己程序因为内存不够挂了。</p>
+<p>这种也是一种常见的情况，你的服务器会跟公司其他人的程序共享一台服务器。所以不可避免受到其他程序的干扰。docker很好的解决了环境隔离的问题。</p>
+<p><code>对进程进行封装隔离，容器与容器之间互不影响，更高效的利用系统资源。</code></p>
+</li>
+<li><p>大量的流量，需要在多部署几十台服务器</p>
+<p>部署几十台服务器，可能服务器的环境还不是一致的。就会出现各种问题。如果用docker，我们只需要将程序打包到镜像，你要多少台服务器，极大提高了部署效率。</p>
+<p><code>通过镜像复制多个环境一致容器</code></p>
+</li>
+</ol>
+<span id="more"></span>
+
+<h5 id="docker与虚拟机的区别"><a href="#docker与虚拟机的区别" class="headerlink" title="docker与虚拟机的区别"></a>docker与虚拟机的区别</h5><p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527201910.png" srcset="/img/loading.gif" lazyload alt="docker和虚拟机区别"></p>
+<blockquote>
+<p>虚拟机的缺点：</p>
+<ol>
+<li>虚拟机运行软件环境之前必须自身携带操作系统，本身很小的应用程序却因为携带了操作系统而变得非常大。很笨重。</li>
+<li>通过虚拟机在资源调度上经过很多步骤。</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>docker的优势：</p>
+<ol>
+<li>docker是不携带操作系统的，所以docker的应用非常轻巧。</li>
+</ol>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>传统虚拟机</th>
+<th>Docker容器</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>磁盘占用</td>
+<td>几个GB到几十个GB</td>
+<td>几十MB到几百MB</td>
+</tr>
+<tr>
+<td>CPU内存占用</td>
+<td>虚拟操作系统非常占用CPU和内存</td>
+<td>Docker引擎占用极低</td>
+</tr>
+<tr>
+<td>启动速度</td>
+<td>几分钟</td>
+<td>几秒</td>
+</tr>
+<tr>
+<td>安装管理</td>
+<td>需要专门的运维技术</td>
+<td>安装、管理方便</td>
+</tr>
+<tr>
+<td>应用部署</td>
+<td>每次部署都耗时费力</td>
+<td>第二次部署轻松便捷</td>
+</tr>
+<tr>
+<td>耦合性</td>
+<td>多个应用服务器安装到一起，容易互相影响</td>
+<td>每个应用服务器一个容器，达到隔离</td>
+</tr>
+<tr>
+<td>系统依赖</td>
+<td>无</td>
+<td>需要相同或相似的内核，Linux</td>
+</tr>
+</tbody></table>
+<h4 id="2、-docker安装"><a href="#2、-docker安装" class="headerlink" title="2、 docker安装"></a>2、 docker安装</h4><p>通用所有的平台</p>
+<p>在测试或开发环境中，Docker官方为了简化安装流程，提供了一套便捷的安装脚本，Centos系统上可以使用这套脚本，另外可以通过<code>--mirror</code>选项来使用国内镜像源进行安装。</p>
+<p>执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker的稳定版本安装在系统中。</p>
+<p>脚本：</p>
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs dsconfig"><span class="hljs-string">curl</span> -<span class="hljs-string">fsSL</span> <span class="hljs-string">get</span>.<span class="hljs-string">docker</span>.<span class="hljs-string">com</span> -<span class="hljs-string">o</span> <span class="hljs-built_in">get-docker.sh</span><br><br><span class="hljs-string">sudo</span> <span class="hljs-string">sh</span> <span class="hljs-built_in">get-docker.sh</span> <span class="hljs-built_in">--mirror</span> <span class="hljs-string">Aliyun</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="3、docker的基本使用"><a href="#3、docker的基本使用" class="headerlink" title="3、docker的基本使用"></a>3、docker的基本使用</h4><h5 id="查看docker版本"><a href="#查看docker版本" class="headerlink" title="查看docker版本"></a>查看docker版本</h5><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs applescript">docker <span class="hljs-built_in">version</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="查看docker状态："><a href="#查看docker状态：" class="headerlink" title="查看docker状态："></a>查看docker状态：</h5><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">systemctl status docker</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="启动docker服务："><a href="#启动docker服务：" class="headerlink" title="启动docker服务："></a>启动docker服务：</h5><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">systemctl <span class="hljs-literal">start</span> docker<br></code></pre></td></tr></table></figure>
+
+<h5 id="停止docker服务："><a href="#停止docker服务：" class="headerlink" title="停止docker服务："></a>停止docker服务：</h5><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs arduino">systemctl stop docker<br></code></pre></td></tr></table></figure>
+
+<h5 id="重启docker服务："><a href="#重启docker服务：" class="headerlink" title="重启docker服务："></a>重启docker服务：</h5><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">systemctl restart docker</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="查看docker信息："><a href="#查看docker信息：" class="headerlink" title="查看docker信息："></a>查看docker信息：</h5><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">docker</span> <span class="hljs-literal">info</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="docker开机自启动"><a href="#docker开机自启动" class="headerlink" title="docker开机自启动"></a>docker开机自启动</h5><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">systemctl <span class="hljs-built_in">enable</span> docker<br></code></pre></td></tr></table></figure>
+
+<h5 id="建立docker组，并使用root用户"><a href="#建立docker组，并使用root用户" class="headerlink" title="建立docker组，并使用root用户"></a>建立docker组，并使用root用户</h5><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs crmsh"><span class="hljs-comment"># 创建docker组</span><br>sudo groupadd docker<br><span class="hljs-comment"># 将当前用户加入docker组</span><br>sudo usermod -aG docker $<span class="hljs-keyword">USER</span><br><span class="hljs-title"># 重启docker</span>服务<br>systemctl restart docker<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="4、docker核心概念和核心架构图"><a href="#4、docker核心概念和核心架构图" class="headerlink" title="4、docker核心概念和核心架构图"></a>4、docker核心概念和核心架构图</h4><h5 id="1-镜像-image"><a href="#1-镜像-image" class="headerlink" title="1. 镜像 image"></a>1. 镜像 image</h5><p>定义：<strong>一个镜像代表着一个软件</strong>。比如说mysql镜像、redis镜像、nginx镜像……</p>
+<h5 id="2-容器-container"><a href="#2-容器-container" class="headerlink" title="2.容器 container"></a>2.容器 container</h5><p>定义：<strong>基于某个镜像运行一次就会生成一个实例，这个实例称为一个容器。</strong></p>
+<h5 id="3-仓库-repository"><a href="#3-仓库-repository" class="headerlink" title="3. 仓库 repository"></a>3. 仓库 repository</h5><p>定义：<strong>用于存储docker中所有镜像的具体位置</strong>。</p>
+<p>远程仓库：docker在世界范围维护一个唯一的远程仓库</p>
+<p>本地仓库：当前自己机器中下载镜像存储位置</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527133415.png" srcset="/img/loading.gif" lazyload alt="Docker使用"></p>
+<p>例子：启动一个安装mysql 5.7 版本的容器</p>
+<ol>
+<li><p>打开docker hub   <a target="_blank" rel="noopener" href="https://registry.hub.docker.com/">https://registry.hub.docker.com/</a></p>
+</li>
+<li><p>选择mysql官方镜像，并选择版本5.7</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527133809.png" srcset="/img/loading.gif" lazyload alt="Docker Hub使用"></p>
+<ol start="3">
+<li><p>启动docker</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">systemctl <span class="hljs-literal">start</span> docker<br></code></pre></td></tr></table></figure>
+</li>
+<li><p>拉取docker</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> pull mysql:<span class="hljs-number">5</span>.<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527134104.png" srcset="/img/loading.gif" lazyload alt="拉取镜像 - 1"></p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527135624.png" srcset="/img/loading.gif" lazyload alt="拉取镜像 - 2"></p>
+<h4 id="5、docker镜像相关操作"><a href="#5、docker镜像相关操作" class="headerlink" title="5、docker镜像相关操作"></a>5、docker镜像相关操作</h4><h5 id="查看本地仓库中存在的镜像"><a href="#查看本地仓库中存在的镜像" class="headerlink" title="查看本地仓库中存在的镜像"></a>查看本地仓库中存在的镜像</h5><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">docker images</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527141036.png" srcset="/img/loading.gif" lazyload alt="镜像字段"></p>
+<h5 id="显示镜像ID"><a href="#显示镜像ID" class="headerlink" title="显示镜像ID"></a>显示镜像ID</h5><figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs css">docker images -<span class="hljs-selector-tag">q</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="拉取镜像"><a href="#拉取镜像" class="headerlink" title="拉取镜像"></a>拉取镜像</h5><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">docker</span> pull 镜像:版本号<br></code></pre></td></tr></table></figure>
+
+<h5 id="通过命令行搜索镜像"><a href="#通过命令行搜索镜像" class="headerlink" title="通过命令行搜索镜像"></a>通过命令行搜索镜像</h5><figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">docker search mysql</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="删除镜像"><a href="#删除镜像" class="headerlink" title="删除镜像"></a>删除镜像</h5><p>镜像没有被使用</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker image <span class="hljs-built_in">rm</span> 镜像名:tag<br><br>docker image <span class="hljs-built_in">rm</span> 镜像<span class="hljs-built_in">id</span><br></code></pre></td></tr></table></figure>
+
+<p>镜像被使用过</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs powershell">docker image <span class="hljs-built_in">rm</span> <span class="hljs-operator">-f</span> 镜像名:tag<br>docker image <span class="hljs-built_in">rm</span> <span class="hljs-operator">-f</span> 镜像id<br></code></pre></td></tr></table></figure>
+
+<p>简化写法：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs powershell">docker rmi <span class="hljs-operator">-f</span> 镜像ID<br>docker rmi <span class="hljs-operator">-f</span> 镜像名:<span class="hljs-number">5.7</span><br><br><span class="hljs-comment"># 删除所有</span><br>docker <span class="hljs-built_in">rm</span> <span class="hljs-operator">-f</span> <span class="hljs-variable">$</span>(docker images <span class="hljs-literal">-q</span>)<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6、容器相关命令"><a href="#6、容器相关命令" class="headerlink" title="6、容器相关命令"></a>6、容器相关命令</h4><h5 id="通过镜像运行一个容器"><a href="#通过镜像运行一个容器" class="headerlink" title="通过镜像运行一个容器"></a>通过镜像运行一个容器</h5><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs crmsh">docker run 镜像名:<span class="hljs-keyword">tag</span> <span class="hljs-title">| 镜像ID</span><br><br><span class="hljs-comment"># 后台执行</span><br>docker run -d 镜像名:<span class="hljs-keyword">tag</span> <span class="hljs-title">| 镜像ID</span><br><br><span class="hljs-comment"># 映射宿主机</span><br>docker run -p  宿主机端口号:容器内端口号  镜像名:<span class="hljs-keyword">tag</span><br><br><span class="hljs-title">比如：</span><br><span class="hljs-title">docker</span> run tomcat:<span class="hljs-number">8.0</span>-jre8<br></code></pre></td></tr></table></figure>
+
+<p>我们启动的一个容器，具有隔离性，是没有办法与外界交互的。</p>
+<p>启动tomcat:8080后，输入Linux系统IP地址和tomcat端口号</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527151007.png" srcset="/img/loading.gif" lazyload alt="访问失败"></p>
+<p>我们需要在启动容器时添加参数。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -p <span class="hljs-number">8080</span>(系统上外部端口) : <span class="hljs-number">8080</span>(容器内服务监听的端口)  tomcat:<span class="hljs-number">8</span>.<span class="hljs-number">0</span>-jre8<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527153012.png" srcset="/img/loading.gif" lazyload alt="成功访问"></p>
+<p><strong>注意：容器和容器之间是隔离的，因此我们启动多个容器，对于容器内可以都是用8080端口，但是容器映射的操作系统不能出现相同的端口号。</strong></p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 我们在启动一个tomcat</span><br><span class="hljs-attribute">docker</span> run -p <span class="hljs-number">8081</span>:<span class="hljs-number">8080</span> tomcat:<span class="hljs-number">8</span>.<span class="hljs-number">0</span>-jre8<br></code></pre></td></tr></table></figure>
+
+<p>我们查看此时的容器：</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs ebnf"><span class="hljs-attribute">docker ps</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527153517.png" srcset="/img/loading.gif" lazyload alt="查看容器"></p>
+<h5 id="查看容器"><a href="#查看容器" class="headerlink" title="查看容器"></a>查看容器</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-comment"># 查看正在运行程序</span><br>docker <span class="hljs-built_in">ps</span> <br><span class="hljs-comment"># 查看所有程序</span><br>docker <span class="hljs-built_in">ps</span> <span class="hljs-literal">-a</span><br><span class="hljs-comment"># 返回正在运行的容器ID</span><br>docker <span class="hljs-built_in">ps</span> <span class="hljs-literal">-q</span> <br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527145515.png" srcset="/img/loading.gif" lazyload alt="查看容器命令"></p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs cmake">CONTAINER ID   容器ID<br>IMAGE     	   镜像<br><span class="hljs-keyword">COMMAND</span>        容器内执行命令      <br>CREATED        创建时间<br>STATUS         当前状态<br>PORTS      	   容器服务监听的端口<br>NAMES		   容器名称<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="重启、停止容器"><a href="#重启、停止容器" class="headerlink" title="重启、停止容器"></a>重启、停止容器</h5><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># 启动容器</span><br>docker start 容器ID<span class="hljs-string">|容器名称</span><br><span class="hljs-meta"># 重启容器</span><br>docker restart 容器ID<span class="hljs-string">|容器名称</span><br><span class="hljs-meta"># 正常停止容器</span><br>docker stop 容器ID<span class="hljs-string">|容器名称</span><br><span class="hljs-meta"># 立即停止容器</span><br>docker kill 容器ID<span class="hljs-string">|容器名称</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="删除容器"><a href="#删除容器" class="headerlink" title="删除容器"></a>删除容器</h5><figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs powershell"><span class="hljs-comment"># 删除停止的容器</span><br>docker <span class="hljs-built_in">rm</span> 容器ID|容器名称 <br><span class="hljs-comment"># 删除正在运行的容器</span><br>docker <span class="hljs-built_in">rm</span> <span class="hljs-operator">-f</span> 容器ID|容器名称<br><span class="hljs-comment"># 删除所有容器</span><br>docker <span class="hljs-built_in">rm</span> <span class="hljs-operator">-f</span> <span class="hljs-variable">$</span>(docker <span class="hljs-built_in">ps</span> <span class="hljs-literal">-aq</span>)<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="查看容器内服务运行日志"><a href="#查看容器内服务运行日志" class="headerlink" title="查看容器内服务运行日志"></a>查看容器内服务运行日志</h5><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs 1c">docker logs 容器ID<span class="hljs-string">|容器名称</span><br><br><span class="hljs-meta"># 实时监听日志信息</span><br>docker logs -f 容器ID<span class="hljs-string">|容器名称</span><br><br><span class="hljs-meta"># 加上日志的时间戳</span><br>docker logs -t  容器ID<span class="hljs-string">|容器名称</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="查看容器内进程"><a href="#查看容器内进程" class="headerlink" title="查看容器内进程"></a>查看容器内进程</h5><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">docker top 容器ID<span class="hljs-string">|容器名称</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="宿主机和容器内部进行交互"><a href="#宿主机和容器内部进行交互" class="headerlink" title="宿主机和容器内部进行交互"></a>宿主机和容器内部进行交互</h5><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs 1c"><span class="hljs-meta"># 进入容器，并于容器内命令终端进行交互</span><br>docker exec -it 容器ID<span class="hljs-string">|容器名称 bash</span><br></code></pre></td></tr></table></figure>
+
+<p>bash就是容器内的终端。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527160713.png" srcset="/img/loading.gif" lazyload alt="容器内部"></p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk"><span class="hljs-comment"># 退出容器</span><br><span class="hljs-keyword">exit</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527160916.png" srcset="/img/loading.gif" lazyload alt="退出容器"></p>
+<h5 id="宿主机和容器的传输文件"><a href="#宿主机和容器的传输文件" class="headerlink" title="宿主机和容器的传输文件"></a>宿主机和容器的传输文件</h5><p>从容器复制文件到宿主机</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">docker cp 容器ID|容器名称:容器内资源路径 宿主机路径<br><br>如：<br>docker cp <span class="hljs-number">86</span>fe26389d83:<span class="hljs-regexp">/usr/</span>local<span class="hljs-regexp">/tomcat/</span>RUNNING.txt ./RUNNING.txt<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527161639.png" srcset="/img/loading.gif" lazyload alt="image-20210527161639012"></p>
+<p>从宿主机复制文件到容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker <span class="hljs-built_in">cp</span> 文件|路径  容器ID|容器名称 : /容器内资源路径<br><br>如：<br>docker <span class="hljs-built_in">cp</span> aa.txt 86fe26389d83:/usr/local/tomcat<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527162033.png" srcset="/img/loading.gif" lazyload alt="image-20210527162033156"></p>
+<h5 id="查看容器内细节"><a href="#查看容器内细节" class="headerlink" title="查看容器内细节"></a>查看容器内细节</h5><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">docker inspect 容器ID<span class="hljs-string">|容器名称</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="数据卷Volume"><a href="#数据卷Volume" class="headerlink" title="数据卷Volume"></a>数据卷Volume</h5><blockquote>
+<p>实现宿主机系统与容器之间的文件共享</p>
+<p>类似于挂载：</p>
+<p>宿主机系统目录改变，直接影响docker目录</p>
+</blockquote>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210527204555.png" srcset="/img/loading.gif" lazyload alt="image-20210527204555352"></p>
+<p>如何使用：</p>
+<p>启动一个容器时 比如启动一个tomcat</p>
+<ol>
+<li><p>自定义数据卷目录</p>
+<p><code>docker run-d -p 8080:8080 -v 宿主机目录(绝对路径):容器内路径  tomcat:8.0-jre8</code></p>
+<p>例：<br><code>docker run -d -p 8080:8080 -v /root/apps/:/usr/local/tomcat/webapps tomcat:8.0-jre8</code></p>
+</li>
+<li><p>自动数据卷目录</p>
+<p><code>docker run -d -p 8080:8080 -v aa:/usr/local/tomcat/webapps tomcat:8.0-jre8</code></p>
+<p>注意：</p>
+<ol>
+<li>aa代表一个数据卷名字，可以随便写。docker在不存在时自动创建这个数据卷同时自动映射宿主机中某个目录</li>
+<li>同时在启动容器时，会将aa对应容器目录中全部内容复制到aa映射目录中</li>
+</ol>
+</li>
+</ol>
+<h5 id="将容器打包成新镜像"><a href="#将容器打包成新镜像" class="headerlink" title="将容器打包成新镜像"></a>将容器打包成新镜像</h5><figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs 1c">docker commit -m <span class="hljs-string">&quot;&quot;</span>  -a<span class="hljs-string">&quot;&quot;</span>  容器ID<span class="hljs-string">|容器名称   打包的镜像名称:标签</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="将镜像备份出来"><a href="#将镜像备份出来" class="headerlink" title="将镜像备份出来"></a>将镜像备份出来</h5><figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs fortran">docker <span class="hljs-keyword">save</span> 容器名称 -o 文件名<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="7、-docker镜像原理"><a href="#7、-docker镜像原理" class="headerlink" title="7、 docker镜像原理"></a>7、 docker镜像原理</h4><blockquote>
+<p>镜像是一种轻量级的，可执行的独立软件包，用来打包软件运行环境和基于运行环境开发的软件，它包含某个软件所需的所有内容，包括代码、运行时所需的库、环境变量和配置文件。</p>
+</blockquote>
+<p>一个软件镜像不仅仅是原来的软件包，包含软件包所需的操作系统依赖，软件自身的依赖，以及自身的软件包组成。不同的镜像之间可能会存在公共的镜像，因此，<strong>docker镜像采用分层镜像原理</strong>。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528125334.png" srcset="/img/loading.gif" lazyload alt="image-20210528125326506"></p>
+<p>docker在设计镜像时，每一个镜像都是由多个镜像共同组成。</p>
+<h5 id="镜像原理-—-UnionFS（联合文件系统）"><a href="#镜像原理-—-UnionFS（联合文件系统）" class="headerlink" title="镜像原理  —-   UnionFS（联合文件系统）"></a>镜像原理  —-   UnionFS（联合文件系统）</h5><blockquote>
+<p> UnionFS文件系统是一种分层，轻量级并且高性能的文件系统，它支持对文件系统的修改作为一次提交来一层层的叠加。同时可以将不同目录挂载到同一虚拟文件系统下。</p>
+</blockquote>
+<p>UnionFS文件系统是docker镜像的基础。</p>
+<p>这种文件系统特性：就是一次同时加载多个文件系统，但从外面看起来，只能看到一个文件系统，联合加载会把各层文件系统叠加起来，这样最终的文件系统会包含所有底层的文件和目录。</p>
+<p><code>docker的镜像实际上是由一层一层的文件系统组成。</code></p>
+<h5 id="为什么要采用这种分层结构"><a href="#为什么要采用这种分层结构" class="headerlink" title="为什么要采用这种分层结构"></a>为什么要采用这种分层结构</h5><p><code>资源共享</code></p>
+<p>有多个镜像都是从相同的base镜像构建而来，那么宿主机只需在磁盘中保存一份base镜像。同时内存也只需要要加载一份base镜像，就可以为所有容器服务了。而且镜像的每一层都是可以被共享的。</p>
+<p>当容器启动时，一个新的可写层被加载到镜像的顶部。这一层通常被称为容器层，容器层之下都叫镜像层。</p>
+<h4 id="8、docker安装mysql服务"><a href="#8、docker安装mysql服务" class="headerlink" title="8、docker安装mysql服务"></a>8、docker安装mysql服务</h4><h5 id="1、dockerhub中搜索mysq服务"><a href="#1、dockerhub中搜索mysq服务" class="headerlink" title="1、dockerhub中搜索mysq服务"></a>1、dockerhub中搜索mysq服务</h5><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> pull mysql:<span class="hljs-number">5</span>.<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+<h5 id="2、基本使用"><a href="#2、基本使用" class="headerlink" title="2、基本使用"></a>2、基本使用</h5><p>在<code>dockerhub</code>中详细的解释的如何使用这个镜像。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528132841.png" srcset="/img/loading.gif" lazyload alt="image-20210528132841767"></p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">$ docker <span class="hljs-built_in">run</span> --name some-mysql -e <span class="hljs-attribute">MYSQL_ROOT_PASSWORD</span>=my-secret-pw -d mysql:tag<br></code></pre></td></tr></table></figure>
+
+<p>-e MYSQL_ROOT_PASSWORD&#x3D;my-secret-pw     代表给root用户指定密码</p>
+<p>比如：启动一个mysql服务，操作系统端口号为3307，密码为root，并且在后台执行</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d -p <span class="hljs-number">3307</span>:<span class="hljs-number">3306</span> -e MYSQL_ROOT_PASSWORD=root mysql:<span class="hljs-number">5</span>.<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+<p>此时，就已经启动了mysql服务</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528133928.png" srcset="/img/loading.gif" lazyload alt="image-20210528133928618"></p>
+<p>我们可以通过SQLyog来查看：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528134124.png" srcset="/img/loading.gif" lazyload alt="image-20210528134123883"></p>
+<p>​	<img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528134204.png" srcset="/img/loading.gif" lazyload alt="image-20210528134204014"></p>
+<h5 id="3、持久化"><a href="#3、持久化" class="headerlink" title="3、持久化"></a>3、持久化</h5><p>容器与容器之间是隔离的。如果我们删除某个容器，那么容器中的数据就会被删除。因此我们要做数据持久化。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528135042.png" srcset="/img/loading.gif" lazyload alt="image-20210528135042157"></p>
+<p>通过数据卷的方式持久化。</p>
+<p>启动一个容器，后台运行，操作系统的端口号为3307，用户密码为root，名称为mysql1</p>
+<p>mysqldata数据卷没有会重新创建。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d -p  <span class="hljs-number">3307</span>:<span class="hljs-number">3306</span> -e MYSQL_ROOT_PASSWORD=root --name mysql1 -v mysqldata:/var/lib/mysql  mysql:<span class="hljs-number">5</span>.<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>执行之后，启动mysql服务</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140034.png" srcset="/img/loading.gif" lazyload alt="image-20210528140034121"></p>
+<p>我们查看是否有mysqldata数据卷</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">docker <span class="hljs-keyword">volume</span><span class="language-bash"> <span class="hljs-built_in">ls</span></span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140149.png" srcset="/img/loading.gif" lazyload alt="image-20210528140149727"></p>
+<p>我们查看mysqldata数据卷中的信息</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs dockerfile">docker <span class="hljs-keyword">volume</span><span class="language-bash"> inspect mysqldata</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140405.png" srcset="/img/loading.gif" lazyload alt="image-20210528140405571"></p>
+<p>此时，数据卷创建好了，并且挂载到宿主机的某个位置。</p>
+<p>我们在客户端创建表，添加数据。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528140654.png" srcset="/img/loading.gif" lazyload alt="image-20210528140654325"></p>
+<p>此时，我们停掉mysql服务，并且删除这个容器。</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs powershell">docker <span class="hljs-built_in">rm</span> <span class="hljs-operator">-f</span> <span class="hljs-variable">$</span>(docker <span class="hljs-built_in">ps</span> <span class="hljs-literal">-aq</span>)<br></code></pre></td></tr></table></figure>
+
+<p>然后重新启动容器，并且指定数据卷为mysqldata。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d -p  <span class="hljs-number">3307</span>:<span class="hljs-number">3306</span> -e MYSQL_ROOT_PASSWORD=root --name mysql1 -v mysqldata:/var/lib/mysql  mysql:<span class="hljs-number">5</span>.<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+<p>重新打开客户端。数据依然还在。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528141026.png" srcset="/img/loading.gif" lazyload alt="image-20210528141026518"></p>
+<h5 id="4、-修改配置文件"><a href="#4、-修改配置文件" class="headerlink" title="4、 修改配置文件"></a>4、 修改配置文件</h5><p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528141428.png" srcset="/img/loading.gif" lazyload></p>
+<p>默认的配置文件是在<code>/etc/mysql/my.cnf</code>。</p>
+<p>启动一个mysql服务，后台运行，指定root用户密码，指定容器名，使用数据卷进行数据持久化，以修改之后的配置文件启动。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d -p <span class="hljs-number">3308</span>:<span class="hljs-number">3306</span> -e MYSQL_ROOT_PASSWORD=root --name mysql3308 -v mysqldata:/var/lib/mysql -v mysqlconfig:/etc/mysql mysql:<span class="hljs-number">5</span>.<span class="hljs-number">7</span><br></code></pre></td></tr></table></figure>
+
+<p>我们通过数据卷的方式将MySQL的配置文件挂载到操作系统的某个目录文件中。</p>
+<p>查看配置文件的位置：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528142409.png" srcset="/img/loading.gif" lazyload alt="image-20210528142409329"></p>
+<p>我们在宿主机中找到这个目录文件。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528142453.png" srcset="/img/loading.gif" lazyload alt="image-20210528142452935"></p>
+<p>所以我们在启动MySQL时，指定数据卷。就可以达到通过配置文件来启动的目的。</p>
+<h4 id="9、docker中容器之间的网络配置"><a href="#9、docker中容器之间的网络配置" class="headerlink" title="9、docker中容器之间的网络配置"></a>9、docker中容器之间的网络配置</h4><h5 id="1、-为什么要提供网络功能"><a href="#1、-为什么要提供网络功能" class="headerlink" title="1、 为什么要提供网络功能"></a>1、 为什么要提供网络功能</h5><p><code>docker允许通过外部访问容器或容器互联的方式来提供网络服务。</code></p>
+<h5 id="2、网络配置原理"><a href="#2、网络配置原理" class="headerlink" title="2、网络配置原理"></a>2、网络配置原理</h5><p>当docker启动时，会自动在主机上创建一个<code>docker0</code>虚拟网桥。实际上是Linux的一个bridge，可以理解为一个软件交换机。它会在挂载到它的网口之间进行转发。</p>
+<p>同时，docker随机分配一个本地未占用的私有网段中的一个地址给<code>docker0</code>接口。</p>
+<p>当创建一个 Docker 容器的时候，同时会创建了一对 <code>veth pair</code> 接口（当数据包发送到一个接口时，另外一个接口也可以收到相同的数据包）。这对接口一端在容器内，即 <code>eth0</code>；另一端在本地并被挂载到 <code>docker0</code> 网桥，名称以 <code>veth</code> 开头（例如 <code>vethAQI2QT</code>）。</p>
+<p>通过这种方式，主机可以跟容器通信，容器之间也可以相互通信。Docker 就创建了在主机和所有容器之间一个虚拟共享网络。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528193314.png" srcset="/img/loading.gif" lazyload alt="image-20210528193306826"></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528194234.png" srcset="/img/loading.gif" lazyload alt="image-20210528194234276"></p>
+<h5 id="3、网络使用"><a href="#3、网络使用" class="headerlink" title="3、网络使用"></a>3、网络使用</h5><p><strong>查看docker中的网络配置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">docker network <span class="hljs-built_in">ls</span><br></code></pre></td></tr></table></figure>
+
+<p><code>bridge</code>是默认的网桥</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528194827.png" srcset="/img/loading.gif" lazyload alt="image-20210528194820229"></p>
+<p>我们可以进入一个容器来查看网络配置信息。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-comment"># 启动容器</span><br><span class="hljs-attribute">docker</span> run -d -p <span class="hljs-number">8080</span>:<span class="hljs-number">8080</span> --name mytomcat tomcat:<span class="hljs-number">8</span>.<span class="hljs-number">0</span>-jre8<br><br><span class="hljs-attribute">docker</span> inspect 容器ID|容器名<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528195619.png" srcset="/img/loading.gif" lazyload alt="image-20210528195619131"></p>
+<p><strong>容器与容器之间的交互</strong></p>
+<p>我们创建两个tomcat，mytomcat和tomcat2。我们进入mytomcat的容器内，在这个容器内去访问tomcat2的8080端口。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528200352.png" srcset="/img/loading.gif" lazyload alt="image-20210528200352177"></p>
+<p>我们还需要知道tomcat2的ip地址。</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> inspect <span class="hljs-number">55</span>fd2f590189<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528200907.png" srcset="/img/loading.gif" lazyload alt="image-20210528200907644"></p>
+<p>进入mytomcat容器内</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> exec -it <span class="hljs-number">66</span>fd52d82688 bash<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs awk">访问tomcat2的<span class="hljs-number">8080</span>端口<br>curl http:<span class="hljs-regexp">//</span><span class="hljs-number">172.17</span>.<span class="hljs-number">0.3</span>:<span class="hljs-number">8080</span><br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528201243.png" srcset="/img/loading.gif" lazyload alt="image-20210528201243617"></p>
+<h5 id="自定义网桥"><a href="#自定义网桥" class="headerlink" title="自定义网桥"></a>自定义网桥</h5><p>如果我们每一个容器都是用默认的网桥。就会造成带宽的降低。因此我们自定义网桥。</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs routeros"><span class="hljs-comment"># 创建自定义网桥</span><br>docker<span class="hljs-built_in"> network </span>create -d<span class="hljs-built_in"> bridge </span>网桥名称 <br></code></pre></td></tr></table></figure>
+
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs routeros">docker<span class="hljs-built_in"> network </span>create -d<span class="hljs-built_in"> bridge </span>net<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528202247.png" srcset="/img/loading.gif" lazyload alt="image-20210528202247215"></p>
+<p>我们查看net网桥中的信息。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528202552.png" srcset="/img/loading.gif" lazyload alt="image-20210528202552064"></p>
+<p>我们在启动一个tomcat，这是的tomcat IP地址就会是172.18.0.xxx这个网段了。</p>
+<h5 id="使用自定义网桥"><a href="#使用自定义网桥" class="headerlink" title="使用自定义网桥"></a>使用自定义网桥</h5><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">docker</span> run -d -p <span class="hljs-number">8080</span>:<span class="hljs-number">8080</span> --name tomcat --network net tomcat:<span class="hljs-number">8</span>.<span class="hljs-number">0</span>-jre8<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210528203139.png" srcset="/img/loading.gif" lazyload alt="image-20210528203139533"></p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E5%AE%B9%E5%99%A8/">#容器</a>
+      
+        <a href="/tags/%E5%B7%A5%E5%85%B7/">#工具</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Docker</div>
+      <div>http://example.com/2021/05/01/Docker/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>May 1, 2021</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/06/15/ReentrantLock/" title="ReentrantLock的使用">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">ReentrantLock的使用</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/04/05/Synchronized%E5%8E%9F%E7%90%86/" title="Synchronized原理">
+                        <span class="hidden-mobile">Synchronized原理</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

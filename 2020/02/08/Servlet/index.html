@@ -1,0 +1,824 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Servlet 编程基础  Servlet 是连接 Web 服务器与服务端 Java 程序的协议，是一种通信规范。这个规范是以一套接口的形式体现的。  Servlet 规范中包含一套接口。而 Servlet 接口仅仅是其中之一。   微观地讲，Servlet 是 Servlet 接口实现类的一个实例对象，是运行在服务器上的一段 Java小程序，即 Server Applet，也就是 Servl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Servlet 编程">
+<meta property="og:url" content="http://example.com/2020/02/08/Servlet/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Servlet 编程基础  Servlet 是连接 Web 服务器与服务端 Java 程序的协议，是一种通信规范。这个规范是以一套接口的形式体现的。  Servlet 规范中包含一套接口。而 Servlet 接口仅仅是其中之一。   微观地讲，Servlet 是 Servlet 接口实现类的一个实例对象，是运行在服务器上的一段 Java小程序，即 Server Applet，也就是 Servl">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101351.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101539.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101707.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210526103836.png">
+<meta property="article:published_time" content="2020-02-08T07:38:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:03:38.064Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Web">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101351.png">
+  
+  
+  
+  <title>Servlet 编程 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Servlet 编程"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-02-08 15:38" pubdate>
+          February 8, 2020 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.2k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          60 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Servlet 编程</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 >Servlet 编程基础</h2>
+
+<p>Servlet 是连接 Web 服务器与服务端 Java 程序的协议，是一种通信规范。这个规范是以一套接口的形式体现的。</p>
+<blockquote>
+<p>Servlet 规范中包含一套接口。而 Servlet 接口仅仅是其中之一。</p>
+</blockquote>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101351.png" srcset="/img/loading.gif" lazyload alt="image-20210526101344544"></p>
+<p>微观地讲，Servlet 是 Servlet 接口实现类的一个实例对象，是运行在服务器上的一段 Java小程序，即 Server Applet，也就是 Servlet 这个单词的来历。<strong>Servlet 的主要功能是根据客户端提交的请求，调用服务器端相关 Java 代码，完成对请求的处理与运算。</strong></p>
+<h4 id="1-1、Servlet生命周期"><a href="#1-1、Servlet生命周期" class="headerlink" title="1.1、Servlet生命周期"></a>1.1、Servlet生命周期</h4><p>Servlt 生命周期是指，Servlet 对象的创建、Servlet 对象的初始化、Servlet 对象服务的执行，及最终 Servlet 对象被销毁的整个过程。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101539.png" srcset="/img/loading.gif" lazyload alt="image-20210526101539889"></p>
+<p>Servlet 的整个生命周期过程的执行，均由 Web 服务器负责管理。即 <strong>Servlet 从创建到服务到销毁的整个过程中方法的调用，都是由 Web 服务器负责调用执行，程序员无法控制其执行流程。</strong></p>
+<p>但程序员可以获取到 Servlet 的这些生命周期时间点，并可以指定让 Servlet 做一些具体业务相关的事情。</p>
+<h5 id="1-1-1、-生命周期方法执行流程"><a href="#1-1-1、-生命周期方法执行流程" class="headerlink" title="1.1.1、 生命周期方法执行流程"></a>1.1.1、 生命周期方法执行流程</h5><p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210526101707.png" srcset="/img/loading.gif" lazyload alt="image-20210526101707654"></p>
+<p>Servlet 生命周期方法的执行流程：</p>
+<ol>
+<li><p>当请求发送到 Web 容器后，Web 容器会解析请求 URL，并从中分离出 Servlet 对应的URI。 </p>
+</li>
+<li><p>根据分离出的 URI，通过 web.xml 中配置的 URI 与 Servlet 的映射关系，找到要执行的Servlet，即找到用于处理该请求的 Servlet。 </p>
+</li>
+<li><p>若该 Servlet 不存在，则调用该 Servlet 的无参构造器、init()方法，实例化该 Servlet。然后执行 service()方法。</p>
+</li>
+<li><p>若该 Servlet 已经被创建，则直接调用 service()方法。</p>
+</li>
+<li><p>当 Web 容器被关闭，或该应用被关闭，则调用执行 destroy()方法，销毁 Servlet 实例。</p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">HelloServlet</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Servlet</span>&#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">HelloServlet</span><span class="hljs-params">()</span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;实例化&quot;</span>);<br>    &#125;<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">init</span><span class="hljs-params">(ServletConfig config)</span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;初始化&quot;</span>);<br>    &#125;<br>    <br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">service</span><span class="hljs-params">(ServletRequest request,ServletResponse response)</span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;服务&quot;</span>);<br>    &#125;<br>    <br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">destory</span><span class="hljs-params">()</span>&#123;<br>        System.out.println(<span class="hljs-string">&quot;销毁&quot;</span>);<br>    &#125;<br>    <br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="1-1-2、Servlet特征"><a href="#1-1-2、Servlet特征" class="headerlink" title="1.1.2、Servlet特征"></a>1.1.2、Servlet特征</h5><ol>
+<li><p>Servlet 是单例多线程的。 </p>
+</li>
+<li><p>一个 Servlet 实例只会执行一次无参构造器与 init()方法，并且是在第一次访问时执行。</p>
+</li>
+<li><p>用户每提交一次对当前 Servlet 的请求，就会执行一次 service()方法。</p>
+</li>
+<li><p>一个 Servlet 实例只会执行一次 destroy()方法，在应用停止时执行。</p>
+</li>
+<li><p>由于 Servlet 是单例多线程的，所以为了保证其线程安全性，一般情况下是不为 Servlet类定义可修改的成员变量的。因为每个线程均可修改这个成员变量，会出现线程安全问题。</p>
+</li>
+<li><p>默认情况下，Servlet 在 Web 容器启动时是不会被实例化的。</p>
+</li>
+</ol>
+<h5 id="1-1-3、Web-容器启动时创建-Servlet-实例"><a href="#1-1-3、Web-容器启动时创建-Servlet-实例" class="headerlink" title="1.1.3、Web 容器启动时创建 Servlet 实例"></a>1.1.3、Web 容器启动时创建 <strong>Servlet</strong> 实例</h5><p>在默认的情况下，Servlet在Web容器启动时不会被实例化</p>
+<p>修改配置文件：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>hello-servlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-class</span>&gt;</span>com.jiang.HelloServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-class</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">load-on-startup</span>&gt;</span>1<span class="hljs-tag">&lt;/<span class="hljs-name">load-on-startup</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>hello-servlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/hello<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>在<servlet/>中添加<load-on-startup/>的作用是，<strong>标记是否在Web服务器（这里是Tomcat）启动时创建并初始化这个 Servlet 实例</strong>，即是否在 Web 服务器启动时调用执行该 Servlet 的无参构造器方法与 init()方法，而不是在真正访问时才创建。</p>
+<ul>
+<li><p>它的值必须是一个整数。</p>
+</li>
+<li><p>当值大于等于 0 时，表示容器在启动时就加载并初始化这个 Servlet，数值越小，该 Servlet的优先级就越高，其被创建的也就越早；</p>
+</li>
+<li><p>当值小于 0 或者没有指定时，则表示该 Servlet 在真正被使用时才会去创建。 </p>
+</li>
+<li><p>当值相同时，容器会自己选择创建顺序。</p>
+</li>
+</ul>
+<h5 id="1-1-4、getServletInfo-方法"><a href="#1-1-4、getServletInfo-方法" class="headerlink" title="1.1.4、getServletInfo()方法"></a>1.1.4、getServletInfo()方法</h5><p>Servlet 接口中的方法 getServletInfo()，是由程序没自己定义的有关当前 Servlet 的一些基本信息，不属于 Servlet 生命周期中的方法。</p>
+<h4 id="1-2、SerlvetConfig"><a href="#1-2、SerlvetConfig" class="headerlink" title="1.2、SerlvetConfig"></a>1.2、SerlvetConfig</h4><h5 id="1-2-1、什么是ServletConfig"><a href="#1-2-1、什么是ServletConfig" class="headerlink" title="1.2.1、什么是ServletConfig"></a>1.2.1、什么是ServletConfig</h5><p>在 Servlet 接口的 init()方法中具有唯一的一个参数 <strong>ServletConfig</strong>。</p>
+<p>ServletConfig 是个接口，顾名思义，就是 Servlet 配置，<strong>即在 web.xml 中对当前 Servlet 类的配置信息。</strong>Servlet 规范将Servlet 的配置信息全部封装到了 ServletConfig 接口对象中。</p>
+<p>在 Web 容器调用 init()方法时，Web 容器首先会将 web.xml 中当前 Servlet 类的配置信息封装为一个对象。这个对象的类型实现了 ServletConfig 接口，Web 容器会将这个对象传递给init()方法中的 ServletConfig 参数。</p>
+<h5 id="1-2-2、获取ServletConfig"><a href="#1-2-2、获取ServletConfig" class="headerlink" title="1.2.2、获取ServletConfig"></a>1.2.2、获取ServletConfig</h5><p><strong>由于 ServletConfig 对象是 Web 容器通过 init()方法传递给当前 Servlet 类的</strong>，而 init()方法只会在 Servlet 对象初始化时调用一次。所以，需要在 init()方法中将 ServletConfig 对象传递给 Servlet 的 ServletConfig 成员变量，这样 service()方法即可使用 ServletConfig 对象了。也就是说，我们需要在 Servlet 中声明一个ServletConfig 成员变量。</p>
+<p>声明了成员变量之后，会不会存在线程安全问题？</p>
+<p>ServletConfig变量的赋值是在init()方法进行赋值，对于所有线程来说，SerlvetConfig对象是可读的，但不能修改。</p>
+<h5 id="1-2-3、ServletConfig-中的方法"><a href="#1-2-3、ServletConfig-中的方法" class="headerlink" title="1.2.3、ServletConfig 中的方法"></a>1.2.3、ServletConfig 中的方法</h5><p>在Java帮助文档中，可以看到接口的四个方法：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210526103836.png" srcset="/img/loading.gif" lazyload alt="image-20210526103836257"></p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>hello-servlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-class</span>&gt;</span>com.jiang.helloServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-class</span>&gt;</span><br>    <span class="hljs-comment">&lt;!--设置初始化参数--&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">init-param</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">param-name</span>&gt;</span>myName<span class="hljs-tag">&lt;/<span class="hljs-name">param-name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">param-value</span>&gt;</span>JiangZW<span class="hljs-tag">&lt;/<span class="hljs-name">param-value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">init-param</span>&gt;</span><br>    <br>    <span class="hljs-tag">&lt;<span class="hljs-name">init-param</span>&gt;</span><br>    	<span class="hljs-tag">&lt;<span class="hljs-name">param-name</span>&gt;</span>myAge<span class="hljs-tag">&lt;/<span class="hljs-name">param-name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">param-value</span>&gt;</span>2<span class="hljs-tag">&lt;/<span class="hljs-name">param-value</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">init-param</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><p><code>getInitParameter()</code>：获取指定名称的初始化参数值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">getInitParameter(<span class="hljs-string">&quot;myName&quot;</span>)<br></code></pre></td></tr></table></figure>
+</li>
+<li><p><code>getInitParameterNames()</code>：获取当前 Servlet 所有的初始化参数名称。其返回值为枚举类型 Enumeration<String>。 </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">getInitParameterNames()<br></code></pre></td></tr></table></figure>
+</li>
+<li><p><code>getServletName()</code>：获取当前 Servlet 的<servlet-name></servlet-name>中指定的 Servlet 名称。如上图中的 ServletName 为”hello-servlet”。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">getServletName()<br></code></pre></td></tr></table></figure>
+</li>
+<li><p><code>getServletContext()</code>：获取到当前 Servlet 的上下文对象 ServletContext。这是个非常重要的对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">getServletContext()<br></code></pre></td></tr></table></figure></li>
+</ul>
+<h5 id="1-2-4、ServletConfig的特点"><a href="#1-2-4、ServletConfig的特点" class="headerlink" title="1.2.4、ServletConfig的特点"></a>1.2.4、ServletConfig的特点</h5><p>对于不同的Servlet，Tomcat会为其创建不同的ServletConfig，用于封装各自的配置信息。也就是说，<strong>一个 Servlet 就会有其对应的一个 ServletConfig 对象。</strong></p>
+<h4 id="1-3、ServletContext"><a href="#1-3、ServletContext" class="headerlink" title="1.3、ServletContext"></a>1.3、ServletContext</h4><h5 id="1-3-1、什么是ServletContext"><a href="#1-3-1、什么是ServletContext" class="headerlink" title="1.3.1、什么是ServletContext"></a>1.3.1、什么是ServletContext</h5><p>ServletContext，即 <strong>Servlet 上下文环境</strong>，是个接口，是 <strong>Web 应用中所有 Servlet 在 Web 容器中的运行时环境</strong>。</p>
+<p><strong>这个运行时环境随着 Web 应用的启动而创建，随着 Web 应用的关闭而销毁。也就是说，一个 Web 应用，就一个 Servlet 运行时环境，即一个ServletContext 对象。</strong></p>
+<p>ServletContext运行环境中有哪些具体的内容？</p>
+<ul>
+<li><p>web.xml 文件中的配置信息</p>
+</li>
+<li><p>Servlet之间 可以共享的数据</p>
+</li>
+</ul>
+<p>可以这么说，ServeltContext 可以代表整个Web应用。所以，ServletConetxt有另外一个名称：<code>application</code>。</p>
+<h5 id="1-3-2、ServletContext中的方法"><a href="#1-3-2、ServletContext中的方法" class="headerlink" title="1.3.2、ServletContext中的方法"></a>1.3.2、ServletContext中的方法</h5><p>查看 Java的帮助文档，可以看到 <code>javax.servlet.ServletContext </code>接口中包含很多方法。</p>
+<p>下面我们介绍几个常用的重要方法。</p>
+<p>在 web.xml 中通过<context-param/>可以进行上下文参数的配置。</p>
+<blockquote>
+<p>上下文参数<context-param/>与初始化参数<init-param/>是不同的：</p>
+<p>​		上下文参数是当前 Web 应用中所有 Servlet 共享的参数，每个 Servlet 均可获取到.</p>
+<p>​		Servlet 初始化参数则是只有当前Servlet 可以获取到的参数。</p>
+</blockquote>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">context-param</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">param-name</span>&gt;</span>myName<span class="hljs-tag">&lt;/<span class="hljs-name">param-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">param-value</span>&gt;</span>JiangZW<span class="hljs-tag">&lt;/<span class="hljs-name">param-value</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">context-param</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">context-param</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">param-name</span>&gt;</span>myAge<span class="hljs-tag">&lt;/<span class="hljs-name">param-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">param-value</span>&gt;</span>2<span class="hljs-tag">&lt;/<span class="hljs-name">param-value</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">context-param</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">servlet</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>helloServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">serlvet-class</span>&gt;</span>com.jiang.servlet<span class="hljs-tag">&lt;/<span class="hljs-name">serlvet-class</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>方法：</p>
+<ul>
+<li><p><code>String getInitParameter ()</code></p>
+<p>获 取 web.xml 文 件 的 <context-param/> 中 指 定 名 称 的 上 下 文 参 数 值 。 </p>
+</li>
+<li><p><code>Enumeration getInitParameterNames()</code></p>
+<p>获取 web.xml 文件的<context-param/>中的所有的上下文参数名称。</p>
+</li>
+<li><p><code>void setAttribute(String name, Object object)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">setAttribute(<span class="hljs-string">&quot;User&quot;</span>,<span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>());<br></code></pre></td></tr></table></figure>
+
+<p>在 ServletContext 的公共数据空间中，也称为域属性空间，放入数据。</p>
+<p><strong>这些数据对于 Web应用来说，是全局性的，与整个应用的生命周期相同。</strong></p>
+</li>
+<li><p><code>Object getAttribute(String name)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-type">User</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> (User)getAttribute(<span class="hljs-string">&quot;User&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p>从 ServletContext 的域属性空间中获取指定名称的数据。</p>
+</li>
+<li><p><code>void removeAttribute(String name)</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">removeAttribute(<span class="hljs-string">&quot;User&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p>从 ServletContext 的域属性空间中删除指定名称的数据。</p>
+</li>
+<li><p><code>String getRealPath(String path)</code></p>
+<p>获取当前 Web 应用中指定文件或目录在本地文件系统中的路径，是基于盘符的路径。绝对路径。</p>
+</li>
+<li><p><code>String getContextPath()</code></p>
+<p>获取当前应用在 Web 容器中的名称。</p>
+</li>
+</ul>
+<h4 id="1-4、欢迎页面设置"><a href="#1-4、欢迎页面设置" class="headerlink" title="1.4、欢迎页面设置"></a>1.4、欢迎页面设置</h4><h5 id="1-4-1、欢迎页面设置"><a href="#1-4-1、欢迎页面设置" class="headerlink" title="1.4.1、欢迎页面设置"></a>1.4.1、欢迎页面设置</h5><p>欢迎页面，是指当在浏览器地址栏中直接通过项目名称访问时，默认显示的页面，即默认访问的路径，可以是个.html、.jsp 等页面，也可以是 Servlet 的访问路径等。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">welcome-file-list</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">welcome-file</span>&gt;</span>index.jsp<span class="hljs-tag">&lt;/<span class="hljs-name">welcome-file</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">welcome-file-list</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>在 web.xml 中有一个<welcome-file-list/>标签，用于指定当前应用的欢迎页面。</p>
+<h5 id="1-4-2、指定多个欢迎页面"><a href="#1-4-2、指定多个欢迎页面" class="headerlink" title="1.4.2、指定多个欢迎页面"></a>1.4.2、指定多个欢迎页面</h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">welcome-file-list</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">welcome-file</span>&gt;</span>index1.jsp<span class="hljs-tag">&lt;/<span class="hljs-name">welcome-file</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">welcome-file</span>&gt;</span>index2.jsp<span class="hljs-tag">&lt;/<span class="hljs-name">welcome-file</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">welcome-file</span>&gt;</span>index3.jsp<span class="hljs-tag">&lt;/<span class="hljs-name">welcome-file</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">welcome-file-list</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以为应用指定多个欢迎页面，但只会有一个起作用。系统加载这些欢迎页面的顺序与其注册顺序相同，即由上到下逐个查找。一旦找到，则马上显示，不会再向下查找</p>
+<h4 id="1-5、的设置与匹配"><a href="#1-5、的设置与匹配" class="headerlink" title="1.5、的设置与匹配"></a>1.5、<url-pattern/>的设置与匹配</h4><p><url-pattern/>标签用于对请求进行筛选匹配，对当前注册的 Servlet 所要处理的请求类型进行筛选。</p>
+<p>对于<url-pattern/>中路径的写法，有多种不同模式，表示不同的意义。</p>
+<h5 id="1-5-1、精确路径模式"><a href="#1-5-1、精确路径模式" class="headerlink" title="1.5.1、精确路径模式"></a>1.5.1、精确路径模式</h5><p>请求路径必须与<url-pattern/>的值完全相同才可被当前 Servlet 处理。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>someServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/some<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/s1/s2<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="1-5-2、通配符路径模式"><a href="#1-5-2、通配符路径模式" class="headerlink" title="1.5.2、通配符路径模式"></a>1.5.2、通配符路径模式</h5><p>该模式中的路径由两部分组成：精确路径部分与通配符部分。</p>
+<p>请求路径中只有携带了<url-pattern/>值中指定的精确路径部分才可被当前 Servlet 处理。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>someServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/some/*<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h5 id="1-5-3、全路径模式"><a href="#1-5-3、全路径模式" class="headerlink" title="1.5.3、全路径模式"></a>1.5.3、全路径模式</h5><p>提交的所有请求全部可被当前的 Servlet 处理。其值可以指定为&#x2F;*，也可指定为&#x2F;。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>someServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/*<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br><br><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>someServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>&#x2F;*与&#x2F;表示所有请求均会被当前 Servlet 所处理。这两个路径的不同之处是：</p>
+<ol>
+<li>使用&#x2F;*，表示当前的 Servlet 会拦截用户对于静态资源（.css、.js、.html、.jpg、.png…..）与动态资源（.jsp）的请求。即用户不会直接获取到这些资源文件，而是将请求交给当前 Servlet</li>
+</ol>
+<p>来处理了。</p>
+<ol start="2">
+<li>使用&#x2F;，表示当前的 Servlet 会拦截用户对于静态资源（.css、.js、.html、.jpg、.png…..），但对于动态资源的请求，是不进行拦截的。即用户请求的静态资源文件是不能直接获取到的。</li>
+</ol>
+</blockquote>
+<h5 id="1-5-4、后缀名模式"><a href="#1-5-4、后缀名模式" class="headerlink" title="1.5.4、后缀名模式"></a>1.5.4、后缀名模式</h5><p>请求路径最后的资源名称必须携带<url-pattern/>中指定的后辍名，其请求才可被当前Servlet 处理。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>	<span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>someServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>*.do<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+        <a href="/tags/Web/">#Web</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Servlet 编程</div>
+      <div>http://example.com/2020/02/08/Servlet/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>February 8, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/02/08/ArrayList%E6%BA%90%E7%A0%81/" title="ArrayList源码">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">ArrayList源码</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/02/08/cookie%E3%80%81session/" title="Cookie和Session">
+                        <span class="hidden-mobile">Cookie和Session</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

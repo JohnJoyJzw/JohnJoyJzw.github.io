@@ -1,0 +1,839 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Synchronized原理1、Synchronized使用123456789&#x2F;&#x2F;synchronized代码块synchronized (SynchronizedTest.class)&amp;#123;    System.out.println(&quot;进入同步代码块&quot;);&amp;#125;&#x2F;&#x2F;synchronized代码方法public synchronized void testFu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Synchronized原理">
+<meta property="og:url" content="http://example.com/2021/04/05/Synchronized%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Synchronized原理1、Synchronized使用123456789&#x2F;&#x2F;synchronized代码块synchronized (SynchronizedTest.class)&amp;#123;    System.out.println(&quot;进入同步代码块&quot;);&amp;#125;&#x2F;&#x2F;synchronized代码方法public synchronized void testFu">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520131637.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520131541.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520132016.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520132049.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520132558.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520133209.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520133724.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520133922.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520143416.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520144450.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520144617.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520145725.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520150020.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520151755.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520152533.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520152838.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520165144.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520165301.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520165615.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520154833.png">
+<meta property="article:published_time" content="2021-04-05T07:38:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:03:58.792Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="多线程">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210520131637.png">
+  
+  
+  
+  <title>Synchronized原理 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Synchronized原理"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2021-04-05 15:38" pubdate>
+          April 5, 2021 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.3k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          53 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Synchronized原理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h3 id="Synchronized原理"><a href="#Synchronized原理" class="headerlink" title="Synchronized原理"></a>Synchronized原理</h3><h3 id="1、Synchronized使用"><a href="#1、Synchronized使用" class="headerlink" title="1、Synchronized使用"></a>1、Synchronized使用</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//synchronized代码块</span><br><span class="hljs-keyword">synchronized</span> (SynchronizedTest.class)&#123;<br>    System.out.println(<span class="hljs-string">&quot;进入同步代码块&quot;</span>);<br>&#125;<br><span class="hljs-comment">//synchronized代码方法</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">synchronized</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testFun</span><span class="hljs-params">()</span>&#123;<br>    System.out.println(<span class="hljs-string">&quot;进入同步方法&quot;</span>);<br>&#125;<br><br></code></pre></td></tr></table></figure>
+
+
+<p>字节码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SynchronizedTest</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-keyword">synchronized</span> (SynchronizedTest.class)&#123;<br>            System.out.println(<span class="hljs-string">&quot;进入同步代码块&quot;</span>);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+<span id="more"></span>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs yaml"><span class="hljs-attr">Code:</span><br>  <span class="hljs-string">stack=2,</span> <span class="hljs-string">locals=3,</span> <span class="hljs-string">args_size=1</span><br>     <span class="hljs-attr">0:</span> <span class="hljs-string">ldc</span>           <span class="hljs-comment">#2                  // class jiang/JVM/SynchronizedTest</span><br>     <span class="hljs-attr">2:</span> <span class="hljs-string">dup</span><br>     <span class="hljs-attr">3:</span> <span class="hljs-string">astore_1</span><br>     <span class="hljs-attr">4:</span> <span class="hljs-string">monitorenter</span><br>     <span class="hljs-attr">5:</span> <span class="hljs-string">getstatic</span>     <span class="hljs-comment">#3                  // Field java/lang/System.out:Ljava/io/PrintStream;</span><br>     <span class="hljs-attr">8:</span> <span class="hljs-string">ldc</span>           <span class="hljs-comment">#4                  // String 进入同步代码块</span><br>    <span class="hljs-attr">10:</span> <span class="hljs-string">invokevirtual</span> <span class="hljs-comment">#5                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V</span><br>    <span class="hljs-attr">13:</span> <span class="hljs-string">aload_1</span><br>    <span class="hljs-attr">14:</span> <span class="hljs-string">monitorexit</span><br>    <span class="hljs-attr">15:</span> <span class="hljs-string">goto</span>          <span class="hljs-number">23</span><br>    <span class="hljs-attr">18:</span> <span class="hljs-string">astore_2</span><br>    <span class="hljs-attr">19:</span> <span class="hljs-string">aload_1</span><br>    <span class="hljs-attr">20:</span> <span class="hljs-string">monitorexit</span><br>    <span class="hljs-attr">21:</span> <span class="hljs-string">aload_2</span><br>    <span class="hljs-attr">22:</span> <span class="hljs-string">athrow</span><br>    <span class="hljs-attr">23:</span> <span class="hljs-string">return</span><br></code></pre></td></tr></table></figure>
+
+
+<p>我们发现有两条陌生的指令：<code>monitorenter</code>和<code>monitorexit</code></p>
+<p>Javac在编译时，会生成对应的<code>monitorenter</code>和<code>monitorexit</code>指令分别对应<code>synchronized</code>同步块的进入和退出</p>
+<p>其中，我们可以发现有两个<code>monitorexit</code>，这是因为：</p>
+<p>为了保证抛异常的情况下也能释放锁，所以java为同步代码块添加了一个隐式的try-finally，在finally中会调用<code>monitorexit</code>命令释放锁。</p>
+<p>对于<code>synchronized</code>方法而言，<code>javac</code>为其生成了一个<code>ACC_SYNCHRONIZED</code>关键字，在JVM进行方法调用时，发现调用的方法被<code>ACC_SYNCHRONIZED</code>修饰，则会先尝试获得锁。</p>
+<p>我们发现在字节码中出现了两次<code>monitorexit</code>。这是在两个不同的代码路径上执行一次。</p>
+<ul>
+<li>第一个指令用于synchronized块的正常退出。</li>
+<li>为了保证抛出异常的情况下也能释放锁，所以Javac为同步代码块添加一个隐式try-finally，在finally中会调用<code>monitorexit</code>命令释放锁。可以看到，在第一个<code>monitorexit</code>之后有一个goto 23，说明，直接跳到23行指令，<code>因此有两个monitorexit并没有执行</code>。</li>
+</ul>
+<h6 id="x3D-x3D-monitorenter-x3D-x3D"><a href="#x3D-x3D-monitorenter-x3D-x3D" class="headerlink" title="&#x3D;&#x3D;monitorenter&#x3D;&#x3D;"></a>&#x3D;&#x3D;monitorenter&#x3D;&#x3D;</h6><p>每一个对象都会和一个<code>监视器锁monitor</code>关联。监视器被占用时会被锁住，其他线程无法来获取该monitor。当JVM执行某个线程的某个方法内部的monitorenter时，它会尝试去获取当前对象对应的monitor的所有权。过程如下：</p>
+<ol>
+<li>若monitor的进入数为0，线程可以进入monitor，并将monitor的进入树置为1.当前线程成为monitor的ower(所有者)</li>
+<li>若线程已拥有monitor的所有权，允许它重入monitor，则进入monitor的进入数加1</li>
+<li>若其他线程已经占有monitor的所有权，那么当前尝试获取monitor的所有权的线程会被阻塞，直到monitor的进入数变为0，才能重新尝试获取monitor的所有权。</li>
+</ol>
+<p>synchronized的锁对象会关联一个monitor,这个monitor不是我们主动创建的,是JVM的线程执行到这个同步代码块,发现锁对象没有monitor就会创建monitor,monitor内部有两个重要的成员变量owner:拥有这把锁的线程,recursions会记录线程拥有锁的次数,当一个线程拥有monitor后其他线程只能等待</p>
+<p>&#x3D;&#x3D;monitorexit&#x3D;&#x3D;</p>
+<ol>
+<li><p>能执行monitorexit指令的线程一定是拥有当前对象的monitor的所有权的线程。</p>
+</li>
+<li><p>执行monitorexit时会将monitor的进入数减1。当monitor的进入数减为0时，当前线程退出monitor，不再拥有monitor的所有权，此时其他被这个monitor阻塞的线程可以尝试去获取这个monitor的所有权。</p>
+</li>
+</ol>
+<p>monitorexit释放锁。monitorexit插入在方法结束处和异常处，JVM保证每个monitorenter必须有对应的monitorexit。</p>
+<h3 id="2、Java对象头"><a href="#2、Java对象头" class="headerlink" title="2、Java对象头"></a>2、Java对象头</h3><p>synchronized用的锁是存放在Java对象头里的。如果对象是数组类型，则虚拟机用3个字宽（Word）存储对象头。如果对象是非数组类型，则用2字宽存储对象头。</p>
+<p>在32位虚拟机中，1字宽等于4字节，即32bit。</p>
+<p>普通对象：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520131637.png" srcset="/img/loading.gif" lazyload alt="image-20210520131637139"></p>
+<p>数组对象：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520131541.png" srcset="/img/loading.gif" lazyload alt="image-20210520131541197"></p>
+<p>Mark Word：存储对象的hashCode或一些锁信息</p>
+<p>Klass Word：存储到对象类型数据的指针</p>
+<p>array length：数组的长度（如果当前对象是数组）</p>
+<p>具体的MarkWord信息和状态变化：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520132016.png" srcset="/img/loading.gif" lazyload alt="image-20210520132016211"></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520132049.png" srcset="/img/loading.gif" lazyload alt="image-20210520132049817"></p>
+<h3 id="3、监视器锁monitor"><a href="#3、监视器锁monitor" class="headerlink" title="3、监视器锁monitor"></a>3、监视器锁monitor</h3><p>无论是同步代码方法，同步代码块，都依赖于一个monitor监视器锁。</p>
+<h4 id="monitor源码"><a href="#monitor源码" class="headerlink" title="monitor源码"></a>monitor源码</h4><p>下面是HotSpot虚拟机中的monitor源码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs c++"><span class="hljs-built_in">ObjectMonitor</span>()<br>&#123;<br>    _header=<span class="hljs-literal">NULL</span>;<br>    _count=<span class="hljs-number">0</span>;<br>    _waiters=<span class="hljs-number">0</span>;<br>    _recursions=<span class="hljs-number">0</span>;<span class="hljs-comment">//线程的重入次数</span><br>    _object=<span class="hljs-literal">NULL</span>;<span class="hljs-comment">//存储该monitor的对象</span><br>    owner=<span class="hljs-literal">NULL</span>;<span class="hljs-comment">//标识拥有该monitor的线程</span><br>    _WaitSet=<span class="hljs-literal">NULL</span>;<span class="hljs-comment">//处于wait状态的线程，会被加入到_WaitSet</span><br>    _WaitSetLock=<span class="hljs-number">0</span>;<br>    _Responsible=<span class="hljs-literal">NULL</span>;<br>    _succ=<span class="hljs-literal">NULL</span>;<br>    _cxq=<span class="hljs-literal">NULL</span>;<span class="hljs-comment">//多线程竞争锁时的单向列表</span><br>    FreeNext=<span class="hljs-literal">NULL</span>;<br>    _EntryList=<span class="hljs-literal">NULL</span>;<span class="hljs-comment">//处于等待锁block状态的线程，会被加入到该列表</span><br>    _SpinFreq=<span class="hljs-number">0</span>;<br>    _SpinClock=<span class="hljs-number">0</span>;<br>    OwnerIsThread=<span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>在源码中，我们要注意一些重要的数据结构：</p>
+<ol>
+<li><p>_owner</p>
+<p>初始化时为NULL。当有线程占有该monitor时，owner标记为线程的唯一标识。当线程释放monitor时，owner又恢复为NULL。owner是一个临时资源，JVM是通过CAS操作来保证其线程安全的。</p>
+</li>
+<li><p>_cxq  :竞争队列</p>
+<p>所有请求锁的线程首先会被放在这个队列中（单向链接）。_cxq是一个<strong>临时资源</strong>，	JVM通过CAS原子指令来修改cxq队列。</p>
+</li>
+<li><p>_EntryList</p>
+<p>存放处于等待锁block状态的线程队列</p>
+</li>
+<li><p>_WaitSet</p>
+<p>存放处于wait状态的线程队列，即调用wait()方法的线程</p>
+</li>
+</ol>
+<h4 id="monitor使用"><a href="#monitor使用" class="headerlink" title="monitor使用"></a>monitor使用</h4><ol>
+<li>刚开始Monitor时Owner为null</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520132558.png" srcset="/img/loading.gif" lazyload alt="image-20210520132558728"></p>
+<ol start="2">
+<li><p>当Thread-2执行synchronized(obj)就会将monitor的所有者owner置为Thread-2，monitor只能有一个owner。</p>
+<p>MarkWord中的信息会按照不同的锁进行更改。如果是重量级锁，会指向Monitor对象</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520133209.png" srcset="/img/loading.gif" lazyload alt="image-20210520133209752"></p>
+<ol start="3">
+<li><p>在Thread-2上锁的过程中，如果Thread-3，Thread-4，Thread-5也来执行synchronized(obj)，就会进入EntryList BLOCKED</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520133724.png" srcset="/img/loading.gif" lazyload alt="image-20210520133724097"></p>
+</li>
+<li><p>Thread-2执行完同步代码块的内容，然后唤醒EntryList中等待的线程来竞争锁。这个竞争是非公平的。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520133922.png" srcset="/img/loading.gif" lazyload alt="image-20210520133922131"></p>
+</li>
+</ol>
+<h3 id="4、锁升级"><a href="#4、锁升级" class="headerlink" title="4、锁升级"></a>4、锁升级</h3><p>Java SE1.6为了减少获得锁和释放锁带来的性能消耗，引入了偏向锁和轻量级锁，在JavaSE1.6中，锁一共有四种状态，级别从低到高依次是：无锁状态，偏向锁、轻量级锁、重量级锁。这几个状态会随着竞争情况逐渐升级。所可以升级但不能降级，意味着偏向锁升级为轻量级锁之后不能降级为偏向锁。（锁降级发生在读写锁上）。</p>
+<h4 id="1、轻量级锁"><a href="#1、轻量级锁" class="headerlink" title="1、轻量级锁"></a>1、轻量级锁</h4><p>轻量级锁的使用场景：如果一个对象虽然有多线程访问，但多线程访问的时间是错开的（也就是没有竞争），那么可以使用轻量级锁来优化。</p>
+<p>轻量级锁对使用者是透明的，语法依旧是synchronized。</p>
+<h5 id="轻量级锁流程"><a href="#轻量级锁流程" class="headerlink" title="轻量级锁流程"></a>轻量级锁流程</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Object</span> <span class="hljs-variable">obj</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">method1</span><span class="hljs-params">()</span> &#123;<br>     <span class="hljs-keyword">synchronized</span>( obj ) &#123;<br>         <span class="hljs-comment">// 同步块 A</span><br>         method2();<br>     &#125;<br>&#125;<br><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">method2</span><span class="hljs-params">()</span> &#123;<br>     <span class="hljs-keyword">synchronized</span>( obj ) &#123;<br>         <span class="hljs-comment">// 同步块 B</span><br>     &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<ol>
+<li><p>首先判断obj的对象是否处于无锁的状态。如果是，创建锁记录（Lock Record）对象，每个线程的栈帧都会包含一个锁记录的结构，&#x3D;&#x3D;内部可以存储锁对象的Mark Word&#x3D;&#x3D;</p>
+<p><code>Lock Record</code>对象中，有两个结构，<code>Displaced Mark Word</code>记录锁对象的MarkWord，<code>Object reference</code>指向锁对象。比如上面程序中的obj锁对象。</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520143416.png" srcset="/img/loading.gif" lazyload alt="image-20210520143416139"></p>
+<ol start="2">
+<li><p>让锁记录中<code>Object reference</code>指向锁对象后，并尝试用CAS替换obj对象锁的<code>Mark Word</code>。将MarkWord的值存入锁记录。</p>
+<p>CAS如何替换：</p>
+<p>根据对象的<code>MarkWord</code>最后两位是否是01，如果是表示此时无锁，可以成功。如果其他线程将它修改为00，那么CAS操作失败。</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520144450.png" srcset="/img/loading.gif" lazyload alt="image-20210520144450659"></p>
+<ol start="3">
+<li>如果CAS替换成功，对象头中存储了锁记录地址和状态00，表示由该线程给对象加锁。</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520144617.png" srcset="/img/loading.gif" lazyload alt="image-20210520144617367"></p>
+<ol start="4">
+<li>如果CAS失败，可能由两种情况。<ul>
+<li>如果是其他线程已经持有了该obj的轻量级锁，这时表明有竞争，进入锁膨胀过程。</li>
+<li>如果是自己执行了synchronized锁重入。那么在添加一条Lock Record作为重入的计数。</li>
+</ul>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520145725.png" srcset="/img/loading.gif" lazyload alt="image-20210520145725597"></p>
+<ol start="5">
+<li>当退出synchronized代码块（解锁时），如果由取值为null的锁记录，表示有重入，这时重置锁记录，表示重入计数减1。</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520150020.png" srcset="/img/loading.gif" lazyload alt="image-20210520150020755"></p>
+<ol start="6">
+<li><p>当退出synchronized代码块（解锁时），如果由取值为null的锁记录，这是使用CAS将MarkWord的值给对象头。</p>
+<p>如果成功：则解锁成功</p>
+<p>如果失败：说明轻量级锁进行了锁膨胀或已经升级为重量级锁，进入重量级锁解锁流程。</p>
+</li>
+</ol>
+<h5 id="轻量级锁锁膨胀"><a href="#轻量级锁锁膨胀" class="headerlink" title="轻量级锁锁膨胀"></a>轻量级锁锁膨胀</h5><p>在解锁时，如果CAS操作失败，表示当前线程执行同步代码块时，有其他线程也在访问，当前的锁是被竞争。那么轻量级锁会膨胀为重量级锁。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520151755.png" srcset="/img/loading.gif" lazyload alt="image-20210520151755439"></p>
+<ol>
+<li>当 Thread-1 进行轻量级加锁时，Thread-0 已经对该对象加了轻量级锁</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520152533.png" srcset="/img/loading.gif" lazyload alt="image-20210520152533571"></p>
+<ol start="2">
+<li><p>这时Thread-1加轻量级锁，进入锁膨胀流程</p>
+<p>Thread-1为obj对象申请一个Monitor锁，让Obj的<code>MarkWord</code>指向重量级锁地址。原来是指向锁记录中的<code>Displaced Mark Word</code>。最后两位是01。</p>
+<p>然后Thread-1进入Monitor的EntyList  BLOCKED。</p>
+<p>并且要改成obj中<code>Displaced Mark Word</code>的最后两位为10，表示是重量级锁。</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520152838.png" srcset="/img/loading.gif" lazyload alt="image-20210520152838701"></p>
+<ol start="3">
+<li>对于Thread-0来说，执行完同步代码块后。使用CAS将Mark Word的值恢复给Obj锁对象的对象头。但是失败，因为此时最后两位已经被更改为10。说明此时已经是重量级锁，需要按照重量级锁的解锁流程来解锁。</li>
+</ol>
+<h5 id="自旋"><a href="#自旋" class="headerlink" title="自旋"></a>自旋</h5><p>重量级锁竞争的时候，还可以使用自旋来进行优化，如果当前线程自旋成功（即这时候持锁线程已经退出了同步块，释放了锁），这时当前线程就可以避免阻塞。</p>
+<h4 id="2、偏向锁"><a href="#2、偏向锁" class="headerlink" title="2、偏向锁"></a>2、偏向锁</h4><p>HotSpot的作者经过研究发现，大多数情况下，锁不仅不存在多线程竞争，而且总是有同一线程多次获得。为了让线程获得锁的代价更低而引入了偏向锁。</p>
+<p>使用jar包可以查看对象头MarkWord信息。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.openjdk.jol<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>jol-core<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>0.14<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>如何使用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">test</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        System.out.println(ClassLayout.parseInstance(test.class).toPrintable());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520165144.png" srcset="/img/loading.gif" lazyload alt="image-20210520165144296"></p>
+<h5 id="偏向锁的特点"><a href="#偏向锁的特点" class="headerlink" title="偏向锁的特点"></a>偏向锁的特点</h5><ul>
+<li>如果开启了偏向锁（默认开启），那么对象创建后，markword值的最后三位是001，这是它的thread、epoch、age都为0。</li>
+<li>偏向锁是默认延迟的，不会在程序启动时立即生效，如果想避免延迟，可以加VM参数<code>-XX:BiasedLockingStartupDelay=0</code>来禁用延迟。</li>
+</ul>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs markdown">在jvm添加上参数<br>-XX:BiasedLockingStartupDelay=0<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520165301.png" srcset="/img/loading.gif" lazyload alt="image-20210520165301145"></p>
+<ul>
+<li><p>如果没有开启偏向锁，那么对象创建后，markword 值为 0x01 即最后 3 位为 001，这时它的 hashcode、age 都为 0，第一次用到 hashcode 时才会赋值</p>
+</li>
+<li><p>添加 VM 参数 <code>-XX:-UseBiasedLocking</code> 禁用偏向锁</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>    <span class="hljs-type">Object</span> <span class="hljs-variable">o</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br>    <span class="hljs-keyword">synchronized</span> (o)&#123;<br>        <span class="hljs-comment">//添加上偏向锁之后</span><br>        System.out.println(ClassLayout.parseInstance(o).toPrintable());<br>    &#125;<br>    System.out.println(ClassLayout.parseInstance(o).toPrintable());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>可以看到两次打印的对象头都是相等的</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520165615.png" srcset="/img/loading.gif" lazyload alt="image-20210520165615643"></p>
+<h5 id="偏向锁流程"><a href="#偏向锁流程" class="headerlink" title="偏向锁流程"></a>偏向锁流程</h5><ol>
+<li><p>当一个线程访问同步块并获取锁时，会在<strong>对象头和栈帧中的锁记录里存储锁偏向的线程ID</strong>。</p>
+</li>
+<li><p>以后该线程在进入和退出同步块时<strong>不需要进入CAS操作来加锁和解锁</strong>，只需要简单地测试一下对象头的Mark Word里是否存储着指向当前线程的偏向锁。</p>
+<ul>
+<li><p>如果测试成功，表示线程已经获得了锁。</p>
+</li>
+<li><p>如果测试失败，则需要在测试一下Mark Word中偏向锁的标识是否设置成1（表示当前时偏向锁），如果没有设置，则使用CAS竞争锁。如果设置了，则尝试使用CAS将对象头的偏向锁指向当前线程。</p>
+</li>
+</ul>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210520154833.png" srcset="/img/loading.gif" lazyload alt="image-20210520154833068"></p>
+<h4 id="偏向锁的撤销"><a href="#偏向锁的撤销" class="headerlink" title="偏向锁的撤销"></a>偏向锁的撤销</h4><ol>
+<li>调用对象的 hashCode</li>
+</ol>
+<p>调用了对象的 hashCode，但此时偏向锁的对象 MarkWord 中存储的是线程 id，如果调用 hashCode 会导致偏向锁被撤销。</p>
+<ol start="2">
+<li><p>其他线程使用锁对象	</p>
+<p>当有多个线程竞争时，会撤销偏向锁。改为轻量级锁。</p>
+</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+        <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Synchronized原理</div>
+      <div>http://example.com/2021/04/05/Synchronized原理/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>April 5, 2021</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2021/05/01/Docker/" title="Docker">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Docker</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2021/04/02/java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B/" title="Java内存模型">
+                        <span class="hidden-mobile">Java内存模型</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,666 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="树树(Tree)形结构是一种重要的非线性结构。树形结构反映了数据元素之间的层次关系和分支关系。 基本术语 ​        一个结点的子树个数称为该结点的度(degree)，一棵树中结点度的最大值称为该树的度。度为0的结点称为叶子结点或者终端结点。 ​		树中结点的后继结点称为儿子结点，结点的前趋结点称为儿子的父亲结点。		 ​		结点的层数使从根开始算起的。设根节点的层数为1，其他结点的层数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="二叉树的实现和遍历">
+<meta property="og:url" content="http://example.com/2020/08/06/%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%92%8C%E9%81%8D%E5%8E%86/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="树树(Tree)形结构是一种重要的非线性结构。树形结构反映了数据元素之间的层次关系和分支关系。 基本术语 ​        一个结点的子树个数称为该结点的度(degree)，一棵树中结点度的最大值称为该树的度。度为0的结点称为叶子结点或者终端结点。 ​		树中结点的后继结点称为儿子结点，结点的前趋结点称为儿子的父亲结点。		 ​		结点的层数使从根开始算起的。设根节点的层数为1，其他结点的层数">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200908171622935.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="og:image" content="https://img-blog.csdnimg.cn/20200908171704214.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+<meta property="article:published_time" content="2020-08-06T07:38:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:06:02.781Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="数据结构与算法">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://img-blog.csdnimg.cn/20200908171622935.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center">
+  
+  
+  
+  <title>二叉树的实现和遍历 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="二叉树的实现和遍历"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-08-06 15:38" pubdate>
+          August 6, 2020 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.1k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          43 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">二叉树的实现和遍历</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="树"><a href="#树" class="headerlink" title="树"></a>树</h1><p>树(Tree)形结构是一种重要的非线性结构。树形结构反映了数据元素之间的层次关系和分支关系。</p>
+<h2 id="基本术语"><a href="#基本术语" class="headerlink" title="基本术语"></a>基本术语</h2><blockquote>
+<p>​        一个结点的子树个数称为该结点的度(degree)，一棵树中结点度的最大值称为该树的度。度为0的结点称为叶子结点或者终端结点。</p>
+<p>​		树中结点的后继结点称为儿子结点，结点的前趋结点称为儿子的父亲结点。		</p>
+<p>​		结点的层数使从根开始算起的。设根节点的层数为1，其他结点的层数等于父亲结点的层数加1.</p>
+<p>​		若把树中每个结点的各子树看成从左到右有次序的(即不可互换的)，则称该树使有序树。</p>
+<p>​		树中任一结点都可以有零个或者多个后继结点。但至多有一个前趋结点。树中只有根节点无前趋结点，叶子结点无后继结点。</p>
+</blockquote>
+<h2 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h2><p>二叉树是由n结点组成的有限集合。此集合或者为空，或者有一个根节点加上两颗左右子树。</p>
+<p>二叉树的性质：</p>
+<p>1、二叉树第i(i&gt;0)层上的结点最多为<br>$$<br>2^{i-1}<br>$$<br>2、高度为k的二叉树最多有的节点数<br>$$<br>2^k-1<br>$$<br>3、对任何二叉树T，n0 ，n1 ，n2 分别表示度数为0、1、2的结点个数。则n0 &#x3D;n2 +1；</p>
+<p>4、具有n个结点的完全二叉树(包括满二叉树)的高度为<br>$$<br>\lfloor  \log n  \rfloor + 1  或者 \lceil \log （n+1） \rceil<br>$$<br>5、满二叉树原理:非空满二叉树的叶结点数等于其分支结点数加1</p>
+<h2 id="二叉树的实现"><a href="#二叉树的实现" class="headerlink" title="二叉树的实现"></a>二叉树的实现</h2><p>通过链表来实现二叉树</p>
+<p><img src="https://img-blog.csdnimg.cn/20200908171622935.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//定义结点</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span>&#123;<br>    <span class="hljs-comment">//结点值</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> no;<br>    <span class="hljs-comment">//结点名字</span><br>    <span class="hljs-keyword">private</span> String name;<br>    <span class="hljs-comment">//左节点</span><br>    <span class="hljs-keyword">private</span> Node left;<br>    <span class="hljs-comment">//右节点</span><br>    <span class="hljs-keyword">private</span> Node right;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Node</span><span class="hljs-params">()</span> &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">Node</span><span class="hljs-params">(<span class="hljs-type">int</span> no, String name, Node left, Node right)</span> &#123;<br>        <span class="hljs-built_in">this</span>.no = no;<br>        <span class="hljs-built_in">this</span>.name = name;<br>        <span class="hljs-built_in">this</span>.left = left;<br>        <span class="hljs-built_in">this</span>.right = right;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">getNo</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> no;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setNo</span><span class="hljs-params">(<span class="hljs-type">int</span> no)</span> &#123;<br>        <span class="hljs-built_in">this</span>.no = no;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getName</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> name;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setName</span><span class="hljs-params">(String name)</span> &#123;<br>        <span class="hljs-built_in">this</span>.name = name;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Node <span class="hljs-title function_">getLeft</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> left;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setLeft</span><span class="hljs-params">(Node left)</span> &#123;<br>        <span class="hljs-built_in">this</span>.left = left;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Node <span class="hljs-title function_">getRight</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> right;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setRight</span><span class="hljs-params">(Node right)</span> &#123;<br>        <span class="hljs-built_in">this</span>.right = right;<br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">BinaryTree</span>&#123;<br>    <span class="hljs-comment">//根结点</span><br>    <span class="hljs-keyword">private</span> Node root;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">BinaryTree</span><span class="hljs-params">()</span> &#123;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">BinaryTree</span><span class="hljs-params">(Node root)</span> &#123;<br>        <span class="hljs-built_in">this</span>.root = root;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> Node <span class="hljs-title function_">getRoot</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> root;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">setRoot</span><span class="hljs-params">(Node root)</span> &#123;<br>        <span class="hljs-built_in">this</span>.root = root;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>测试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br>    <span class="hljs-comment">//创建一颗树</span><br>    <span class="hljs-type">BinaryTree</span> <span class="hljs-variable">binaryTree</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BinaryTree</span>();<br><br>    <span class="hljs-comment">//定义结点</span><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">node3</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">3</span>, <span class="hljs-string">&quot;3&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>);<br><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">node1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;1&quot;</span>, node3, <span class="hljs-literal">null</span>);<br><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">node2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;2&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>);<br><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">root</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&quot;0&quot;</span>, node1, node2);<br><br>    binaryTree.setRoot(root);<br><br>    System.out.println(root.getLeft().getLeft().getName());  <span class="hljs-comment">//&quot;3&quot;</span><br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>创建树的结构：<br><img src="https://img-blog.csdnimg.cn/20200908171704214.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80MzIwMzczNQ==,size_16,color_FFFFFF,t_70#pic_center" srcset="/img/loading.gif" lazyload alt="在这里插入图片描述"></p>
+<h2 id="二叉树的遍历"><a href="#二叉树的遍历" class="headerlink" title="二叉树的遍历"></a>二叉树的遍历</h2><p>二叉树的遍历分成前序，中序，后序和层次遍历。</p>
+<p>前序，中序，后序遍历需要用到递归的思想；</p>
+<p>而层次遍历，需要借助队列来实现；类似图的广度优先遍历算法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//定义结点</span><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Node</span>&#123;<br>    <span class="hljs-comment">//结点值</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> no;<br>    <span class="hljs-comment">//结点名字</span><br>    <span class="hljs-keyword">private</span> String name;<br>    <span class="hljs-comment">//左节点</span><br>    <span class="hljs-keyword">private</span> Node left;<br>    <span class="hljs-comment">//右节点</span><br>    <span class="hljs-keyword">private</span> Node right;<br><br>    <span class="hljs-comment">//前序遍历</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">preOrderNode</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-comment">//遍历</span><br>        System.out.println(<span class="hljs-string">&quot;结点名字是&quot;</span> + <span class="hljs-built_in">this</span>.getName() + <span class="hljs-string">&quot;,值是&quot;</span> + <span class="hljs-built_in">this</span>.getNo());<br>        <span class="hljs-comment">//查看它的左节点能否遍历</span><br>        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.left != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.left.preOrderNode();<br>        &#125;<br>        <span class="hljs-comment">//查看它的右节点能否遍历</span><br>        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.right != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.right.preOrderNode();<br>        &#125;<br><br>    &#125;<br>    <span class="hljs-comment">//中序</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">infixOrderNode</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.left != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.left.infixOrderNode();<br>        &#125;<br><br>        System.out.println(<span class="hljs-string">&quot;结点名字是&quot;</span> + <span class="hljs-built_in">this</span>.getName() + <span class="hljs-string">&quot;,值是&quot;</span> + <span class="hljs-built_in">this</span>.getNo());<br><br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">this</span>.right != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.right.infixOrderNode();<br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">//后序</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">postOrderNode</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">this</span>.left != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.left.postOrderNode();<br>        &#125;<br><br>        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">this</span>.right != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.right.postOrderNode();<br>        &#125;<br><br>        System.out.println(<span class="hljs-string">&quot;结点名字是&quot;</span> + <span class="hljs-built_in">this</span>.getName() + <span class="hljs-string">&quot;,值是&quot;</span> + <span class="hljs-built_in">this</span>.getNo());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">BinaryTree</span>&#123;<br>    <span class="hljs-comment">//根结点</span><br>    <span class="hljs-keyword">private</span> Node root;<br><br>    <span class="hljs-comment">//前序遍历</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">preOrder</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.root != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.root.preOrderNode();<br>        &#125;<span class="hljs-keyword">else</span>&#123;<br>            System.out.println(<span class="hljs-string">&quot;二叉树为空&quot;</span>);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">//中序遍历</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">infixOrder</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.root != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.root.infixOrderNode();<br>        &#125;<span class="hljs-keyword">else</span>&#123;<br>            System.out.println(<span class="hljs-string">&quot;二叉树为空&quot;</span>);<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">//后序遍历</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">postOrder</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">if</span>(<span class="hljs-built_in">this</span>.root != <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-built_in">this</span>.root.postOrderNode();<br>        &#125;<span class="hljs-keyword">else</span>&#123;<br>            System.out.println(<span class="hljs-string">&quot;二叉树为空&quot;</span>);<br>        &#125;<br>    &#125;<br><br><br>    <span class="hljs-comment">//层次遍历</span><br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">LevelOrder</span><span class="hljs-params">()</span>&#123;<br>        ArrayQueue&lt;Node&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayQueue</span>&lt;Node&gt;(<span class="hljs-number">10</span>);<br><br>        queue.add(root);<br><br>        <span class="hljs-keyword">while</span>(queue.size() != <span class="hljs-number">0</span>)&#123;<br>            <span class="hljs-type">Node</span> <span class="hljs-variable">node</span> <span class="hljs-operator">=</span> queue.remove(<span class="hljs-number">0</span>);<br>            System.out.println(<span class="hljs-string">&quot;结点名字是&quot;</span> + node.getName() + <span class="hljs-string">&quot;,值是&quot;</span> + node.getNo());<br><br>            <span class="hljs-keyword">if</span>(node.getLeft() != <span class="hljs-literal">null</span>)&#123;<br>                queue.add(node.getLeft());<br>            &#125;<br>            <span class="hljs-keyword">if</span> (node.getRight() != <span class="hljs-literal">null</span>)&#123;<br>                queue.add(node.getRight());<br>            &#125;<br>        &#125;<br>    &#125;<br><br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>测试:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br><br>    <span class="hljs-comment">//创建一颗树</span><br>    <span class="hljs-type">BinaryTree</span> <span class="hljs-variable">binaryTree</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BinaryTree</span>();<br><br>    <span class="hljs-comment">//定义结点</span><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">node3</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">3</span>, <span class="hljs-string">&quot;3&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>);<br><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">node1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;1&quot;</span>, node3, <span class="hljs-literal">null</span>);<br><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">node2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;2&quot;</span>, <span class="hljs-literal">null</span>, <span class="hljs-literal">null</span>);<br><br>    <span class="hljs-type">Node</span> <span class="hljs-variable">root</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Node</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&quot;0&quot;</span>, node1, node2);<br><br>    binaryTree.setRoot(root);<br><br>    binaryTree.preOrder();<br>    System.out.println(<span class="hljs-string">&quot;********************************************************&quot;</span>);<br><br>    binaryTree.infixOrder();<br><br>    System.out.println(<span class="hljs-string">&quot;********************************************************&quot;</span>);<br><br>    binaryTree.postOrder();<br><br>    System.out.println(<span class="hljs-string">&quot;********************************************************&quot;</span>);<br><br>    binaryTree.LevelOrder();<br><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>结果</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java">结点名字是<span class="hljs-number">0</span>,值是<span class="hljs-number">0</span><br>结点名字是<span class="hljs-number">1</span>,值是<span class="hljs-number">1</span><br>结点名字是<span class="hljs-number">3</span>,值是<span class="hljs-number">3</span><br>结点名字是<span class="hljs-number">2</span>,值是<span class="hljs-number">2</span><br>********************************************************<br>结点名字是<span class="hljs-number">3</span>,值是<span class="hljs-number">3</span><br>结点名字是<span class="hljs-number">1</span>,值是<span class="hljs-number">1</span><br>结点名字是<span class="hljs-number">0</span>,值是<span class="hljs-number">0</span><br>结点名字是<span class="hljs-number">2</span>,值是<span class="hljs-number">2</span><br>********************************************************<br>结点名字是<span class="hljs-number">3</span>,值是<span class="hljs-number">3</span><br>结点名字是<span class="hljs-number">1</span>,值是<span class="hljs-number">1</span><br>结点名字是<span class="hljs-number">2</span>,值是<span class="hljs-number">2</span><br>结点名字是<span class="hljs-number">0</span>,值是<span class="hljs-number">0</span><br>********************************************************<br>结点名字是<span class="hljs-number">0</span>,值是<span class="hljs-number">0</span><br>结点名字是<span class="hljs-number">1</span>,值是<span class="hljs-number">1</span><br>结点名字是<span class="hljs-number">2</span>,值是<span class="hljs-number">2</span><br>结点名字是<span class="hljs-number">3</span>,值是<span class="hljs-number">3</span><br></code></pre></td></tr></table></figure>
+
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/">#数据结构与算法</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>二叉树的实现和遍历</div>
+      <div>http://example.com/2020/08/06/二叉树的实现和遍历/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>August 6, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/09/06/%E4%BA%8B%E5%8A%A1/" title="事务">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">事务</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/07/01/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" title="Git">
+                        <span class="hidden-mobile">Git</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

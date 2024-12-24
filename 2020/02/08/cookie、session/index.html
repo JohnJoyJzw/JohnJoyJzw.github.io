@@ -1,0 +1,761 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="1、Cookie1.1、Cookie概述我们打开163邮箱官方。https:&#x2F;&#x2F;mail.163.com&#x2F;  输入账号和密码，并且点击十天内免登录。进入邮箱。 当我们关闭浏览器或关闭电脑之后，我们再次进入邮箱。https:&#x2F;&#x2F;mail.163.com&#x2F; 此时我们不需要输入用户名和密码。说明：我们的账号和密码是保存在客户端，并且是在客户端的硬盘上，而不是内存中。 客户端电脑中用于保存这些会话状态">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cookie和Session">
+<meta property="og:url" content="http://example.com/2020/02/08/cookie%E3%80%81session/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1、Cookie1.1、Cookie概述我们打开163邮箱官方。https:&#x2F;&#x2F;mail.163.com&#x2F;  输入账号和密码，并且点击十天内免登录。进入邮箱。 当我们关闭浏览器或关闭电脑之后，我们再次进入邮箱。https:&#x2F;&#x2F;mail.163.com&#x2F; 此时我们不需要输入用户名和密码。说明：我们的账号和密码是保存在客户端，并且是在客户端的硬盘上，而不是内存中。 客户端电脑中用于保存这些会话状态">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210517104232.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518182351.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518182820.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518183201.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518184140.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518185341.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518185845.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518190522.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518191001.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518191059.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518191411.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518192708.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210518192835.png">
+<meta property="article:published_time" content="2020-02-08T07:38:36.000Z">
+<meta property="article:modified_time" content="2022-12-06T17:00:54.661Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="Web">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210517104232.png">
+  
+  
+  
+  <title>Cookie和Session - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"example.com","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Cookie和Session"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2020-02-08 15:38" pubdate>
+          February 8, 2020 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          7.1k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          59 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Cookie和Session</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="1、Cookie"><a href="#1、Cookie" class="headerlink" title="1、Cookie"></a>1、Cookie</h2><h3 id="1-1、Cookie概述"><a href="#1-1、Cookie概述" class="headerlink" title="1.1、Cookie概述"></a>1.1、Cookie概述</h3><p>我们打开163邮箱官方。<a target="_blank" rel="noopener" href="https://mail.163.com/">https://mail.163.com/</a></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210517104232.png" srcset="/img/loading.gif" lazyload alt="163邮箱"></p>
+<p>输入账号和密码，并且点击<strong>十天内免登录</strong>。进入邮箱。</p>
+<p>当我们关闭浏览器或关闭电脑之后，我们再次进入邮箱。<a target="_blank" rel="noopener" href="https://mail.163.com/">https://mail.163.com/</a></p>
+<p>此时我们不需要输入用户名和密码。说明：我们的账号和密码是保存在客户端，并且是在客户端的硬盘上，而不是内存中。</p>
+<p>客户端电脑中用于保存这些会话状态的资源，称为Cookie。</p>
+<blockquote>
+<p>Cookie是1993由网景公司（Netscape）前雇员发明的一种进行<strong>网络会话状态跟踪的技术</strong>。</p>
+</blockquote>
+<p><code>会话是由一组请求与响应组成</code>，是围绕着一件相关的事情所进行的请求与响应。所以在请求与响应之间需要有数据传递的。即是需要进行会话状态跟踪的。</p>
+<p>但是<strong>HTTP是无状态的协议</strong>，所谓的无状态，是指：请求之间无法进行数据的传递的。也就是说，HTTP是无法直到上一次的请求是什么。</p>
+<p>因此cookie就是这种进行请求间的数据传递会话跟踪技术。</p>
+<p>Cookie是由服务器生成，保存在客户端的一种信息载体。这个载体中存放着用户访问该站点的会话状态信息。只要cookie没有被清空或者失效，那么，保存在其中的会话状态就有效。</p>
+<p>用户在第一次请求后，有服务器生成cookie，并将其封装到响应头中，以响应的形式发送给客户端。客户端接受到这个响应后，将Cookie保存在客户端。当客户端再次发送同类请求后，在请求中会携带保存在客户端的Cookie数据，发送到服务端，由服务端对会话进行跟踪。</p>
+<h3 id="1-2、服务端生成Cooike"><a href="#1-2、服务端生成Cooike" class="headerlink" title="1.2、服务端生成Cooike"></a>1.2、服务端生成Cooike</h3><h4 id="cookie的生成和获取"><a href="#cookie的生成和获取" class="headerlink" title="cookie的生成和获取"></a>cookie的生成和获取</h4><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">web-app</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://xmlns.jcp.org/xml/ns/javaee&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://xmlns.jcp.org/xml/ns/javaee</span></span><br><span class="hljs-string"><span class="hljs-tag">                  http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd&quot;</span></span><br><span class="hljs-tag">         <span class="hljs-attr">version</span>=<span class="hljs-string">&quot;4.0&quot;</span>&gt;</span><br><br><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>Demo1<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">servlet-class</span>&gt;</span>com.jiang.SomeServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-class</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">servlet</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>Demo1<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>        <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/demo1<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br>    <span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br><br>&lt;/web-app &gt;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeServlet</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br>        <span class="hljs-comment">//创建两个cookie</span><br>        <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;name&quot;</span>,<span class="hljs-string">&quot;JiangZW&quot;</span>);<br>        <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;age&quot;</span>,<span class="hljs-string">&quot;20&quot;</span>);<br><br>        <span class="hljs-comment">//向响应中添加cookie</span><br>        resp.addCookie(cookie1);<br>        resp.addCookie(cookie2);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>我们可以看到在响应头中，有从服务端返回的Cookie</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518182351.png" srcset="/img/loading.gif" lazyload alt="生成cookie"></p>
+<p>我们说过，cookie是用来请求之间的数据传递的。</p>
+<p>如果我们发送同类请求，Cookie是否会发送？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">OtherServlet</span>  <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br>        &#125;<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">servlet</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>Demo2<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-class</span>&gt;</span>com.jiang.OtherServlet<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-class</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">servlet-mapping</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">servlet-name</span>&gt;</span>Demo2<span class="hljs-tag">&lt;/<span class="hljs-name">servlet-name</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">url-pattern</span>&gt;</span>/demo2<span class="hljs-tag">&lt;/<span class="hljs-name">url-pattern</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">servlet-mapping</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>我们可以看到，我们访问localhost:8080&#x2F;demo2，请求头上cookie携带上一次请求的数据。并将它传递给服务端。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518182820.png" srcset="/img/loading.gif" lazyload alt="携带cookie"></p>
+<p>我们可以在服务端接受前端传来的cookie数据</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">OtherServlet</span>  <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br>        Cookie[] cookies = req.getCookies();<br><br>        <span class="hljs-keyword">for</span> (Cookie cookie:cookies) &#123;<br>            System.out.println(cookie.getName() + <span class="hljs-string">&quot;   &quot;</span> + cookie.getValue() + <span class="hljs-string">&quot;    &quot;</span> + cookie.getPath());<br>        &#125;<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518183201.png" srcset="/img/loading.gif" lazyload alt="服务端得到cookie"></p>
+<h4 id="设置有效期"><a href="#设置有效期" class="headerlink" title="设置有效期"></a>设置有效期</h4><p>在默认的情况下，Cookie是保存在浏览器的缓存中，浏览器关闭，缓存消失，Cookie消失。通过Cookie设置有效时长，可以将Cookie写入客户端硬盘文件中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeServlet</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br><br>        <span class="hljs-comment">//创建两个cookie</span><br>        <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;name&quot;</span>,<span class="hljs-string">&quot;JiangZW&quot;</span>);<br>        <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;age&quot;</span>,<span class="hljs-string">&quot;20&quot;</span>);<br><br>        <span class="hljs-comment">//设置有效期</span><br>        cookie1.setMaxAge(<span class="hljs-number">100</span>);<br>        cookie2.setMaxAge(<span class="hljs-number">100</span>);<br>        <span class="hljs-comment">//向响应中添加cookie</span><br>        resp.addCookie(cookie1);<br>        resp.addCookie(cookie2);<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="绑定路径"><a href="#绑定路径" class="headerlink" title="绑定路径"></a>绑定路径</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeServlet</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br><br>        <span class="hljs-comment">//创建两个cookie</span><br>        <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;name&quot;</span>,<span class="hljs-string">&quot;JiangZW&quot;</span>);<br>        <span class="hljs-type">Cookie</span> <span class="hljs-variable">cookie2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Cookie</span>(<span class="hljs-string">&quot;age&quot;</span>,<span class="hljs-string">&quot;20&quot;</span>);<br><br>        <span class="hljs-comment">//指定cookie绑定路径</span><br>        cookie1.setPath(req.getContextPath() + <span class="hljs-string">&quot;/xxx/demo1&quot;</span>);<br>        cookie2.setPath(req.getContextPath() + <span class="hljs-string">&quot;/xxx/demo2&quot;</span>);<br>        <span class="hljs-comment">//向响应中添加cookie</span><br>        resp.addCookie(cookie1);<br>        resp.addCookie(cookie2);<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="1-3、Cookie禁用"><a href="#1-3、Cookie禁用" class="headerlink" title="1.3、Cookie禁用"></a>1.3、Cookie禁用</h3><p>浏览器是可以禁用 Cookie 的。所谓禁用 Cookie 是指客户端浏览器不接收服务器发送来</p>
+<p>的 Cookie。不过，现在的很多网站，若浏览器禁用了 Cookie，则将无法访问。例如，163邮</p>
+<p>箱就要求浏览器不能禁用 Cookie。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518184140.png" srcset="/img/loading.gif" lazyload alt="cookie禁用后登录邮箱"></p>
+<h2 id="2、Session"><a href="#2、Session" class="headerlink" title="2、Session"></a>2、Session</h2><p>Session，即会话，是 <strong>Web 开发中的一种会话状态跟踪技术</strong>。前面所说的 Cookie也是一种会话跟踪技术。<strong>不同的是 Cookie 是将会话状态保存在了客户端而， Session 则是将会话状态保存在了服务器端</strong>。</p>
+<p>什么是会话：</p>
+<p>对于用户来说：当用户打开浏览器，从发出第一次请求开始，一直到最终关闭浏览器，就表示一次会话的完成。</p>
+<h3 id="2-1、Session的使用"><a href="#2-1、Session的使用" class="headerlink" title="2.1、Session的使用"></a>2.1、Session的使用</h3><p>若要对 Session 进行操作，则可以通过 HttpServletRequest 的 getSession()方法获取。该方法具有两个重载的方法。</p>
+<ul>
+<li><p>public HttpSession getSession(boolean create)</p>
+<p>用于创建 Session。若参数 create 为 true，则表示若当前没有 Session，则新建一</p>
+<p>个 Session，若当前存在 Session 则使用当前的 Session。若参数 create 为 false 表示若当前没</p>
+<p>有 Session，则直接返回 null。 </p>
+</li>
+<li><p>public HttpSession getSession()</p>
+<p>该方法用于创建 Session。相当于 getSession(true)，即没有 Session 则创建新的 Session。</p>
+</li>
+</ul>
+<h4 id="对Session域属性空间操作"><a href="#对Session域属性空间操作" class="headerlink" title="对Session域属性空间操作"></a>对Session域属性空间操作</h4><p>Session 是一个专门用于存放数据的集合，我们一般称这个用于存放数据的内存空间为域属性空间，简称域。HttpSession 中具有三个方法，是专门用于对该域属性空间中数据进行写、读操作的。</p>
+<ul>
+<li><p>public void setAttribute(String name, Object value)</p>
+<p>该方法用于向 Session 的域属性空间中放入指定名称、指定值的域属性。</p>
+</li>
+<li><p>public Object getAttribute(String name)</p>
+<p>该方法用于从 Session 的域属性空间中读取指定名称为域属性值。</p>
+</li>
+<li><p>public void removeAttribute(String name)</p>
+<p>该方法用于从 Session 的域属性空间中删除指定名称的域属性。</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SomeServlet</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br><br>        <span class="hljs-comment">//创建session</span><br>        <span class="hljs-type">HttpSession</span> <span class="hljs-variable">session</span> <span class="hljs-operator">=</span> req.getSession();<br><br>        session.setAttribute(<span class="hljs-string">&quot;name&quot;</span>,<span class="hljs-string">&quot;jzw&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">OtherServlet</span>  <span class="hljs-keyword">extends</span> <span class="hljs-title class_">HttpServlet</span> &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doGet</span><span class="hljs-params">(HttpServletRequest req, HttpServletResponse resp)</span> <span class="hljs-keyword">throws</span> ServletException, IOException &#123;<br>        <span class="hljs-type">HttpSession</span> <span class="hljs-variable">session</span> <span class="hljs-operator">=</span> req.getSession();<br><br>        <span class="hljs-type">String</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> (String)session.getAttribute(<span class="hljs-string">&quot;name&quot;</span>);<br><br>        System.out.println(<span class="hljs-string">&quot;name ====== &quot;</span> + name);<br><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518185341.png" srcset="/img/loading.gif" lazyload alt="session域的使用"></p>
+<p>可以通过removeAttribute移除</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">session.removeAttribute(<span class="hljs-string">&quot;name&quot;</span>);<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518185845.png" srcset="/img/loading.gif" lazyload alt="session移除"></p>
+<h3 id="2-2、Session原理"><a href="#2-2、Session原理" class="headerlink" title="2.2、Session原理"></a>2.2、Session原理</h3><p>多个用户均在自己的电脑上访问当前应用，发现不同用户从 Session 中读取到的都是自己所提交的参数值，并没有读取到别人的参数，并没有发生“错乱”现象。这是为什么呢？</p>
+<p>Web开发中的Session机制，为每个用户都分配了一个Session。即一个用户一个Session，确切地说，是一次会话一个 Session 对象。同一用户可以发出多个会话，即会产生多个 Session。</p>
+<p>在服务器中系统会为每个会话维护一个Session。不同的会话，对应不同的Session。</p>
+<p>不同的会话，对应不同的 Session。那么，系统是如何识别各个 Session 对象的？即是如何做到在同一会话过程中，一直使用的是同一个 Session 对象呢？</p>
+<h3 id="Session的工作流程"><a href="#Session的工作流程" class="headerlink" title="Session的工作流程"></a>Session的工作流程</h3><h4 id="生成Session列表"><a href="#生成Session列表" class="headerlink" title="生成Session列表"></a>生成Session列表</h4><p>服务器对当前应用中的 Session 是以 Map 的形式进行管理的，这个 Map 称为 Session 列 表。该 Map 的 key 为一个 32 位长度的随机串，这个随机串称为 JSessionID，value 则为 Session对象的引用。</p>
+<p>当用户第一次提交请求时，服务端 Servlet 中执行到 request.getSession()方法后，会自动生成一个 Map.Entry 对象，key 为一个根据某种算法新生成的 JSessionID，value 则为新创建的 HttpSession 对象。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518190522.png" srcset="/img/loading.gif" lazyload alt="session原理"></p>
+<h4 id="服务器生成并发送Cookie"><a href="#服务器生成并发送Cookie" class="headerlink" title="服务器生成并发送Cookie"></a>服务器生成并发送Cookie</h4><p>在将 Session 信息写入 Session 列表后，系统还会自动将“JSESSIONID”作为 name，这 个 32 位长度的随机串作为 value，以 Cookie 的形式存放到响应报头中，并随着响应，将该Cookie 发送到客户端。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518191001.png" srcset="/img/loading.gif" lazyload alt="cookie中携带sessionID"></p>
+<h4 id="客户端接收并发送Cookie"><a href="#客户端接收并发送Cookie" class="headerlink" title="客户端接收并发送Cookie"></a>客户端接收并发送Cookie</h4><p>客户端接收到这个 Cookie 后会将其存放到浏览器的缓存中。即，只要客户端浏览器不关闭，浏览器缓存中的 Cookie 就不会消失。当用户提交第二次请求时，会将缓存中的这个 Cookie，伴随着请求的头部信息，一块发送到服务端。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518191059.png" srcset="/img/loading.gif" lazyload alt="向服务端发送cookie中携带sessionID"></p>
+<h4 id="从-Session-列表中查找"><a href="#从-Session-列表中查找" class="headerlink" title="从 Session 列表中查找"></a>从 <strong>Session</strong> 列表中查找</h4><p>服务端从请求中读取到客户端发送来的 Cookie，并根据 Cookie 的 JSSESSIONID 的值，从</p>
+<p>Map 中查找相应 key 所对应的 value，即 Session 对象。然后，对该 Session 对象的域属性进</p>
+<p>行读写操作。</p>
+<h3 id="2-3、Session失效"><a href="#2-3、Session失效" class="headerlink" title="2.3、Session失效"></a>2.3、Session失效</h3><p>Web 开发中引入的 Session 超时的概念，Session 的失效就是指 Session 的超时。若某个Session 在指定的时间范围内一直未被访问，那么 Session 将超时，即将失效。</p>
+<p>在 web.xml 中可以通过<session-config/>标签设置 Session 的超时时间，单位为分钟。默认 Session 的超时时间为 30 分钟。需要再次强调的是，这个时间并不是从 Session 被创建开始计时的生命周期时长，而是从最后一次被访问开始计时，在指定的时长内一直未被访问的时长。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-tag">&lt;<span class="hljs-name">session-config</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">session-timeout</span>&gt;</span>30<span class="hljs-tag">&lt;/<span class="hljs-name">session-timeout</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">session-config</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+
+
+
+
+<p>我们也可以通过代码失效：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">session.invalidate();<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518191411.png" srcset="/img/loading.gif" lazyload alt="session失效"></p>
+<h3 id="2-4、禁用cookie后的session"><a href="#2-4、禁用cookie后的session" class="headerlink" title="2.4、禁用cookie后的session"></a>2.4、禁用cookie后的session</h3><p>当我们在客户端禁用cookie之后，在服务端不会受到影响。依旧会创建cookie和session。并通过响应返回给客户端。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518192708.png" srcset="/img/loading.gif" lazyload alt="服务端依旧会生成session  并传递给客户端"></p>
+<p>我们不关闭浏览器，再次访问localhost:8080&#x2F;demo1。</p>
+<p>发现出现的JSESSIONID不是原来的值了。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/20210518192835.png" srcset="/img/loading.gif" lazyload alt="session值"></p>
+<p>我们没有关闭浏览器，这是一次会话，但出现的session不同。</p>
+<p>若客户端浏览器禁用了 Cookie，会发现向服务器所提交的每一次请求，服务器在给出的响应中都会包含名称为 JSESSIONID 的 Cookie，只不过这个 Cookie 的值每一次都不同。也就是说，只要客户端浏览器所提交的请求中没有包含 JSESSIONID，服务器就会认为这是一次新的会话的开始，就会为其生成一个 Map.Entry 对象，key 为新的 32 位长度的随机串，value为新创建的 Session 会话引用。这样的话，也就无法实现会话跟踪了。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+        <a href="/tags/Web/">#Web</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Cookie和Session</div>
+      <div>http://example.com/2020/02/08/cookie、session/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>February 8, 2020</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/02/08/Servlet/" title="Servlet 编程">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Servlet 编程</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2020/02/05/%E5%9F%BA%E4%BA%8E%E4%BD%8D%E5%9B%BE%E7%9A%84%E4%BC%98%E5%85%88%E7%BA%A7%E7%AE%97%E6%B3%95/" title="基于位图的优先级算法">
+                        <span class="hidden-mobile">基于位图的优先级算法</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
