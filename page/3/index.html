@@ -389,15 +389,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
-          类加载机制
+        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
+          类加载器
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
         <div>
-          虚拟机类加载机制1.概述虚拟机把描述类的数据从Class文件加载到内存中，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。 12345在Java中数据类型分为基本数据类型和引用数据类型。基本数据类型有虚拟机预先定义，引用数据类型需要进行类的加载。在Java语言中，类型的加载、连接和初始化过程都是在程序运行期间完成的，这种策略虽然会令类加
+          类加载器1.类加载器概述​		类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。 ClassLoader的作用123#
         </div>
       </a>
 
@@ -431,15 +431,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
-          类加载器
+        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
+          类加载机制
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
         <div>
-          类加载器1.类加载器概述​		类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。 ClassLoader的作用123#
+          虚拟机类加载机制1.概述虚拟机把描述类的数据从Class文件加载到内存中，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。 12345在Java中数据类型分为基本数据类型和引用数据类型。基本数据类型有虚拟机预先定义，引用数据类型需要进行类的加载。在Java语言中，类型的加载、连接和初始化过程都是在程序运行期间完成的，这种策略虽然会令类加
         </div>
       </a>
 
@@ -502,6 +502,50 @@
               <a href="/tags/Java/">#Java</a>
             
               <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/02/01/Redis%E5%AE%9E%E7%8E%B0mybatis%E7%9A%84%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98/" target="_self">
+          Redis实现Mybatis二级缓存
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/01/Redis%E5%AE%9E%E7%8E%B0mybatis%E7%9A%84%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98/" target="_self">
+        <div>
+          Mybatis中的二级缓存Myabtis 的二级缓存是如何实现的1234# 在Mybatis中开启二级缓存在Mapper.xml文件中加标签&lt;cache /&gt;  开启二级缓存需要将实体类序列化，否则会出现错误	Cause: java.io.NotSerializableException: com.jiang.travels.entity.User  123# Mybatis的二级
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-02-01 15:38" pubdate>
+              2021-02-01
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+              <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
+            
+              <a href="/tags/%E7%BC%93%E5%AD%98/">#缓存</a>
             
           </div>
         
@@ -584,50 +628,6 @@
         
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/02/01/Redis%E5%AE%9E%E7%8E%B0mybatis%E7%9A%84%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98/" target="_self">
-          Redis实现Mybatis二级缓存
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/01/Redis%E5%AE%9E%E7%8E%B0mybatis%E7%9A%84%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98/" target="_self">
-        <div>
-          Mybatis中的二级缓存Myabtis 的二级缓存是如何实现的1234# 在Mybatis中开启二级缓存在Mapper.xml文件中加标签&lt;cache /&gt;  开启二级缓存需要将实体类序列化，否则会出现错误	Cause: java.io.NotSerializableException: com.jiang.travels.entity.User  123# Mybatis的二级
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-02-01 15:38" pubdate>
-              2021-02-01
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
-            
-              <a href="/tags/%E7%BC%93%E5%AD%98/">#缓存</a>
             
               <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
             
