@@ -223,15 +223,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/07/15/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E7%BD%91%E5%85%B3/" target="_self">
-          微服务组件 -- 网关
+        <a href="/2021/09/09/Redis%E5%AE%9E%E7%8E%B0-%E5%AD%97%E5%85%B8/" target="_self">
+          Redis实现-字典
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/07/15/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E7%BD%91%E5%85%B3/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/09/Redis%E5%AE%9E%E7%8E%B0-%E5%AD%97%E5%85%B8/" target="_self">
         <div>
-          微服务组件：网关服务一、网关1、为什么需要网关我们已经了解了微服务的各个基础组件，这些组件已经可以构建一个简单的微服务模型：  注册中心：Eureka和consul，用于将各个微服务的信息注册，为了让其他的微服务知道这些信息。方便调用 服务调用：声明式调用组件OpenFeign，为了解决服务的集群调用，需要引入负载均衡组件Ribbon。 容错保护：在服务运行时，可能会出现雪崩，服务器宕机等
+          Redis实现 - 字典一、字典在Redis的使用1.字典简述字典又称为映射 – map，是一种用于保存键值对（K - V）的抽象数据结构。 在map中，一个键(K)对应一个值(V)，这对关联的键和值称为键值对。 字典中的键都是唯一的。因此，我们可以通过键来改变值，或者删除整个键值对。 2.在Redis中的使用字典在Redis中的应用非常广泛，比如，Redis的数据库就是使用字典来作为底层实现
         </div>
       </a>
 
@@ -239,8 +239,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2021-07-15 19:00" pubdate>
-              2021-07-15
+            <time datetime="2021-09-09 19:55" pubdate>
+              2021-09-09
             </time>
           </div>
         
@@ -249,7 +249,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
+            
+              <a href="/tags/Redis/">#Redis</a>
             
           </div>
         
@@ -263,15 +265,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/07/14/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E5%AE%B9%E9%94%99%E4%BF%9D%E6%8A%A4/" target="_self">
-          微服务组件 -- 服务容错保护
+        <a href="/2021/09/05/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3ThreadLocal/" target="_self">
+          深入理解ThreadLocal
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/07/14/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E5%AE%B9%E9%94%99%E4%BF%9D%E6%8A%A4/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/05/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3ThreadLocal/" target="_self">
         <div>
-          微服务组件： Hystrix一、Hystrix 简介1、为什么需要容错保护在微服务架构中，我们将系统的按功能拆分了很多服务单元，各个服务单元都被注册在注册中心中。通过从注册中心获取的其他服务地址，来调用其他服务。实现服务之间的调用。 比如：在一个电商网站中，我们可能将系统拆分为用户、订单、积分等服务单元。当用户创建一个订单的时候，  各个服务单元相互调用，相互依赖。由于每个服务单元都在不同的进
+          ThreadLocal多线程产生的线程安全性问题数据一致性问题：发生在多个主体对同一份数据无法达成共识。 解决方法：  排队：锁、互斥量、管程、屏障 投票：Paxos算法、Raft算法  这两种方法都会消耗额外的性能。 ThreadLocal是能够避免数据不一致性的。 ThreadLocal使用定义：  提供线程局部变量 一个线程局部变量在多个线程中，分别有多个独立的值。  特点：  简单(开
         </div>
       </a>
 
@@ -279,8 +281,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2021-07-14 10:57" pubdate>
-              2021-07-14
+            <time datetime="2021-09-05 21:22" pubdate>
+              2021-09-05
             </time>
           </div>
         
@@ -289,7 +291,7 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a>
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
             
           </div>
         
@@ -303,15 +305,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/07/12/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/" target="_self">
-          微服务组件 -- 服务调用
+        <a href="/2021/09/04/%E5%9B%9E%E8%A1%A8%E5%92%8C%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95/" target="_self">
+          回表和覆盖索引
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/07/12/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E8%B0%83%E7%94%A8/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/04/%E5%9B%9E%E8%A1%A8%E5%92%8C%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95/" target="_self">
         <div>
-          服务调用在 SpringCloud 中服务间调用方式主要是使用 http restful方式进行服务间调用。 所谓的服务键调用，简单来说，就是我可以调用其他模块的接口。 比如： 在服务A中有一个接口。 12345678@RestControllerpublic AController&#123;        @GetMapping(&quot;/msga&quot;)    public S
+          回表在理解回表之前，需要了解聚簇索引和非聚簇索引。 在InnoDB，由聚簇索引和辅助键索引。 聚簇索引就是将主键值和数据放在一起存储。 辅助键索引就是将索引值和主键值放在一起存储。 表数据 表中有4列，其中ID是主键，设置age为普通索引。    执行SQL语句： 1SELECT ID,age FROM USER WHERE age = 19  此时我们只需要通过普通索引就可以找到查询结果
         </div>
       </a>
 
@@ -319,8 +321,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2021-07-12 15:11" pubdate>
-              2021-07-12
+            <time datetime="2021-09-04 20:07" pubdate>
+              2021-09-04
             </time>
           </div>
         
@@ -329,7 +331,7 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
             
           </div>
         
@@ -343,15 +345,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/07/09/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86/" target="_self">
-          微服务组件 -- 服务治理
+        <a href="/2021/09/04/%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95/" target="_self">
+          聚簇索引和非聚簇索引
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/07/09/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/04/%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95%E5%92%8C%E9%9D%9E%E8%81%9A%E7%B0%87%E7%B4%A2%E5%BC%95/" target="_self">
         <div>
-          微服务组件 – 服务治理一、服务治理服务治理是微服务架构中最为核心和基础的模块，它是用于实现各个微服务实例的自动化注册与发现。 1、为什么需要服务治理我们可以通过做一些静态配置来完成服务的调用。比如，有两个服务A和B，其中服务A需要调用服务B来完成一个业务操作时，我们需要手工维护服务B的具体实例清单。 但是随着业务的发展，系统功能越来越复杂，相应的微服务应用也不断增加。我们的静态配置就会变得越
+          聚簇索引和非聚簇索引简单来说： 聚簇索引就是将数据和索引存储在一块，索引结构的叶子结点保存了数据。 非聚簇索引就是将数据和索引存储在一块，索引结构的叶子结点指向了数据对应的数据。 在InnoDB中主键使用的时聚簇索引。MyISAM不管是主键索引还是二级索引都是使用的非聚簇索引。 聚簇索引The InnoDB term for a primary key index. InnoDB table
         </div>
       </a>
 
@@ -359,8 +361,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2021-07-09 20:34" pubdate>
-              2021-07-09
+            <time datetime="2021-09-04 18:21" pubdate>
+              2021-09-04
             </time>
           </div>
         
@@ -369,7 +371,7 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/">#微服务</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
             
           </div>
         
