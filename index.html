@@ -505,6 +505,46 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2023/03/08/Redis%E5%AE%9E%E7%8E%B0-%E6%8C%81%E4%B9%85%E5%8C%96/" target="_self">
+          Redis实现-持久化
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2023/03/08/Redis%E5%AE%9E%E7%8E%B0-%E6%8C%81%E4%B9%85%E5%8C%96/" target="_self">
+        <div>
+          Redis实现-持久化一、引言​	Redis 作为一款高性能的内存数据库，其数据主要存储在内存中，从而提供了极快的读写速度。然而，内存是易失性存储，一旦服务器进程退出或宕机，内存中的数据就会全部丢失。 ​	为了解决这一问题，Redis 提供了持久化功能，将内存中的数据保存到磁盘中，以便在重启后恢复数据。Redis 支持两种持久化方式：RDB持久化和 AOF持久化。本文将深入剖析这两种持久化机制
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2023-03-08 15:38" pubdate>
+              2023-03-08
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Redis/">#Redis</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2023/02/08/Redis%E5%AE%9E%E7%8E%B0-5%E7%A7%8D%E5%AF%B9%E8%B1%A1%E7%B1%BB%E5%9E%8B%E7%9A%84%E5%BA%95%E5%B1%82%E5%AE%9E%E7%8E%B0/" target="_self">
           Redis实现-5种对象类型的底层实现
         </a>
@@ -572,46 +612,6 @@
             <i class="iconfont icon-tags"></i>
             
               <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8/" target="_self">
-          Redis实现-压缩列表
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8/" target="_self">
-        <div>
-          Redis实现-压缩列表一、压缩列表在Redis中的使用压缩列表(ziplist)是列表键和哈希键的底层实现之一。压缩列表是Redis为了节约内存而开发的。 当一个列表项，并且每个列表项要么就是小整数值，要么就是比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。 12127.0.0.1:6379&gt; rpush lst 1 3 5 10086 &quot;hello&qu
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-09-10 19:55" pubdate>
-              2021-09-10
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Redis/">#Redis</a>
             
           </div>
         
