@@ -1,0 +1,1442 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析一、引言​	在当今的数据时代，MySQL作为最流行的开源关系型数据库之一，支撑着无数互联网应用的核心数据存储。然而，很多开发者和DBA在日常工作中只停留在SQL编写和表面优化的层面，当遇到性能瓶颈或数据损坏等问题时，往往束手无策。真正的高手，必定深谙底层原理。 ​	 理解MySQL如何存储数据和索引，不仅能帮助我们写出更高效的SQL，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/02/08/MySQL%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E5%92%8C%E7%B4%A2%E5%BC%95%E7%9A%84%E5%AD%98%E5%82%A8%E5%A5%A5%E7%A7%98-%E4%BB%8E%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E5%88%B0%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E5%85%A8%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析一、引言​	在当今的数据时代，MySQL作为最流行的开源关系型数据库之一，支撑着无数互联网应用的核心数据存储。然而，很多开发者和DBA在日常工作中只停留在SQL编写和表面优化的层面，当遇到性能瓶颈或数据损坏等问题时，往往束手无策。真正的高手，必定深谙底层原理。 ​	 理解MySQL如何存储数据和索引，不仅能帮助我们写出更高效的SQL，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171144688.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171145207.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171148725.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171200957.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171311627.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171334436.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171350327.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602172007290.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171408709.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602172050514.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602172213861.png">
+<meta property="article:published_time" content="2025-02-08T07:38:36.000Z">
+<meta property="article:modified_time" content="2026-02-17T14:51:12.632Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602171144688.png">
+  
+  
+  
+  <title>MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/code-wallpaper-22.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-02-08 15:38" pubdate>
+          February 8, 2025 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          17k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          146 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析"><a href="#MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析" class="headerlink" title="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析"></a>MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</h1><h2 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h2><p>​	在当今的数据时代，MySQL作为最流行的开源关系型数据库之一，支撑着无数互联网应用的核心数据存储。然而，很多开发者和DBA在日常工作中只停留在SQL编写和表面优化的层面，当遇到性能瓶颈或数据损坏等问题时，往往束手无策。<strong>真正的高手，必定深谙底层原理。</strong></p>
+<p>​	 理解MySQL如何存储数据和索引，不仅能帮助我们写出更高效的SQL，还能在设计表结构、选择索引、配置数据库参数时做出更明智的决策。</p>
+<h2 id="二、存储基础——从磁盘到文件系统"><a href="#二、存储基础——从磁盘到文件系统" class="headerlink" title="二、存储基础——从磁盘到文件系统"></a>二、存储基础——从磁盘到文件系统</h2><h3 id="2-1-数据持久化的物理基础：硬盘存储原理"><a href="#2-1-数据持久化的物理基础：硬盘存储原理" class="headerlink" title="2.1 数据持久化的物理基础：硬盘存储原理"></a>2.1 数据持久化的物理基础：硬盘存储原理</h3><p>​	在深入MySQL内部结构之前，我们必须先理解数据最终存放的物理介质——硬盘的工作原理。无论是机械硬盘（HDD）还是固态硬盘（SSD），<strong>其I&#x2F;O性能都远低于内存访问速度</strong>，这也是数据库系统设计时需要克服的最大挑战。</p>
+<h4 id="2-1-1-机械硬盘的物理结构"><a href="#2-1-1-机械硬盘的物理结构" class="headerlink" title="2.1.1 机械硬盘的物理结构"></a>2.1.1 机械硬盘的物理结构</h4><p>机械硬盘由盘片（Platter）、磁头（Head）、磁道（Track）、扇区（Sector）和柱面（Cylinder）组成。</p>
+<ul>
+<li><strong>盘片</strong>：覆盖磁性材料的圆形薄片，数据就存储在这里</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171144688.png" srcset="/img/loading.gif" lazyload alt="盘片"></p>
+<ul>
+<li><p><strong>磁道</strong>：盘片上同心圆状的存储区域</p>
+</li>
+<li><p><strong>扇区</strong>：磁道被划分为若干段圆弧，每个段称为一个扇区，是硬盘<strong>最小的物理存储单位</strong>，传统大小为512字节，现代硬盘多为4KB，其中，最内侧磁道上的扇区面积最小，因此数据密度最大。</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171145207.png" srcset="/img/loading.gif" lazyload alt="磁道和扇区"></p>
+<ul>
+<li><strong>柱面</strong>：所有盘片上相同半径的磁道构成一个柱面</li>
+<li><strong>磁头</strong>：位于磁臂末端，用于读写盘片上的数据</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171148725.png" srcset="/img/loading.gif" lazyload alt="柱面和磁头"></p>
+<p>​	当需要读取数据时，磁臂移动磁头到指定磁道（寻道时间），然后盘片旋转使目标扇区旋转到磁头下方（旋转延迟），最后进行数据传输。这两个机械动作的耗时通常在毫秒级别，虽然看起来不长，<strong>但与纳秒级别的CPU处理和微秒级别的内存访问相比，简直是天壤之别</strong>。</p>
+<h4 id="1-1-2-固态硬盘"><a href="#1-1-2-固态硬盘" class="headerlink" title="1.1.2 固态硬盘"></a>1.1.2 固态硬盘</h4><p>固态硬盘（SSD）的物理结构完全摒弃了传统机械硬盘的旋转盘片和移动磁头，由纯电子元件构成，我们不详细介绍其中的物理组件。</p>
+<p>我们主要介绍下固态硬盘的特点：</p>
+<ul>
+<li><strong>读写不对称</strong>：读比写快</li>
+<li><strong>擦除前需先写入</strong>：闪存不能原地覆盖，需要先擦除再写入</li>
+<li><strong>写入放大</strong>：实际写入量可能大于应用层请求量</li>
+<li><strong>寿命有限</strong>：每个存储单元有有限的擦写次数</li>
+</ul>
+<p>尽管SSD性能更好，但其随机访问延迟仍在微秒级别，依然远慢于内存。</p>
+<h3 id="2-2-从磁盘到文件系统的抽象"><a href="#2-2-从磁盘到文件系统的抽象" class="headerlink" title="2.2 从磁盘到文件系统的抽象"></a>2.2 从磁盘到文件系统的抽象</h3><p>​	操作系统在磁盘之上建立了文件系统（如ext4、XFS、NTFS等）的抽象层，隐藏了磁盘的物理细节，以<strong>文件</strong>和<strong>目录</strong>的形式组织数据。文件系统也有自己的存储单位——<strong>块（Block）</strong>，通常是磁盘扇区的整数倍，常见大小为4KB。</p>
+<p>​	当MySQL向磁盘写入数据时，实际上是通过文件系统接口操作文件。但文件系统并不直接控制数据在磁盘上的物理位置，这可能导致额外的开销：</p>
+<ul>
+<li><strong>文件系统缓存</strong>：数据可能先写入操作系统缓存，再刷入磁盘</li>
+<li><strong>日志型文件系统</strong>：可能引入额外的写操作保证一致性</li>
+<li><strong>碎片化</strong>：文件在物理上可能不连续存储</li>
+</ul>
+<h3 id="2-3-数据库系统面临的挑战"><a href="#2-3-数据库系统面临的挑战" class="headerlink" title="2.3 数据库系统面临的挑战"></a>2.3 数据库系统面临的挑战</h3><p>基于上述硬件特性，数据库系统在设计时必须解决几个核心问题：</p>
+<ol>
+<li><strong>速度鸿沟</strong>：如何弥合内存与磁盘之间的巨大性能差距？</li>
+<li><strong>原子性保障</strong>：如何保证部分写入操作不会导致数据损坏？</li>
+<li><strong>并发控制</strong>：多个用户同时读写时如何保证数据一致？</li>
+<li><strong>崩溃恢复</strong>：系统突然崩溃后如何恢复数据？</li>
+</ol>
+<p>MySQL的InnoDB存储引擎正是通过精心设计的架构来解决这些问题。接下来，我们将深入剖析InnoDB的存储架构。</p>
+<h2 id="三、InnoDB存储引擎架构概览"><a href="#三、InnoDB存储引擎架构概览" class="headerlink" title="三、InnoDB存储引擎架构概览"></a>三、InnoDB存储引擎架构概览</h2><h3 id="3-1-InnoDB的逻辑架构"><a href="#3-1-InnoDB的逻辑架构" class="headerlink" title="3.1 InnoDB的逻辑架构"></a>3.1 InnoDB的逻辑架构</h3><p>InnoDB存储引擎采用插件式架构，既作为MySQL的一部分运行，又相对独立地管理数据的存储和访问。其整体架构可以分为内存结构和磁盘结构两大部分。</p>
+<h4 id="3-1-1-内存结构"><a href="#3-1-1-内存结构" class="headerlink" title="3.1.1 内存结构"></a>3.1.1 内存结构</h4><ul>
+<li><strong>缓冲池（Buffer Pool）</strong>：InnoDB访问数据和索引的缓存区域，通过内存加速数据访问</li>
+<li><strong>更改缓冲区（Change Buffer）</strong>：缓存对二级索引的更改操作，待时机合适时再合并</li>
+<li><strong>自适应哈希索引（Adaptive Hash Index）</strong>：根据查询模式自动建立的哈希索引，加速等值查询</li>
+<li><strong>日志缓冲区（Log Buffer）</strong>：暂存待写入磁盘的重做日志</li>
+</ul>
+<h4 id="3-1-2-磁盘结构"><a href="#3-1-2-磁盘结构" class="headerlink" title="3.1.2 磁盘结构"></a>3.1.2 磁盘结构</h4><ul>
+<li><strong>表空间（Tablespaces）</strong>：存储表数据和索引的物理文件</li>
+<li><strong>重做日志（Redo Log）</strong>：记录所有更改操作，用于崩溃恢复</li>
+<li><strong>撤销日志（Undo Log）</strong>：记录数据修改前的版本，用于事务回滚和MVCC</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171200957.png" srcset="/img/loading.gif" lazyload alt="innoDB整体架构"></p>
+<h3 id="3-2-存储单位层级体系"><a href="#3-2-存储单位层级体系" class="headerlink" title="3.2 存储单位层级体系"></a>3.2 存储单位层级体系</h3><p>InnoDB的存储管理采用层次化的单位体系</p>
+<table>
+<thead>
+<tr>
+<th>单位</th>
+<th>大小</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>行（Row）</td>
+<td>可变</td>
+<td>单条记录，存储实际数据</td>
+</tr>
+<tr>
+<td>页（Page）</td>
+<td>默认16KB</td>
+<td>InnoDB磁盘管理的最小单位</td>
+</tr>
+<tr>
+<td>区（Extent）</td>
+<td>1MB（64个页）</td>
+<td>空间分配的单位，保证物理连续性</td>
+</tr>
+<tr>
+<td>段（Segment）</td>
+<td>可变</td>
+<td>管理特定类型数据（如索引段、数据段）</td>
+</tr>
+<tr>
+<td>表空间（Tablespace）</td>
+<td>可变</td>
+<td>逻辑存储容器，对应物理文件</td>
+</tr>
+</tbody></table>
+<p>这种层级结构既保证了灵活的空间管理，又能利用磁盘的物理连续性减少I&#x2F;O开销。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171311627.png" srcset="/img/loading.gif" lazyload alt="innoDB存储单元"></p>
+<h4 id="3-2-1-表空间（Tablespace）"><a href="#3-2-1-表空间（Tablespace）" class="headerlink" title="3.2.1 表空间（Tablespace）"></a>3.2.1 表空间（Tablespace）</h4><p>​	表空间是 InnoDB 逻辑存储的最高层级，分为“共享表空间”和“独立表空间”（对应物理存储中的 ibdata1 和 .ibd 文件），本质是一个逻辑容器，用于容纳多个段（索引段、数据段等）。每张表都会有一个表空间（xxx.ibd），一个mysql实例可以对应多个表空间，用于存储记录、索引等数据。</p>
+<p>​	核心特点：表空间有固定的头部信息，记录表空间的 ID、大小、关联的表等元数据；InnoDB 通过表空间 ID 唯一标识每个表空间，确保数据跨表空间访问的正确性。</p>
+<h4 id="3-2-2-段（Segment）"><a href="#3-2-2-段（Segment）" class="headerlink" title="3.2.2 段（Segment）"></a>3.2.2 段（Segment）</h4><p>段是表空间下的逻辑划分，对应一个索引（InnoDB 中“数据段”本质是主键索引段），每个索引对应两个段：叶子节点段（Leaf Segment）和非叶子节点段（Non-Leaf Segment）。</p>
+<p>主键索引段（聚簇索引段）：包含表的所有行数据，叶子节点存储完整数据行，非叶子节点存储索引键值和子节点指针；</p>
+<p>二级索引段：叶子节点存储索引键值和对应的主键值，非叶子节点存储索引键值和子节点指针，不存储完整数据行。</p>
+<p>特点：段的大小不固定，会随着数据量的增加动态扩展，扩展的最小单位是“区”。</p>
+<p>段是表空间内的主要组织结构，InnoDB中主要有：</p>
+<ul>
+<li><strong>数据段</strong>：B+树的叶子节点，存储实际数据</li>
+<li><strong>索引段</strong>：B+树的非叶子节点，存储索引键</li>
+<li><strong>回滚段</strong>：存储Undo日志</li>
+</ul>
+<p>每个索引对应两个段：叶子节点段和非叶子节点段。</p>
+<h4 id="3-2-3-区（Extent）"><a href="#3-2-3-区（Extent）" class="headerlink" title="3.2.3 区（Extent）"></a>3.2.3 区（Extent）</h4><p>区是段的组成单位，是 InnoDB 中磁盘空间分配的最小单位，固定大小为 1MB（无论 MySQL 版本和操作系统，均为 1MB）。</p>
+<p>换算关系：1 个区 &#x3D; 64 个连续的页（因 1 个页默认大小为 16KB，1MB &#x3D; 1024KB ÷ 16KB &#x3D; 64 页）。</p>
+<p>核心作用：避免频繁分配磁盘空间。若直接以“页”为单位分配空间，当数据量较大时，会产生大量零散的页，导致磁盘碎片化；以区为单位分配，可确保索引的 B+ 树节点在磁盘上连续存储，提升磁盘 I&#x2F;O 效率（机械硬盘连续读比随机读快得多）。</p>
+<p>特殊区：InnoDB 为每个段的初始阶段分配“碎片区”（Fragment Extent），碎片区以“页”为单位分配（而非 64 页），当碎片区大小达到 1MB 后，后续分配将以完整的区为单位，避免小表占用过多空闲空间。</p>
+<h4 id="3-2-4-页（Page）"><a href="#3-2-4-页（Page）" class="headerlink" title="3.2.4 页（Page）"></a>3.2.4 页（Page）</h4><p>​	页是 InnoDB 中数据读写的最小单位（区别于“区是空间分配的最小单位”），默认大小为 16KB（可通过参数 innodb_page_size 配置为 4KB、8KB、16KB、32KB、64KB，需在 MySQL 初始化时设置，后续无法修改）。在下节中我们会详细介绍页的结构。</p>
+<h4 id="3-2-5-行（Row）"><a href="#3-2-5-行（Row）" class="headerlink" title="3.2.5 行（Row）"></a>3.2.5 行（Row）</h4><p>​	行是 InnoDB 中存储数据的最小逻辑单元，对应表中的一条记录。InnoDB 的行数据有多种存储格式，核心差异在于行数据的压缩和字段长度的存储方式。后面我们也会详细介绍行的结构。</p>
+<h3 id="3-3-重要概念解释"><a href="#3-3-重要概念解释" class="headerlink" title="3.3 重要概念解释"></a>3.3 重要概念解释</h3><p>在深入细节之前，我们先明确几个关键概念：</p>
+<ul>
+<li><strong>聚簇索引（Clustered Index）</strong>：InnoDB表的主键索引，叶子节点直接存储整行数据</li>
+<li><strong>二级索引（Secondary Index）</strong>：非主键索引，叶子节点存储主键值</li>
+<li><strong>回表</strong>：通过二级索引查询时，需要先用主键到聚簇索引中查找完整数据</li>
+<li><strong>覆盖索引</strong>：索引本身包含了查询所需的所有列，无需回表</li>
+</ul>
+<p>理解了这些基础概念后，让我们从最基础的存储单元——页开始，逐步构建完整的存储体系。</p>
+<h2 id="四、页（Page）——InnoDB存储的基石"><a href="#四、页（Page）——InnoDB存储的基石" class="headerlink" title="四、页（Page）——InnoDB存储的基石"></a>四、页（Page）——InnoDB存储的基石</h2><h3 id="4-1-页的基本概念"><a href="#4-1-页的基本概念" class="headerlink" title="4.1 页的基本概念"></a>4.1 页的基本概念</h3><p>​	<strong>页（Page）是InnoDB存储引擎管理存储空间的基本单位，也是内存和磁盘之间进行I&#x2F;O操作的最小单位</strong> 。默认情况下，每个页的大小为16KB，这个值可以通过<code>innodb_page_size</code>参数在初始化MySQL实例时设置（通常不建议修改）。</p>
+<blockquote>
+<p>为什么选择16KB作为默认页大小？这是综合考虑了以下因素后的折中选择：</p>
+<ul>
+<li><strong>磁盘I&#x2F;O特性</strong>：一次I&#x2F;O操作读取16KB数据，平衡了单次传输量和I&#x2F;O次数</li>
+<li><strong>内存利用率</strong>：页太大浪费内存，太小则增加I&#x2F;O次数</li>
+<li><strong>B+树特性</strong>：16KB的页可以容纳足够多的索引条目，保持树的高度较低</li>
+</ul>
+</blockquote>
+<h3 id="4-2-页的内部结构"><a href="#4-2-页的内部结构" class="headerlink" title="4.2 页的内部结构"></a>4.2 页的内部结构</h3><p>一个16KB的InnoDB页被划分为多个区域，每个区域有特定的功能。下面我们以最常用的<strong>数据页</strong>为例，详细解剖其内部结构。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171334436.png" srcset="/img/loading.gif" lazyload alt="页结构"></p>
+<p>下面详细介绍页的内部结构：</p>
+<h4 id="4-2-1-File-Header（文件头）"><a href="#4-2-1-File-Header（文件头）" class="headerlink" title="4.2.1 File Header（文件头）"></a>4.2.1 File Header（文件头）</h4><p>File Header占用38字节，存储页的通用元信息，主要包括：</p>
+<table>
+<thead>
+<tr>
+<th>表头信息</th>
+<th>大小</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>FIL_PAGE_SPACE_OR_CHKSUM</td>
+<td>4</td>
+<td>页的校验和，用于检测页是否损坏</td>
+</tr>
+<tr>
+<td>FIL_PAGE_OFFSET</td>
+<td>4</td>
+<td>页号，在表空间中唯一标识一个页</td>
+</tr>
+<tr>
+<td>FIL_PAGE_PREV</td>
+<td>4</td>
+<td>上一页的页号，用于构建双向链表</td>
+</tr>
+<tr>
+<td>FIL_PAGE_NEXT</td>
+<td>4</td>
+<td>下一页的页号</td>
+</tr>
+<tr>
+<td>FIL_PAGE_LSN</td>
+<td>8</td>
+<td>页最后一次修改对应的日志序列号</td>
+</tr>
+<tr>
+<td>FIL_PAGE_TYPE</td>
+<td>2</td>
+<td>页类型（见下表）</td>
+</tr>
+<tr>
+<td>FIL_PAGE_FILE_FLUSH_LSN</td>
+<td>8</td>
+<td>仅用于系统表空间的第一个页</td>
+</tr>
+</tbody></table>
+<p><code>FIL_PAGE_PREV</code>和<code>FIL_PAGE_NEXT</code>就分别代表本页的上一个和下一个页的页号。这样通过建立一个双向链表把许许多多的页就都串联起来了，<br>保证这些页之间不需要是物理上的连续，而是逻辑上的连续</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171350327.png" srcset="/img/loading.gif" lazyload alt="双向链表连接"></p>
+<p>常见的页类型包括：</p>
+<table>
+<thead>
+<tr>
+<th>类型值</th>
+<th>名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>17855</td>
+<td>FIL_PAGE_INDEX</td>
+<td>B+树索引页（最常用）</td>
+</tr>
+<tr>
+<td>17857</td>
+<td>FIL_PAGE_UNDO_LOG</td>
+<td>撤销日志页</td>
+</tr>
+<tr>
+<td>17858</td>
+<td>FIL_PAGE_INODE</td>
+<td>索引节点信息</td>
+</tr>
+<tr>
+<td>17859</td>
+<td>FIL_PAGE_IBUF_FREE_LIST</td>
+<td>插入缓冲空闲列表</td>
+</tr>
+<tr>
+<td>17860</td>
+<td>FIL_PAGE_TYPE_ALLOCATED</td>
+<td>最新分配的页</td>
+</tr>
+<tr>
+<td>17861</td>
+<td>FIL_PAGE_IBUF_BITMAP</td>
+<td>插入缓冲位图</td>
+</tr>
+<tr>
+<td>17862</td>
+<td>FIL_PAGE_TYPE_SYS</td>
+<td>系统页</td>
+</tr>
+<tr>
+<td>17863</td>
+<td>FIL_PAGE_TYPE_TRX_SYS</td>
+<td>事务系统数据</td>
+</tr>
+<tr>
+<td>17864</td>
+<td>FIL_PAGE_TYPE_FSP_HDR</td>
+<td>表空间头部信息</td>
+</tr>
+<tr>
+<td>17865</td>
+<td>FIL_PAGE_TYPE_XDES</td>
+<td>区描述符页</td>
+</tr>
+<tr>
+<td>17866</td>
+<td>FIL_PAGE_TYPE_BLOB</td>
+<td>BLOB页</td>
+</tr>
+</tbody></table>
+<h4 id="4-2-2-Page-Header（页头）"><a href="#4-2-2-Page-Header（页头）" class="headerlink" title="4.2.2 Page Header（页头）"></a>4.2.2 Page Header（页头）</h4><p>Page Header占用56字节，专门针对存放数据的页，包含数据页的元数据信息，主要包括：</p>
+<table>
+<thead>
+<tr>
+<th>页头信息</th>
+<th>大小</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PAGE_N_DIR_SLOTS</td>
+<td>2</td>
+<td>页目录中的槽数量</td>
+</tr>
+<tr>
+<td>PAGE_HEAP_TOP</td>
+<td>2</td>
+<td>指向堆中第一个未使用记录的指针</td>
+</tr>
+<tr>
+<td>PAGE_N_HEAP</td>
+<td>2</td>
+<td>堆中的记录数，包含已删除和未删除的</td>
+</tr>
+<tr>
+<td>PAGE_FREE</td>
+<td>2</td>
+<td>指向已删除记录链表的首指针</td>
+</tr>
+<tr>
+<td>PAGE_GARBAGE</td>
+<td>2</td>
+<td>已删除记录占用的总字节数</td>
+</tr>
+<tr>
+<td>PAGE_LAST_INSERT</td>
+<td>2</td>
+<td>最后插入记录的位置偏移</td>
+</tr>
+<tr>
+<td>PAGE_DIRECTION</td>
+<td>2</td>
+<td>插入方向（左、右、相同）</td>
+</tr>
+<tr>
+<td>PAGE_N_DIRECTION</td>
+<td>2</td>
+<td>连续插入方向相同的次数</td>
+</tr>
+<tr>
+<td>PAGE_N_RECS</td>
+<td>2</td>
+<td>用户记录的数量（不包括Infimum和Supremum）</td>
+</tr>
+<tr>
+<td>PAGE_MAX_TRX_ID</td>
+<td>8</td>
+<td>修改当前页的最大事务ID</td>
+</tr>
+<tr>
+<td>PAGE_LEVEL</td>
+<td>2</td>
+<td>当前页在B+树中的层级（叶子节点为0）</td>
+</tr>
+<tr>
+<td>PAGE_INDEX_ID</td>
+<td>8</td>
+<td>当前页所属的索引ID</td>
+</tr>
+<tr>
+<td>PAGE_BTR_SEG_LEAF</td>
+<td>10</td>
+<td>B+树叶子段头部信息</td>
+</tr>
+<tr>
+<td>PAGE_BTR_SEG_TOP</td>
+<td>10</td>
+<td>B+树非叶子段头部信息</td>
+</tr>
+</tbody></table>
+<h4 id="4-2-3-Infimum和Supremum记录"><a href="#4-2-3-Infimum和Supremum记录" class="headerlink" title="4.2.3 Infimum和Supremum记录"></a>4.2.3 Infimum和Supremum记录</h4><p>每个数据页中固定包含两条虚拟记录：</p>
+<ul>
+<li><strong>Infimum记录</strong>：表示比页内任何用户记录都小的值</li>
+<li><strong>Supremum记录</strong>：表示比页内任何用户记录都大的值</li>
+</ul>
+<p>这两条记录不存储实际数据，只用于界定页<strong>内记录的边界</strong>，在页初始化时创建，始终存在且不会被删除。它们共同占用26字节空间。</p>
+<h4 id="4-2-4-User-Records（用户记录）"><a href="#4-2-4-User-Records（用户记录）" class="headerlink" title="4.2.4 User Records（用户记录）"></a>4.2.4 User Records（用户记录）</h4><p>用户记录区域存储实际的行数据或索引条目。每条记录都有特定的格式，我们将在下一节详细讨论。</p>
+<h4 id="4-2-5-Free-Space（空闲空间）"><a href="#4-2-5-Free-Space（空闲空间）" class="headerlink" title="4.2.5 Free Space（空闲空间）"></a>4.2.5 Free Space（空闲空间）</h4><p>空闲空间是页中尚未使用的区域，随着新记录的插入而逐渐减少。当空闲空间用完时，页需要进行分裂操作。</p>
+<h4 id="4-2-6-Page-Directory（页目录）"><a href="#4-2-6-Page-Directory（页目录）" class="headerlink" title="4.2.6 Page Directory（页目录）"></a>4.2.6 Page Directory（页目录）</h4><p>页目录存储记录的相对位置（称为槽），用于加速页内的查找。页目录的设计非常巧妙：</p>
+<ul>
+<li>页内的记录以单链表形式连接，但如果顺序查找链表，效率很低</li>
+<li>InnoDB将记录分组，每组最后一条记录的偏移量存储在槽中</li>
+<li>槽的数量通常远少于记录数，每组包含4-8条记录</li>
+<li>查找时先在页目录中二分查找，找到所在组后再遍历组内记录</li>
+</ul>
+<p>这种设计使得页内查找的时间复杂度从O(n)降低到O(log n) + 常数，极大提高了效率。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602172007290.png" srcset="/img/loading.gif" lazyload alt="页目录"></p>
+<h4 id="4-2-7-File-Trailer（文件尾）"><a href="#4-2-7-File-Trailer（文件尾）" class="headerlink" title="4.2.7 File Trailer（文件尾）"></a>4.2.7 File Trailer（文件尾）</h4><p>File Trailer仅8字节，包含两部分：</p>
+<ul>
+<li><strong>校验和</strong>：与File Header中的校验和对应，用于检测页是否完整写入</li>
+<li><strong>LSN低4字节</strong>：与File Header中的LSN后4字节一致</li>
+</ul>
+<p>当页写入磁盘时，先写File Header，最后写File Trailer。如果在写入过程中发生崩溃，可以通过比较两者的校验和和LSN来检测页是否损坏。</p>
+<h2 id="五、行记录格式"><a href="#五、行记录格式" class="headerlink" title="五、行记录格式"></a>五、行记录格式</h2><h3 id="5-1-行格式概述"><a href="#5-1-行格式概述" class="headerlink" title="5.1 行格式概述"></a>5.1 行格式概述</h3><p>InnoDB存储引擎支持多种行记录格式，用于定义数据行在页内的存储方式。MySQL 5.6以后支持四种行格式：</p>
+<ul>
+<li><strong>REDUNDANT</strong>：老版本格式，兼容性好但空间利用率低</li>
+<li><strong>COMPACT</strong>：MySQL 5.0引入的紧凑格式，目前默认格式</li>
+<li><strong>DYNAMIC</strong>：MySQL 5.7开始默认，对BLOB字段优化</li>
+<li><strong>COMPRESSED</strong>：压缩格式，节省空间但增加CPU开销</li>
+</ul>
+<p>可以通过以下命令查看和设置行格式：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 查看当前默认行格式</span><br><span class="hljs-keyword">SHOW</span> VARIABLES <span class="hljs-keyword">LIKE</span> <span class="hljs-string">&#x27;innodb_default_row_format&#x27;</span>;<br><br><span class="hljs-comment">-- 创建表时指定行格式</span><br><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> t1 (<br>    id <span class="hljs-type">INT</span> <span class="hljs-keyword">PRIMARY</span> KEY,<br>    name <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">100</span>)<br>) ROW_FORMAT<span class="hljs-operator">=</span><span class="hljs-keyword">DYNAMIC</span>;<br><br><span class="hljs-comment">-- 修改已有表的行格式</span><br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> t1 ROW_FORMAT<span class="hljs-operator">=</span>COMPACT;<br></code></pre></td></tr></table></figure>
+
+<p>不同格式的对比：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>REDUNDANT</th>
+<th>COMPACT</th>
+<th>DYNAMIC</th>
+<th>COMPRESSED</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>引入版本</td>
+<td>早期</td>
+<td>MySQL 5.0</td>
+<td>MySQL 5.6</td>
+<td>MySQL 5.6</td>
+</tr>
+<tr>
+<td>默认使用</td>
+<td>否</td>
+<td>否</td>
+<td>MySQL 5.7+</td>
+<td>否</td>
+</tr>
+<tr>
+<td>空间利用率</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+<td>极高</td>
+</tr>
+<tr>
+<td>溢出处理</td>
+<td>768字节前缀</td>
+<td>768字节前缀</td>
+<td>完全溢出</td>
+<td>完全溢出</td>
+</tr>
+<tr>
+<td>压缩支持</td>
+<td>否</td>
+<td>否</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>CPU开销</td>
+<td>低</td>
+<td>低</td>
+<td>低</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<h3 id="5-2-DYNAMIC行格式详解"><a href="#5-2-DYNAMIC行格式详解" class="headerlink" title="5.2 DYNAMIC行格式详解"></a>5.2 DYNAMIC行格式详解</h3><p>​	在 MySQL 5.7 及之后版本中，InnoDB 存储引擎的<strong>默认行格式</strong>就是 <code>DYNAMIC</code>。这种格式是在 COMPACT 基础上发展而来的，主要针对大数据字段（如 BLOB、TEXT）做了优化，使得每个数据页能够容纳更多行记录，从而提升缓存效率和查询性能。</p>
+<p>​	下面就是<strong>DYNAMIC 行格式的总体存储结构：</strong></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602171408709.png" srcset="/img/loading.gif" lazyload alt="DYNAMIC详细结构"></p>
+<h4 id="5-2-1-记录头信息"><a href="#5-2-1-记录头信息" class="headerlink" title="5.2.1 记录头信息"></a>5.2.1 记录头信息</h4><p>每条记录的开头是一段固定长度的记录头信息，占用5字节（40位），包含以下字段：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc"><span class="hljs-code">+---------------+</span>----------------<span class="hljs-code">+--------------+</span>--------<span class="hljs-code">+--------+</span><br><span class="hljs-section">| 预留位1(1bit) | 预留位2(1bit)  | deleted_flag| min_rec_flag| n_owned(4bits)|</span><br><span class="hljs-section">+---------------+----------------+--------------+--------+--------+</span><br><span class="hljs-section">| heap_no(13bits)| record_type(3bits)| next_record(16bits)  |</span><br><span class="hljs-section">+----------------+-------------------+-----------------------+</span><br></code></pre></td></tr></table></figure>
+
+<p>各字段含义：</p>
+<ul>
+<li><strong>deleted_flag</strong>：1位，标记记录是否被删除（1表示已删除）</li>
+<li><strong>min_rec_flag</strong>：1位，标记记录是否为当前层级的最小记录</li>
+<li><strong>n_owned</strong>：4位，当前记录拥有的记录数（用于页目录分组）</li>
+<li><strong>heap_no</strong>：13位，记录在页堆中的相对位置</li>
+<li><strong>record_type</strong>：3位，记录类型（0&#x3D;普通，1&#x3D;非叶子节点，2&#x3D;Infimum，3&#x3D;Supremum）</li>
+<li><strong>next_record</strong>：16位，指向下一条记录的相对偏移量</li>
+</ul>
+<h4 id="5-2-2-变长字段长度列表"><a href="#5-2-2-变长字段长度列表" class="headerlink" title="5.2.2 变长字段长度列表"></a>5.2.2 变长字段长度列表</h4><p>​	记录每个变长列（VARCHAR、VARBINARY、TEXT、BLOB）的实际数据长度（单位：字节）。按列顺序<strong>逆序存放</strong>（即最后面的变长列在前）。如果列允许 NULL 且值为 NULL，则不占用列表位置。</p>
+<ul>
+<li>如果字段允许NULL且实际值为NULL，则不存储长度</li>
+<li>长度 ≤ 255 字节时，用 1 字节存储；</li>
+<li>长度 &gt; 255 字节时，用 2 字节存储（注意：InnoDB 内部是使用 2 字节表示，但实际存储时以<strong>小端</strong>方式存放）。</li>
+<li>长度列表按列顺序逆序存放（MySQL内部优化）</li>
+</ul>
+<p>变长字段的长度最大不可以超过2字节，因为MySQL数据库中可变类型的最大长度限制为65535。</p>
+<h4 id="5-2-3-NULL值列表"><a href="#5-2-3-NULL值列表" class="headerlink" title="5.2.3 NULL值列表"></a>5.2.3 NULL值列表</h4><p>NULL值列表使用位图表示哪些列的值是NULL：</p>
+<ul>
+<li>每个允许NULL的列占用1位</li>
+<li>按列顺序逆序存放</li>
+<li>如果列值为NULL，对应位为1；否则为0</li>
+<li>列表长度 &#x3D; ceil(允许NULL的列数 &#x2F; 8) 字节</li>
+</ul>
+<p>这种设计节省了存储空间：如果某列为NULL，数据部分就不需要为其分配空间。</p>
+<h4 id="5-2-4-事务ID和回滚指针"><a href="#5-2-4-事务ID和回滚指针" class="headerlink" title="5.2.4 事务ID和回滚指针"></a>5.2.4 事务ID和回滚指针</h4><p>对于聚簇索引记录，NULL值列表之后是两个系统列：</p>
+<ul>
+<li><strong>DB_TRX_ID</strong>（6字节）：最后修改该记录的事务ID</li>
+<li><strong>DB_ROLL_PTR</strong>（7字节）：指向Undo Log中记录修改前版本的指针</li>
+</ul>
+<p>这两个字段是InnoDB实现MVCC的关键，每条记录都保存了修改它的事务ID，以及用于回滚的指针。</p>
+<h4 id="5-2-5-行ID"><a href="#5-2-5-行ID" class="headerlink" title="5.2.5 行ID"></a>5.2.5 行ID</h4><p>如果表没有定义主键，InnoDB会自动生成一个6字节的<strong>DB_ROW_ID</strong>作为隐式主键。这个字段在聚簇索引中作为排序键。</p>
+<h4 id="5-2-6-实际列数据"><a href="#5-2-6-实际列数据" class="headerlink" title="5.2.6 实际列数据"></a>5.2.6 实际列数据</h4><p>最后存储各列的实际数据：</p>
+<ul>
+<li><p>对于定长数据类型，分配固定长度空间</p>
+<ul>
+<li>比如：头信息，事务ID和回滚指针</li>
+</ul>
+</li>
+<li><p>对于变长数据类型，根据实际长度存储</p>
+<ul>
+<li>变长字段长度列表，NULL值列表，行ID，实际列数据</li>
+</ul>
+</li>
+<li><p>对于NULL列，数据部分不存储</p>
+</li>
+</ul>
+<h3 id="5-3-行溢出（Row-Overflow）"><a href="#5-3-行溢出（Row-Overflow）" class="headerlink" title="5.3 行溢出（Row Overflow）"></a>5.3 行溢出（Row Overflow）</h3><h4 id="5-3-1-什么是行溢出"><a href="#5-3-1-什么是行溢出" class="headerlink" title="5.3.1 什么是行溢出"></a>5.3.1 什么是行溢出</h4><p>InnoDB的页大小默认为16KB，而VARCHAR、TEXT、BLOB等类型的字段可能远大于16KB。当行记录过大，无法完整存储在单个页中时，就会发生<strong>行溢出</strong></p>
+<h4 id="5-3-2-溢出处理机制"><a href="#5-3-2-溢出处理机制" class="headerlink" title="5.3.2 溢出处理机制"></a>5.3.2 溢出处理机制</h4><p>不同行格式处理溢出的方式不同：</p>
+<p><strong>COMPACT和REDUNDANT格式</strong>：</p>
+<ul>
+<li>在记录中存储前768字节（称为前缀）</li>
+<li>剩余部分存储在溢出页（BLOB页）中</li>
+<li>记录中保存指向溢出页的指针（20字节）</li>
+</ul>
+<p><strong>DYNAMIC和COMPRESSED格式</strong>：</p>
+<ul>
+<li>如果行长度超过阈值（约半个页），整列数据都存储在溢出页</li>
+<li>记录中只保存20字节的指针</li>
+<li>这种方式称为“完全行溢出”，避免了存储无用的前缀</li>
+</ul>
+<h4 id="5-3-3-溢出页的结构"><a href="#5-3-3-溢出页的结构" class="headerlink" title="5.3.3 溢出页的结构"></a>5.3.3 溢出页的结构</h4><p>溢出页（FIL_PAGE_TYPE_BLOB）的结构相对简单：</p>
+<ul>
+<li><strong>BLOB页头</strong>：存储所属表空间ID、页号等信息</li>
+<li><strong>数据区域</strong>：存储实际的BLOB数据</li>
+<li>多个BLOB页通过链表连接，支持超大对象</li>
+</ul>
+<h3 id="5-5-DYNAMIC行格式占用空间计算"><a href="#5-5-DYNAMIC行格式占用空间计算" class="headerlink" title="5.5 DYNAMIC行格式占用空间计算"></a>5.5 DYNAMIC行格式占用空间计算</h3><p>​	在 MySQL 5.7 及之后版本中，InnoDB 的默认行格式就是 <strong>DYNAMIC</strong>。这种格式继承了 COMPACT 的紧凑性，并针对 BLOB、TEXT 等大字段做了优化——采用<strong>完全行溢出</strong>策略，即当字段长度超过一定阈值时，整个字段内容存储在溢出页中，数据页只保留一个 20 字节的指针，从而让每个数据页能容纳更多行，提升缓存效率。</p>
+<p>​	下面我们通过一个具体的例子，创建一张表，插入几条数据，然后一步步分析在 DYNAMIC 格式下，这些行在 InnoDB 页中是如何存储的。</p>
+<h4 id="5-5-1-创建测试表"><a href="#5-5-1-创建测试表" class="headerlink" title="5.5.1 创建测试表"></a>5.5.1 创建测试表</h4><p>假设我们有一张用户信息表，包含定长、变长及大字段：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> `<span class="hljs-keyword">user</span>` (<br>    `id` <span class="hljs-type">INT</span> <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span> AUTO_INCREMENT,<br>    `name` <span class="hljs-type">VARCHAR</span>(<span class="hljs-number">50</span>) <span class="hljs-keyword">NOT</span> <span class="hljs-keyword">NULL</span>,<br>    `age` TINYINT,<br>    `intro` TEXT,<br>    <span class="hljs-keyword">PRIMARY</span> KEY (`id`)<br>) ENGINE<span class="hljs-operator">=</span>InnoDB ROW_FORMAT<span class="hljs-operator">=</span><span class="hljs-keyword">DYNAMIC</span>;<br></code></pre></td></tr></table></figure>
+
+<p>这里我们显式指定了 <code>ROW_FORMAT=DYNAMIC</code>，实际上不写也会默认使用 DYNAMIC（如果 <code>innodb_default_row_format</code> 为 DYNAMIC）。</p>
+<h4 id="5-5-2-插入几条数据"><a href="#5-5-2-插入几条数据" class="headerlink" title="5.5.2 插入几条数据"></a>5.5.2 插入几条数据</h4><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> `<span class="hljs-keyword">user</span>` (`name`, `age`, `intro`) <span class="hljs-keyword">VALUES</span><br>(<span class="hljs-string">&#x27;Alice&#x27;</span>, <span class="hljs-number">25</span>, <span class="hljs-string">&#x27;Short intro.&#x27;</span>),<br>(<span class="hljs-string">&#x27;Bob&#x27;</span>, <span class="hljs-keyword">NULL</span>, <span class="hljs-keyword">NULL</span>),<br>(<span class="hljs-string">&#x27;Charlie&#x27;</span>, <span class="hljs-number">30</span>, REPEAT(<span class="hljs-string">&#x27;A long intro...&#x27;</span>, <span class="hljs-number">1000</span>));  <span class="hljs-comment">-- 产生一个很长的字符串</span><br></code></pre></td></tr></table></figure>
+
+<p>三条记录分别代表：</p>
+<ul>
+<li>普通短数据，无 NULL；</li>
+<li>有 NULL 值；</li>
+<li>含超长 TEXT 字段。</li>
+</ul>
+<p>我们逐条分析行记录的存储细节</p>
+<h4 id="5-5-3-分析行记录的存储细节"><a href="#5-5-3-分析行记录的存储细节" class="headerlink" title="5.5.3 分析行记录的存储细节"></a>5.5.3 分析行记录的存储细节</h4><p><strong>1. 第一条记录：<code>(id=1, name=&#39;Alice&#39;, age=25, intro=&#39;Short intro.&#39;)</code></strong></p>
+<p>首先，我们先看下每列的存储数据：</p>
+<ul>
+<li><code>id</code>：INT，4 字节（主键，聚簇索引中已存在）</li>
+<li><code>name</code>：VARCHAR(50)，实际长度 5（’Alice’），变长</li>
+<li><code>age</code>：TINYINT，1 字节，可为 NULL，但此处为 25 非 NULL</li>
+<li><code>intro</code>：TEXT，实际长度 12（’Short intro.’），变长，且未超过溢出阈值，所以存储在行内</li>
+</ul>
+<p>然后我们根据上节的行格式，分析存储细节：</p>
+<ol>
+<li><p><strong>记录头（5 字节）</strong>：包含基本信息，如记录类型为 0（普通记录）、heap_no、n_owned、next_record 偏移量等。我们暂且忽略具体二进制值。</p>
+</li>
+<li><p><strong>变长字段长度列表</strong>：共有两个变长列：<code>name</code> 和 <code>intro</code>。按照逆序，先存储 <code>intro</code> 的长度，再存储 <code>name</code> 的长度。</p>
+<ul>
+<li><code>intro</code> 长度 &#x3D; 12（十六进制 0x0C），使用 1 字节存储（因为最大长度 255 以内）。</li>
+<li><code>name</code> 长度 &#x3D; 5（0x05），使用 1 字节存储。<br>所以变长长度列表为：<code>0x0C 0x05</code>（实际存储顺序可能是 <code>0x05 0x0C</code>？需注意 InnoDB 是逆序存放，即最后面的变长列在前。这里 <code>intro</code> 在 <code>name</code> 后面，所以列表第一个字节是 <code>intro</code> 的长度 0x0C，第二个字节是 <code>name</code> 的长度 0x05）。我们按此理解即可。</li>
+</ul>
+</li>
+<li><p><strong>NULL 位图</strong>：表中有两个可为 NULL 的列：<code>age</code>、<code>intro</code>。<code>id</code> 是主键，非空；<code>name</code> 是 NOT NULL。所以需要 2 位来表示。</p>
+<ul>
+<li><p>位图大小 &#x3D; ceil(2&#x2F;8) &#x3D; 1 字节。</p>
+</li>
+<li><p>按照列顺序逆序存放位：第 0 位（最低位）对应第一个可为 NULL 的列？InnoDB 规则是：位图中每个位对应一个可为 NULL 的列，列顺序按照表定义顺序，但存储时逆序。<br>表定义中可为 NULL 的列顺序：<code>age</code>（第 1 列）、<code>intro</code>（第 2 列）。<br>逆序后，位图的 bit0（最低位）对应 <code>intro</code>，bit1 对应 <code>age</code>。<br>此处 <code>intro</code> 非 NULL（位 0 &#x3D; 0），<code>age</code> 非 NULL（位 1 &#x3D; 0），所以 NULL 位图值为 <code>00000000</code>（二进制）即 0x00。</p>
+</li>
+</ul>
+</li>
+<li><p><strong>事务 ID 和回滚指针</strong>：各 6 字节和 7 字节，存储系统信息。</p>
+</li>
+<li><p><strong>列数据</strong>（按表定义顺序）</p>
+<ul>
+<li><code>id</code>：主键列，实际存储为 4 字节整数（例如 0x00000001）。</li>
+<li><code>name</code>：存储实际字符串 ‘Alice’，占用 5 字节（无结束符，直接存字符）。</li>
+<li><code>age</code>：存储 1 字节 25（0x19）。</li>
+<li><code>intro</code>：存储 ‘Short intro.’ 的 12 字节（ASCII 字符串）</li>
+</ul>
+</li>
+</ol>
+<p><strong>整体存储示意图（逻辑上）</strong>：</p>
+<figure class="highlight scheme"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scheme">[<span class="hljs-name">记录头5B</span>] [<span class="hljs-name">0x0C</span>] [<span class="hljs-name">0x05</span>] [<span class="hljs-name">0x00</span>] [<span class="hljs-name">6B事务ID</span>] [<span class="hljs-name">7B回滚指针</span>] [<span class="hljs-name">id=1</span>(<span class="hljs-name">4B</span>)] [<span class="hljs-name">name=</span><span class="hljs-symbol">&#x27;Alice</span>&#x27;(<span class="hljs-number">5</span>B)] [<span class="hljs-name">age=25</span>(<span class="hljs-name">1B</span>)] [<span class="hljs-name">intro=</span><span class="hljs-symbol">&#x27;Short</span> intro.&#x27;(<span class="hljs-number">12</span>B)]<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>总大小</strong> &#x3D; 5 + 2 + 1 + 6 + 7 + 4 + 5 + 1 + 12 &#x3D; <strong>43 字节</strong></p>
+<p><strong>2. 第二条记录：<code>(id=2, name=&#39;Bob&#39;, age=NULL, intro=NULL)</code></strong> </p>
+<p><strong>数据大小分析：</strong></p>
+<ul>
+<li><code>name</code>：’Bob’ 长度 3</li>
+<li><code>age</code>：NULL</li>
+<li><code>intro</code>：NULL</li>
+</ul>
+<p><strong>变长字段长度列表</strong>：只有 <code>name</code> 是变长且非 NULL，<code>intro</code> 虽然变长但值为 NULL，不存储长度。所以长度列表只有 <code>name</code> 的长度 3（0x03），1 字节。</p>
+<p><strong>NULL 位图</strong>：两个可为 NULL 的列：<code>age</code> 和 <code>intro</code> 均为 NULL。<br>逆序后：bit0（intro）&#x3D;1，bit1（age）&#x3D;1，位图值为 <code>00000011</code>（二进制）&#x3D; 0x03。</p>
+<p><strong>列数据</strong>：</p>
+<ul>
+<li><code>id</code>：4 字节（2）</li>
+<li><code>name</code>：’Bob’（3 字节）</li>
+<li><code>age</code>：NULL，数据部分不占空间</li>
+<li><code>intro</code>：NULL，数据部分不占空间</li>
+</ul>
+<p><strong>存储示意</strong>：</p>
+<figure class="highlight scheme"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scheme">[<span class="hljs-name">记录头5B</span>] [<span class="hljs-name">0x03</span>] [<span class="hljs-name">0x03</span>] [<span class="hljs-name">6B事务ID</span>] [<span class="hljs-name">7B回滚指针</span>] [<span class="hljs-name">id=2</span>(<span class="hljs-name">4B</span>)] [<span class="hljs-name">name=</span><span class="hljs-symbol">&#x27;Bob</span>&#x27;(<span class="hljs-number">3</span>B)]<br></code></pre></td></tr></table></figure>
+
+<p>注意：虽然 <code>age</code> 和 <code>intro</code> 是 NULL，但数据部分没有它们的任何字节，完全由 NULL 位图标识。</p>
+<p><strong>总大小</strong> &#x3D; 5 + 1 + 1 + 6 + 7 + 4 + 3 &#x3D; <strong>27 字节</strong></p>
+<p><strong>3. 第三条记录：<code>(id=3, name=&#39;Charlie&#39;, age=30, intro=超长字符串)</code></strong></p>
+<p>假设 <code>intro</code> 字段内容长度为 3000 字节（远超溢出阈值），因此 DYNAMIC 格式会将整个 <code>intro</code> 存入溢出页，数据页只保留一个 20 字节的溢出指针。</p>
+<p><strong>记录结构变化：</strong></p>
+<ul>
+<li><code>intro</code> 列在数据页中不再存储实际数据，而是存储一个 BLOB 指针。</li>
+<li>BLOB 指针结构：20 字节，包含：<ul>
+<li>空间 ID（4 字节）</li>
+<li>页号（4 字节）</li>
+<li>页内偏移（2 字节）——指向溢出页中 BLOB 数据的起始位置</li>
+<li>一些标志位</li>
+</ul>
+</li>
+</ul>
+<p><strong>变长字段长度列表</strong>：<code>intro</code> 是变长且非 NULL，但其实际数据不在本页，长度列表中是否存储长度？实际上，在 DYNAMIC 格式中，对于完全溢出的 BLOB 列，<strong>长度列表仍然存储该列的实际长度</strong>（用于快速知道总大小），因为长度可能用于排序或计算。所以长度列表会包含 <code>intro</code> 的长度（3000），可能使用 2 字节表示（因 &gt; 255）。所以长度列表为：<code>intro</code> 长度（3000，0x0BB8，2 字节）和 <code>name</code> 长度（7，0x07，1 字节），逆序存储为 <code>0x0BB8 0x07</code>（实际存储低字节在前？按 InnoDB 存储整型是小端，长度存储也是小端，所以 3000 的十六进制 0x0BB8 存储为 <code>0xB8 0x0B</code>）。</p>
+<p><strong>NULL 位图</strong>：<code>age</code> 和 <code>intro</code> 均非 NULL，所以位图为 0x00。</p>
+<p><strong>列数据</strong>：</p>
+<ul>
+<li><code>id</code>：4 字节（3）</li>
+<li><code>name</code>：’Charlie’（7 字节）</li>
+<li><code>age</code>：30（1 字节 0x1E）</li>
+<li><code>intro</code>：20 字节的溢出指针（不是实际数据）</li>
+</ul>
+<p><strong>存储示意</strong>：</p>
+<figure class="highlight scheme"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs scheme">[<span class="hljs-name">记录头5B</span>] [<span class="hljs-name">intro_len_low</span>][<span class="hljs-name">intro_len_high</span>] [<span class="hljs-name">0x07</span>] [<span class="hljs-name">0x00</span>] [<span class="hljs-name">6B事务ID</span>] [<span class="hljs-name">7B回滚指针</span>] [<span class="hljs-name">id=3</span>(<span class="hljs-name">4B</span>)] [<span class="hljs-name">name=</span><span class="hljs-symbol">&#x27;Charlie</span>&#x27;(<span class="hljs-number">7</span>B)] [<span class="hljs-name">age=30</span>(<span class="hljs-name">1B</span>)] [<span class="hljs-name">溢出指针</span>(<span class="hljs-name">20B</span>)]<br></code></pre></td></tr></table></figure>
+
+<p>溢出指针指向的 BLOB 页中，存储着完整的 3000 字节字符串。</p>
+<p><strong>总大小</strong> &#x3D; 5 + 3 + 1 + 6 + 7 + 4 + 7 + 1 + 20 &#x3D; <strong>54 字节</strong></p>
+<h4 id="5-5-4-影响行大小的关键因素"><a href="#5-5-4-影响行大小的关键因素" class="headerlink" title="5.5.4 影响行大小的关键因素"></a>5.5.4 影响行大小的关键因素</h4><ul>
+<li><strong>列的数据类型</strong>：定长类型（INT, BIGINT, DATE 等）占用固定空间；变长类型（VARCHAR, TEXT）占用实际数据长度。</li>
+<li><strong>NULL 值处理</strong>：NULL 不占数据空间，只占位图中的 1 位。</li>
+<li><strong>行格式</strong>：DYNAMIC&#x2F;COMPACT 比 REDUNDANT 更紧凑；COMPRESSED 会压缩数据，但增加 CPU 开销。</li>
+<li><strong>溢出</strong>：大字段溢出后，行内只存指针（20 字节），可大幅减少行大小，但访问大字段需额外 I&#x2F;O。</li>
+</ul>
+<h2 id="六、B-树深度解析"><a href="#六、B-树深度解析" class="headerlink" title="六、B+树深度解析"></a>六、B+树深度解析</h2><p>索引的核心目标是<strong>加速数据查找</strong>，而选择合适的数据结构至关重要。</p>
+<p>B+树的演变过程我们后续讲解，我们先看下B+树的特点：</p>
+<ol>
+<li><strong>数据只存于叶子节点</strong>：内部节点只存储索引键和子节点指针，不存数据</li>
+<li><strong>叶子节点通过链表连接</strong>：所有叶子节点按顺序链接，形成有序链表</li>
+<li><strong>更高的扇出</strong>：内部节点可容纳更多键，树高更低</li>
+<li><strong>稳定的查询性能</strong>：所有查询都要走到叶子节点，路径长度固定</li>
+</ol>
+<h3 id="6-1-B-树的详细结构"><a href="#6-1-B-树的详细结构" class="headerlink" title="6.1 B+树的详细结构"></a>6.1 B+树的详细结构</h3><h4 id="6-1-1-节点结构"><a href="#6-1-1-节点结构" class="headerlink" title="6.1.1 节点结构"></a>6.1.1 节点结构</h4><p>B+树节点分为两种类型：</p>
+<p><strong>非叶子节点</strong>：</p>
+<ul>
+<li>存储k个键值和k+1个子节点指针</li>
+<li>所有键值按升序排列</li>
+<li>键值用于划分搜索路径</li>
+</ul>
+<p><strong>叶子节点</strong>：</p>
+<ul>
+<li>存储键值和实际数据（或指向数据的指针）</li>
+<li>在InnoDB聚簇索引中，叶子节点直接存储整行数据</li>
+<li>叶子节点间通过双向链表连接</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602172050514.png" srcset="/img/loading.gif" lazyload alt="image-20260217205051317"></p>
+<h3 id="6-2-B-树的高度计算"><a href="#6-2-B-树的高度计算" class="headerlink" title="6.2 B+树的高度计算"></a>6.2 B+树的高度计算</h3><p>B+树的高度决定了一次查询需要多少次磁盘I&#x2F;O。我们可以计算不同层级能存储的数据量。</p>
+<p>我们计算存储数据量：主要是计算叶子节点中存储的行数</p>
+<p>因此得到计算公式：</p>
+<figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf">总行数 <span class="hljs-operator">=</span> 叶子节点个数 * 每个叶子节点行数<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="6-2-1-怎么计算出叶子节点的个数"><a href="#6-2-1-怎么计算出叶子节点的个数" class="headerlink" title="6.2.1 怎么计算出叶子节点的个数"></a>6.2.1 怎么计算出叶子节点的个数</h4><p>如果只有一层，那么一个叶子节点，就是根节点。</p>
+<p>如果有两层呢？这就取决于根节点里的内部节点个数。</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs tap">内部节点存储的是“键值 + 子节点指针”（当前主键的字节数以及指向叶子节点的指针）。<br>在 InnoDB 中，子节点指针通常为<span class="hljs-number"> 6 </span>字节（用于表示页号等），键值即索引列的大小。<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs tap">假设主键为 `BIGINT`（8 字节），则一个内部节点条目大小为<span class="hljs-number"> 8 </span>+<span class="hljs-number"> 6 </span>=<span class="hljs-number"> 14 </span>字节<br>页大小为<span class="hljs-number"> 16384 </span>字节(16Kb * 1024)，减去页头（约 120~200 字节）和页尾（8 字节）开销后，实际可用于存储条目的空间约为 **16200 字节** 左右。<br></code></pre></td></tr></table></figure>
+
+<p>因此两层B+树：内部节点最多可容纳的条目数为：16384 &#x2F; 14 &#x3D; 1170</p>
+<p>如果有三层呢？</p>
+<p>就是1170 * 1170 &#x3D; 136 8900个叶子节点。</p>
+<h4 id="6-2-2-怎么计算出每个叶子节点存储的行数"><a href="#6-2-2-怎么计算出每个叶子节点存储的行数" class="headerlink" title="6.2.2 怎么计算出每个叶子节点存储的行数"></a>6.2.2 怎么计算出每个叶子节点存储的行数</h4><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf">叶子节点存储的是实际数据或索引条目。每行大小包括数据本身以及 InnoDB 的行开销（记录头、变长字段列表、NULL 位图、事务 ID、回滚指针等）。<br>为简化，我们通常使用 平均行大小 来估算。下面我们已平均行大小 <span class="hljs-operator">=</span> <span class="hljs-number">1</span>KB <span class="hljs-operator">=</span> <span class="hljs-number">1024</span> 字节来计算。<br></code></pre></td></tr></table></figure>
+
+<p>​	因此一个叶子节点的行数有：16kb * 1024  &#x2F; 1024 &#x3D; 16行</p>
+<p>综上所述，计算B+树容量为：</p>
+<ul>
+<li><p>高度为1（根为叶子节点层）：1 × 16 ≈ 16条记录</p>
+</li>
+<li><p>高度为2（根为内部节点，叶子节点层）：1170 × 16 ≈ 18,720条记录</p>
+</li>
+<li><p>高度为3：1170 × 1170 × 16 ≈ 2,190万条记录</p>
+</li>
+<li><p>高度为4：1170³ × 16 ≈ 256亿条记录</p>
+</li>
+</ul>
+<p><strong>惊人的结论</strong>：仅需3-4次I&#x2F;O，就能从上亿条记录中精确定位到任意一条数据！</p>
+<h3 id="6-3-二级索引的容量计算"><a href="#6-3-二级索引的容量计算" class="headerlink" title="6.3 二级索引的容量计算"></a>6.3 二级索引的容量计算</h3><p>二级索引的 B+ 树结构与聚簇索引类似，但叶子节点存储的是“索引列值 + 主键值”（而不是整行数据）。因此，<strong>叶子节点条目大小</strong>会改变，从而影响每页行数。</p>
+<p>假设二级索引列为 <code>INT</code>（4 字节），主键为 <code>BIGINT</code>（8 字节），则叶子节点条目大小约为：4 + 8 + 行开销（记录头等，约 10~20 字节）。若合计为 25 字节，则每页可存储 L2 ≈ 16200 &#x2F; 25 ≈ 648 条索引条目。</p>
+<p>内部节点存储的是索引列值（4 字节）+ 指针（6 字节），条目大小 10 字节，扇出系数 F2 ≈ 16200 &#x2F; 10 &#x3D; 1620。</p>
+<p>此时，高度为 3 的二级索引可存储的索引条目数为：</p>
+<p>text</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs basic"><span class="hljs-symbol">1620 </span>* <span class="hljs-number">1620</span> *  <span class="hljs-number">648</span> = <span class="hljs-number">1.7</span>×<span class="hljs-number">10</span>⁹ 条（<span class="hljs-number">17</span> 亿）<br></code></pre></td></tr></table></figure>
+
+<p>远高于聚簇索引的行数限制，因为二级索引条目更小。</p>
+<h2 id="七、表空间（Tablespace）深入剖析"><a href="#七、表空间（Tablespace）深入剖析" class="headerlink" title="七、表空间（Tablespace）深入剖析"></a>七、表空间（Tablespace）深入剖析</h2><h3 id="7-1-表空间的概念与层次"><a href="#7-1-表空间的概念与层次" class="headerlink" title="7.1 表空间的概念与层次"></a>7.1 表空间的概念与层次</h3><p>表空间是InnoDB存储引擎的最高逻辑存储层次，对应一个或多个物理文件</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs text">+-------------------+<br>|   表空间          |<br>|  (Tablespace)     |<br>+-------------------+<br>         |<br>         v<br>+-------------------+<br>|   段 (Segment)    |<br>+-------------------+<br>         |<br>         v<br>+-------------------+<br>|   区 (Extent)     |<br>+-------------------+<br>         |<br>         v<br>+-------------------+<br>|   页 (Page)       |<br>+-------------------+<br>         |<br>         v<br>+-------------------+<br>|   行 (Row)        |<br>+-------------------+<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="7-2-表空间的类型"><a href="#7-2-表空间的类型" class="headerlink" title="7.2 表空间的类型"></a>7.2 表空间的类型</h3><p>InnoDB中有多种表空间类型：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602172213861.png" srcset="/img/loading.gif" lazyload alt="表空间类型"></p>
+<h4 id="7-2-1-系统表空间（System-Tablespace）"><a href="#7-2-1-系统表空间（System-Tablespace）" class="headerlink" title="7.2.1 系统表空间（System Tablespace）"></a>7.2.1 系统表空间（System Tablespace）</h4><p>系统表空间是InnoDB默认的表空间，对应<code>ibdata1</code>文件，存储以下内容：</p>
+<ul>
+<li>数据字典（Data Dictionary）</li>
+<li>双写缓冲区（Doublewrite Buffer）</li>
+<li>修改缓冲区（Change Buffer）</li>
+<li>Undo日志（Undo Logs，可配置独立）</li>
+<li>如果未启用独立表空间，还存储所有表的数据和索引</li>
+</ul>
+<p>系统表空间的文件可以通过<code>innodb_data_file_path</code>配置：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[mysqld]</span><br><span class="hljs-attr">innodb_data_file_path</span>=ibdata1:<span class="hljs-number">12</span>M:autoextend<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="7-2-2-独立表空间（File-per-table-Tablespace）"><a href="#7-2-2-独立表空间（File-per-table-Tablespace）" class="headerlink" title="7.2.2 独立表空间（File-per-table Tablespace）"></a>7.2.2 独立表空间（File-per-table Tablespace）</h4><p>独立表空间是每个表单独的.ibd文件，通过<code>innodb_file_per_table</code>参数控制（MySQL 5.6以后默认开启）。</p>
+<p><strong>优点</strong>：</p>
+<ul>
+<li>便于管理：删除表时直接删除文件</li>
+<li>空间回收：TRUNCATE操作可立即释放空间给操作系统</li>
+<li>便于移动：可以轻松迁移单个表</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>大量文件可能超过操作系统限制</li>
+<li>每个表有自己的空闲空间，整体利用率略低</li>
+</ul>
+<h4 id="7-2-3-通用表空间（General-Tablespace）"><a href="#7-2-3-通用表空间（General-Tablespace）" class="headerlink" title="7.2.3 通用表空间（General Tablespace）"></a>7.2.3 通用表空间（General Tablespace）</h4><p>通用表空间是MySQL 5.7引入的共享表空间，可以容纳多个表，类似于系统表空间但更灵活。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 创建通用表空间</span><br><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span>SPACE `ts1` <span class="hljs-keyword">ADD</span> DATAFILE <span class="hljs-string">&#x27;ts1.ibd&#x27;</span> ENGINE<span class="hljs-operator">=</span>InnoDB;<br><br><span class="hljs-comment">-- 在通用表空间中创建表</span><br><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> t1 (id <span class="hljs-type">INT</span>) TABLESPACE ts1;<br><br><span class="hljs-comment">-- 移动表到通用表空间</span><br><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span> t1 TABLESPACE ts1;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="7-2-4-撤销表空间（Undo-Tablespace）"><a href="#7-2-4-撤销表空间（Undo-Tablespace）" class="headerlink" title="7.2.4 撤销表空间（Undo Tablespace）"></a>7.2.4 撤销表空间（Undo Tablespace）</h4><p>从MySQL 5.7开始，Undo日志可以存储在独立的撤销表空间中，默认创建两个（undo_001、undo_002）。</p>
+<h4 id="7-2-5-临时表空间（Temporary-Tablespace）"><a href="#7-2-5-临时表空间（Temporary-Tablespace）" class="headerlink" title="7.2.5 临时表空间（Temporary Tablespace）"></a>7.2.5 临时表空间（Temporary Tablespace）</h4><p>存储临时表的数据，对应<code>ibtmp1</code>文件，服务器重启时重建。</p>
+<h3 id="7-3-表空间文件结构解析"><a href="#7-3-表空间文件结构解析" class="headerlink" title="7.3 表空间文件结构解析"></a>7.3 表空间文件结构解析</h3><h4 id="7-3-1-独立表空间文件（-ibd）结构"><a href="#7-3-1-独立表空间文件（-ibd）结构" class="headerlink" title="7.3.1 独立表空间文件（.ibd）结构"></a>7.3.1 独立表空间文件（.ibd）结构</h4><p>一个典型的.ibd文件结构如下：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs asciidoc"><span class="hljs-code">+------------------------+</span><br><span class="hljs-section">| 表空间头部 (FSP_HDR)   | ← 第0页，存储表空间元数据和区信息</span><br><span class="hljs-section">+------------------------+</span><br><span class="hljs-section">| 插入缓冲位图页         | ← 管理插入缓冲</span><br><span class="hljs-section">+------------------------+</span><br><span class="hljs-section">| 索引根节点页           | ← 聚簇索引根页</span><br><span class="hljs-section">+------------------------+</span><br><span class="hljs-section">| 索引根节点页           | ← 二级索引根页（如果有）</span><br><span class="hljs-section">+------------------------+</span><br><span class="hljs-section">| 数据页 ...             |</span><br><span class="hljs-section">+------------------------+</span><br><span class="hljs-section">| Undo页（如果启用）     |</span><br><span class="hljs-section">+------------------------+</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="7-3-2-FSP-HDR页结构"><a href="#7-3-2-FSP-HDR页结构" class="headerlink" title="7.3.2 FSP_HDR页结构"></a>7.3.2 FSP_HDR页结构</h4><p>FSP_HDR页（文件空间头部）是表空间的第一个页，存储表空间的全局信息：</p>
+<ul>
+<li>表空间大小和版本</li>
+<li>空闲区的位图</li>
+<li>碎片页列表</li>
+<li>段的INODE信息</li>
+</ul>
+<p>FSP_HDR页之后，每256MB会有一个XDES（区描述符）页，继续管理后续区的状态。</p>
+<h3 id="7-4-表空间管理机制"><a href="#7-4-表空间管理机制" class="headerlink" title="7.4 表空间管理机制"></a>7.4 表空间管理机制</h3><h4 id="7-4-1-空间分配策略"><a href="#7-4-1-空间分配策略" class="headerlink" title="7.4.1 空间分配策略"></a>7.4.1 空间分配策略</h4><p>InnoDB采用以下策略分配空间：</p>
+<ol>
+<li><strong>优先使用碎片页</strong>：对于小对象，从碎片页池中分配</li>
+<li><strong>分配新区</strong>：如果碎片页不够，分配连续64页的完整区</li>
+<li><strong>预分配</strong>：为保持连续性，有时会一次性分配多个区</li>
+</ol>
+<h4 id="7-4-2-空间回收"><a href="#7-4-2-空间回收" class="headerlink" title="7.4.2 空间回收"></a>7.4.2 空间回收</h4><ul>
+<li><strong>DROP TABLE</strong>：直接删除文件（独立表空间）或标记空间可重用（系统表空间）</li>
+<li><strong>TRUNCATE TABLE</strong>：删除所有数据，保留表结构，重建.ibd文件</li>
+<li><strong>OPTIMIZE TABLE</strong>：重建表和索引，整理碎片</li>
+</ul>
+<h2 id="八、缓冲池（Buffer-Pool）——内存缓存的核心"><a href="#八、缓冲池（Buffer-Pool）——内存缓存的核心" class="headerlink" title="八、缓冲池（Buffer Pool）——内存缓存的核心"></a>八、缓冲池（Buffer Pool）——内存缓存的核心</h2><h3 id="8-1-缓冲池的作用与地位"><a href="#8-1-缓冲池的作用与地位" class="headerlink" title="8.1 缓冲池的作用与地位"></a>8.1 缓冲池的作用与地位</h3><p>缓冲池是InnoDB中最重要的内存组件，用于缓存数据和索引页，极大减少磁盘I&#x2F;O。其重要性体现在：</p>
+<ul>
+<li><strong>速度差异</strong>：内存访问是纳秒级，磁盘是毫秒级，相差几个数量级</li>
+<li><strong>局部性原理</strong>：刚访问过的数据很可能再次访问，邻近数据也可能被访问</li>
+<li><strong>写缓冲</strong>：修改先在内存进行，异步刷盘，提高写入性能</li>
+</ul>
+<h3 id="8-2-缓冲池的结构"><a href="#8-2-缓冲池的结构" class="headerlink" title="8.2 缓冲池的结构"></a>8.2 缓冲池的结构</h3><h4 id="8-2-1-物理结构"><a href="#8-2-1-物理结构" class="headerlink" title="8.2.1 物理结构"></a>8.2.1 物理结构</h4><p>缓冲池是一片连续的内存区域，按页（16KB）划分，每个页称为一个<strong>缓冲帧（Buffer Frame）</strong>，包含：</p>
+<ul>
+<li><strong>数据内容</strong>：与磁盘页一一对应</li>
+<li><strong>控制信息</strong>：页所属表空间、页号、脏页标记、访问频率等</li>
+</ul>
+<h4 id="8-2-2-逻辑组织"><a href="#8-2-2-逻辑组织" class="headerlink" title="8.2.2 逻辑组织"></a>8.2.2 逻辑组织</h4><p>缓冲池内部通过三种链表组织页：</p>
+<ol>
+<li><strong>LRU链表</strong>：管理最近最少使用的页</li>
+<li><strong>Flush链表</strong>：管理脏页（已修改但未刷盘）</li>
+<li><strong>Free链表</strong>：管理空闲页</li>
+</ol>
+<h3 id="8-3-缓冲池管理算法"><a href="#8-3-缓冲池管理算法" class="headerlink" title="8.3 缓冲池管理算法"></a>8.3 缓冲池管理算法</h3><h4 id="8-3-1-改进的LRU算法"><a href="#8-3-1-改进的LRU算法" class="headerlink" title="8.3.1 改进的LRU算法"></a>8.3.1 改进的LRU算法</h4><p>InnoDB没有使用标准的LRU算法，而是采用<strong>中点插入策略</strong>，将LRU链表分为两部分：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs text">+-------------------+--------------------+<br>|  新生代 (young)   |   老生代 (old)     |<br>|  占5/8            |   占3/8            |<br>+-------------------+--------------------+<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>工作原理</strong>：</p>
+<ol>
+<li>新读取的页插入到老生代的头部（中点位置）</li>
+<li>如果页在足够长的时间内被再次访问（超过<code>innodb_old_blocks_time</code>设置的时间），则晋升到新生代头部</li>
+<li>淘汰时从老生代尾部开始</li>
+</ol>
+<p><strong>这种设计防止了什么？</strong></p>
+<ul>
+<li>全表扫描污染缓冲池：大量一次性访问的页不会挤占热点页位置</li>
+</ul>
+<h4 id="8-3-2-预读机制"><a href="#8-3-2-预读机制" class="headerlink" title="8.3.2 预读机制"></a>8.3.2 预读机制</h4><p>InnoDB通过预读机制提前将可能需要的页加载到缓冲池：</p>
+<ul>
+<li><strong>线性预读</strong>：根据顺序访问模式，预读后续页</li>
+<li><strong>随机预读</strong>：根据同一区中页的访问模式，预读整个区（MySQL 5.5后默认禁用）</li>
+</ul>
+<p>预读由<code>innodb_read_ahead_threshold</code>等参数控制。</p>
+<h3 id="8-4-脏页刷新机制"><a href="#8-4-脏页刷新机制" class="headerlink" title="8.4 脏页刷新机制"></a>8.4 脏页刷新机制</h3><h4 id="8-4-1-脏页产生"><a href="#8-4-1-脏页产生" class="headerlink" title="8.4.1 脏页产生"></a>8.4.1 脏页产生</h4><p>当缓冲池中的页被修改后，就变成脏页（与磁盘内容不一致）。脏页需要刷回磁盘以保证持久性。</p>
+<h4 id="8-4-2-刷新策略"><a href="#8-4-2-刷新策略" class="headerlink" title="8.4.2 刷新策略"></a>8.4.2 刷新策略</h4><p>InnoDB采用多种策略刷新脏页：</p>
+<ol>
+<li><strong>后台线程刷新</strong>：Page Cleaner线程定期刷新部分脏页</li>
+<li><strong>自适应刷新</strong>：根据脏页比例和I&#x2F;O能力动态调整刷新速度</li>
+<li><strong>同步刷新</strong>：当脏页比例过高时，强制用户线程参与刷新</li>
+</ol>
+<h4 id="8-4-3-Checkpoint机制"><a href="#8-4-3-Checkpoint机制" class="headerlink" title="8.4.3 Checkpoint机制"></a>8.4.3 Checkpoint机制</h4><p>检查点（Checkpoint）是脏页刷新的重要机制：</p>
+<ul>
+<li><strong>模糊检查点</strong>：只刷新部分脏页，不要求所有脏页都刷</li>
+<li><strong>尖锐检查点</strong>：将所有脏页刷盘（只在关闭数据库时发生）</li>
+</ul>
+<p>每个检查点会记录一个LSN（Log Sequence Number），表示该LSN之前的所有修改都已持久化。</p>
+<h3 id="8-5-缓冲池配置优化"><a href="#8-5-缓冲池配置优化" class="headerlink" title="8.5 缓冲池配置优化"></a>8.5 缓冲池配置优化</h3><h4 id="8-5-1-大小设置"><a href="#8-5-1-大小设置" class="headerlink" title="8.5.1 大小设置"></a>8.5.1 大小设置</h4><p>缓冲池大小是最重要的性能参数：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[mysqld]</span><br><span class="hljs-comment"># 设置为可用内存的70%-80%（专用服务器）</span><br><span class="hljs-attr">innodb_buffer_pool_size</span>=<span class="hljs-number">8</span>G<br><br><span class="hljs-comment"># 如果是多实例MySQL，按比例分配</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>经验法则：</p>
+<ul>
+<li>读密集型：尽量大，缓存更多数据</li>
+<li>写密集型：适当减小，避免脏页刷新压力过大</li>
+</ul>
+<h4 id="8-5-2-多实例配置"><a href="#8-5-2-多实例配置" class="headerlink" title="8.5.2 多实例配置"></a>8.5.2 多实例配置</h4><p>对于大内存服务器，可以将缓冲池划分为多个实例，减少锁竞争：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[mysqld]</span><br><span class="hljs-attr">innodb_buffer_pool_instances</span>=<span class="hljs-number">4</span><br><span class="hljs-attr">innodb_buffer_pool_size</span>=<span class="hljs-number">32</span>G  <span class="hljs-comment"># 每个实例8G</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="8-5-3-预热机制"><a href="#8-5-3-预热机制" class="headerlink" title="8.5.3 预热机制"></a>8.5.3 预热机制</h4><p>MySQL支持在重启后恢复缓冲池状态：</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs ini"><span class="hljs-section">[mysqld]</span><br><span class="hljs-comment"># 启用缓冲池状态保存和恢复</span><br><span class="hljs-attr">innodb_buffer_pool_dump_at_shutdown</span>=<span class="hljs-number">1</span><br><span class="hljs-attr">innodb_buffer_pool_load_at_startup</span>=<span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="8-6-监控缓冲池"><a href="#8-6-监控缓冲池" class="headerlink" title="8.6 监控缓冲池"></a>8.6 监控缓冲池</h3><p>通过以下方式监控缓冲池状态：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- 查看缓冲池统计信息</span><br><span class="hljs-keyword">SHOW</span> ENGINE INNODB STATUS\G<br><br><span class="hljs-comment">-- 通过INFORMATION_SCHEMA表</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> INFORMATION_SCHEMA.INNODB_BUFFER_POOL_STATS;<br><br><span class="hljs-comment">-- 查看具体页内容（调试用）</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> INFORMATION_SCHEMA.INNODB_BUFFER_PAGE LIMIT <span class="hljs-number">10</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>重点关注指标：</p>
+<ul>
+<li><strong>命中率</strong>：缓冲池读取命中率，应&gt;99%</li>
+<li><strong>脏页比例</strong>：不应过高，否则刷新压力大</li>
+<li><strong>空闲页</strong>：不应为0，否则说明缓冲池太小</li>
+</ul>
+<h2 id="九、总结"><a href="#九、总结" class="headerlink" title="九、总结"></a>九、总结</h2><p>​	本篇文章主要介绍了磁盘到内存、从页到行、从索引到表空间。现在，我们提炼出几个最核心的认知：</p>
+<ul>
+<li><strong>磁盘是永恒的归宿，内存是速度的翅膀</strong>：所有数据最终都躺在磁盘上，但 InnoDB 通过缓冲池将热点数据缓存在内存中，利用局部性原理将磁盘 I&#x2F;O 降到最低。理解页的缓存策略、LRU 算法和脏页刷新机制，是优化数据库性能的基础。</li>
+<li><strong>B+ 树是索引的灵魂</strong>：InnoDB 选择 B+ 树作为索引结构，是因为它在磁盘场景下实现了极低的树高（通常 3~4 层），从而用极少的 I&#x2F;O 次数支撑起亿万级数据的快速定位。掌握 B+ 树的扇出计算，就能预估表容量和索引效率。</li>
+<li><strong>行格式决定空间利用率</strong>：DYNAMIC 行格式通过完全行溢出策略，让大字段不再占用数据页空间，使得每个页能容纳更多行，提升缓冲池命中率。理解行内各部分的存储开销，有助于设计更紧凑的表结构。</li>
+<li><strong>日志是数据一致性的守护神</strong>：重做日志（Redo Log）保证了事务的持久性，撤销日志（Undo Log）支撑了 MVCC 和回滚，二进制日志（Binlog）则负责复制和恢复。两阶段提交机制确保了 InnoDB 与 Server 层日志的一致性。</li>
+<li><strong>表空间是物理组织的蓝图</strong>：从系统表空间到独立表空间，从段到区再到页，InnoDB 通过层次化的空间管理，既保证了数据的物理连续性，又提供了灵活的空间回收能力。</li>
+</ul>
+<p>​	MySQL 的底层存储原理，既是一部精巧的工程设计史，也是一本性能优化的实战指南。掌握它，你就能在遇到问题时透过现象看本质——当索引失效时，你知道 B+ 树如何工作；当 I&#x2F;O 飙升时，你明白缓冲池如何影响磁盘访问；当数据损坏时，你懂得日志如何恢复。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</div>
+      <div>https://johnjoyjzw.github.io/2025/02/08/MySQL底层数据和索引的存储奥秘-从磁盘结构到内存管理的全解析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>February 8, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/04/05/Synchronized%E5%8E%9F%E7%90%86/" title="Synchronized原理">
+                        <span class="hidden-mobile">Synchronized原理</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
