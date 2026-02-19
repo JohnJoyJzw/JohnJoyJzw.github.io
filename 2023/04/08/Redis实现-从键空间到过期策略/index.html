@@ -13,14 +13,14 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="John Joy">
+  <meta name="author" content="JiangZW">
   <meta name="keywords" content="">
   
     <meta name="description" content="Redis实现-从键空间到过期策略一、引言​	Redis 是一个高性能的键值对数据库，其核心功能之一就是数据库的管理。每个 Redis 服务器可以包含多个数据库，每个数据库本质上是一个字典（键空间），存储着所有的键值对。除此之外，数据库还需要处理键的过期时间、持久化、通知等功能。 ​	本文深入剖析 Redis 数据库的底层原理，包括服务器中数据库的表示、客户端切换数据库的机制、键空间的操作、过">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis实现-从键空间到过期策略">
 <meta property="og:url" content="https://johnjoyjzw.github.io/2023/04/08/Redis%E5%AE%9E%E7%8E%B0-%E4%BB%8E%E9%94%AE%E7%A9%BA%E9%97%B4%E5%88%B0%E8%BF%87%E6%9C%9F%E7%AD%96%E7%95%A5/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="JohnJoy blog">
 <meta property="og:description" content="Redis实现-从键空间到过期策略一、引言​	Redis 是一个高性能的键值对数据库，其核心功能之一就是数据库的管理。每个 Redis 服务器可以包含多个数据库，每个数据库本质上是一个字典（键空间），存储着所有的键值对。除此之外，数据库还需要处理键的过期时间、持久化、通知等功能。 ​	本文深入剖析 Redis 数据库的底层原理，包括服务器中数据库的表示、客户端切换数据库的机制、键空间的操作、过">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602162333094.png">
@@ -36,14 +36,14 @@
 <meta property="og:image" content="c:\Users\jiang\AppData\Roaming\Typora\typora-user-images\image-20260217003350327.png">
 <meta property="article:published_time" content="2023-04-08T07:38:36.000Z">
 <meta property="article:modified_time" content="2026-02-16T16:40:07.086Z">
-<meta property="article:author" content="John Joy">
+<meta property="article:author" content="JiangZW">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602162333094.png">
   
   
   
-  <title>Redis实现-从键空间到过期策略 - Hexo</title>
+  <title>Redis实现-从键空间到过期策略 - JohnJoy blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -461,7 +461,7 @@
       
         <div class="license-meta-item">
           <div>Author</div>
-          <div>John Joy</div>
+          <div>JiangZW</div>
         </div>
       
       

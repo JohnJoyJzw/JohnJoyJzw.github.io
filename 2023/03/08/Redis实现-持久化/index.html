@@ -13,14 +13,14 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="John Joy">
+  <meta name="author" content="JiangZW">
   <meta name="keywords" content="">
   
     <meta name="description" content="Redis实现-持久化一、引言​	Redis 作为一款高性能的内存数据库，其数据主要存储在内存中，从而提供了极快的读写速度。然而，内存是易失性存储，一旦服务器进程退出或宕机，内存中的数据就会全部丢失。 ​	为了解决这一问题，Redis 提供了持久化功能，将内存中的数据保存到磁盘中，以便在重启后恢复数据。Redis 支持两种持久化方式：RDB持久化和 AOF持久化。本文将深入剖析这两种持久化机制">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis实现-持久化">
 <meta property="og:url" content="https://johnjoyjzw.github.io/2023/03/08/Redis%E5%AE%9E%E7%8E%B0-%E6%8C%81%E4%B9%85%E5%8C%96/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="JohnJoy blog">
 <meta property="og:description" content="Redis实现-持久化一、引言​	Redis 作为一款高性能的内存数据库，其数据主要存储在内存中，从而提供了极快的读写速度。然而，内存是易失性存储，一旦服务器进程退出或宕机，内存中的数据就会全部丢失。 ​	为了解决这一问题，Redis 提供了持久化功能，将内存中的数据保存到磁盘中，以便在重启后恢复数据。Redis 支持两种持久化方式：RDB持久化和 AOF持久化。本文将深入剖析这两种持久化机制">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602162132940.png">
@@ -28,14 +28,14 @@
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602162247777.png">
 <meta property="article:published_time" content="2023-03-08T07:38:36.000Z">
 <meta property="article:modified_time" content="2026-02-16T15:12:54.675Z">
-<meta property="article:author" content="John Joy">
+<meta property="article:author" content="JiangZW">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602162132940.png">
   
   
   
-  <title>Redis实现-持久化 - Hexo</title>
+  <title>Redis实现-持久化 - JohnJoy blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -648,7 +648,7 @@
       
         <div class="license-meta-item">
           <div>Author</div>
-          <div>John Joy</div>
+          <div>JiangZW</div>
         </div>
       
       

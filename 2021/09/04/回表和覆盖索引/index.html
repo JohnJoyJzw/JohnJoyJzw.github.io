@@ -13,14 +13,14 @@
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   
   <meta name="theme-color" content="#2f4154">
-  <meta name="author" content="John Joy">
+  <meta name="author" content="JiangZW">
   <meta name="keywords" content="">
   
     <meta name="description" content="回表在理解回表之前，需要了解聚簇索引和非聚簇索引。 在InnoDB，由聚簇索引和辅助键索引。 聚簇索引就是将主键值和数据放在一起存储。 辅助键索引就是将索引值和主键值放在一起存储。 表数据 表中有4列，其中ID是主键，设置age为普通索引。    执行SQL语句： 1SELECT ID,age FROM USER WHERE age &#x3D; 19  此时我们只需要通过普通索引就可以找到查询结果">
 <meta property="og:type" content="article">
 <meta property="og:title" content="回表和覆盖索引">
 <meta property="og:url" content="https://johnjoyjzw.github.io/2021/09/04/%E5%9B%9E%E8%A1%A8%E5%92%8C%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="JohnJoy blog">
 <meta property="og:description" content="回表在理解回表之前，需要了解聚簇索引和非聚簇索引。 在InnoDB，由聚簇索引和辅助键索引。 聚簇索引就是将主键值和数据放在一起存储。 辅助键索引就是将索引值和主键值放在一起存储。 表数据 表中有4列，其中ID是主键，设置age为普通索引。    执行SQL语句： 1SELECT ID,age FROM USER WHERE age &#x3D; 19  此时我们只需要通过普通索引就可以找到查询结果">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210904190237.png">
@@ -32,14 +32,14 @@
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210904194315.png">
 <meta property="article:published_time" content="2021-09-04T12:07:34.000Z">
 <meta property="article:modified_time" content="2022-12-06T17:06:08.367Z">
-<meta property="article:author" content="John Joy">
+<meta property="article:author" content="JiangZW">
 <meta property="article:tag" content="数据库">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210904190237.png">
   
   
   
-  <title>回表和覆盖索引 - Hexo</title>
+  <title>回表和覆盖索引 - JohnJoy blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -356,7 +356,7 @@
       
         <div class="license-meta-item">
           <div>Author</div>
-          <div>John Joy</div>
+          <div>JiangZW</div>
         </div>
       
       
