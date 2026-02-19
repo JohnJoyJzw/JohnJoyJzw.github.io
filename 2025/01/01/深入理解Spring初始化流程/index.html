@@ -1,0 +1,738 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="JiangZW">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="深入理解Spring初始化流程一、前言​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：实例化（Instantiation）、属性填充（Populate）和初始化（Initialization）。 ​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、Bean正式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深入理解Spring初始化流程">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/01/01/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Spring%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:site_name" content="JohnJoy blog">
+<meta property="og:description" content="深入理解Spring初始化流程一、前言​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：实例化（Instantiation）、属性填充（Populate）和初始化（Initialization）。 ​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、Bean正式">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-01-01T02:28:37.000Z">
+<meta property="article:modified_time" content="2026-02-19T14:42:17.981Z">
+<meta property="article:author" content="JiangZW">
+<meta property="article:tag" content="框架">
+<meta property="article:tag" content="Spring源码">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>深入理解Spring初始化流程 - JohnJoy blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="深入理解Spring初始化流程"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-01-01 10:28" pubdate>
+          January 1, 2025 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          12k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          97 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">深入理解Spring初始化流程</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="深入理解Spring初始化流程"><a href="#深入理解Spring初始化流程" class="headerlink" title="深入理解Spring初始化流程"></a>深入理解Spring初始化流程</h1><h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：<strong>实例化（Instantiation）</strong>、<strong>属性填充（Populate）</strong>和<strong>初始化（Initialization）</strong>。</p>
+<p>​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、Bean正式投入使用前的那段“初始化”旅程，往往只有一个模糊的概念——好像会调用<code>afterPropertiesSet</code>和<code>init-method</code>，好像还有一些<code>BeanPostProcessor</code>会插手。至于这些环节的先后顺序、源码实现细节、以及Spring设计背后的深意，却知之甚少。</p>
+<p>​	本文将以<strong>源码深度解析</strong>的形式，为你全景式展现Spring Bean在属性填充完成后的初始化流程。我们将从<code>doCreateBean</code>方法切入，逐行分析<code>initializeBean</code>的每一行代码，深入探讨<code>Aware</code>接口的回调、<code>BeanPostProcessor</code>的前后置处理、<code>InitializingBean</code>和<code>init-method</code>的调用机制，并揭示AOP代理对象创建的真正时机。</p>
+<h2 id="二、从-doCreateBean-说起：初始化流程的入口"><a href="#二、从-doCreateBean-说起：初始化流程的入口" class="headerlink" title="二、从 doCreateBean 说起：初始化流程的入口"></a>二、从 doCreateBean 说起：初始化流程的入口</h2><p>​	在Spring源码中，Bean的创建核心逻辑封装在<code>AbstractAutowireCapableBeanFactory</code>类的<code>doCreateBean</code>方法中。这个方法的名字很直白——“执行创建Bean”。在经历实例化和属性填充后，初始化工作从这里拉开序幕。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutowireCapableBeanFactory.java</span><br><span class="hljs-keyword">protected</span> Object <span class="hljs-title function_">doCreateBean</span><span class="hljs-params">(<span class="hljs-keyword">final</span> String beanName, <span class="hljs-keyword">final</span> RootBeanDefinition mbd, <span class="hljs-keyword">final</span> <span class="hljs-meta">@Nullable</span> Object[] args)</span><br>        <span class="hljs-keyword">throws</span> BeanCreationException &#123;<br><br>    <span class="hljs-comment">// 1. 实例化Bean</span><br>    <span class="hljs-type">BeanWrapper</span> <span class="hljs-variable">instanceWrapper</span> <span class="hljs-operator">=</span> <span class="hljs-literal">null</span>;<br>    <span class="hljs-keyword">if</span> (mbd.isSingleton()) &#123;<br>        instanceWrapper = <span class="hljs-built_in">this</span>.factoryBeanInstanceCache.remove(beanName);<br>    &#125;<br>    <span class="hljs-keyword">if</span> (instanceWrapper == <span class="hljs-literal">null</span>) &#123;<br>        instanceWrapper = createBeanInstance(beanName, mbd, args);<br>    &#125;<br>    <span class="hljs-keyword">final</span> <span class="hljs-type">Object</span> <span class="hljs-variable">bean</span> <span class="hljs-operator">=</span> instanceWrapper.getWrappedInstance();<br><br>    <span class="hljs-comment">// 省略：提前暴露Bean以解决循环依赖（三级缓存处理）</span><br>    <br>    <span class="hljs-comment">// 2. 属性填充（Populate）</span><br>    populateBean(beanName, mbd, instanceWrapper);<br><br>    <span class="hljs-comment">// 3. 初始化（Initialize）—— 本文的核心</span><br>    exposedObject = initializeBean(beanName, exposedObject, mbd);<br><br>    <span class="hljs-comment">// 省略：注册销毁方法等</span><br>    <span class="hljs-keyword">return</span> exposedObject;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>​	从这段代码可以清晰地看到，<code>initializeBean</code>方法是属性填充后的下一站。这个方法接收三个参数：beanName、已经填充好属性的Bean实例（exposedObject），以及合并后的Bean定义（RootBeanDefinition）。返回值<code>exposedObject</code>可能是原始的Bean，也可能是经过<code>BeanPostProcessor</code>包装后的对象（比如AOP代理对象）</p>
+<h2 id="三、initializeBean-方法概览：初始化的四部曲"><a href="#三、initializeBean-方法概览：初始化的四部曲" class="headerlink" title="三、initializeBean 方法概览：初始化的四部曲"></a>三、initializeBean 方法概览：初始化的四部曲</h2><p>我们直接进入<code>initializeBean</code>方法的源码，看看Spring到底在这个方法里做了什么。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutowireCapableBeanFactory.java</span><br><span class="hljs-keyword">protected</span> Object <span class="hljs-title function_">initializeBean</span><span class="hljs-params">(<span class="hljs-keyword">final</span> String beanName, <span class="hljs-keyword">final</span> Object bean, <span class="hljs-meta">@Nullable</span> RootBeanDefinition mbd)</span> &#123;<br>    <br>    <span class="hljs-comment">// 第一步：激活Aware方法</span><br>    <span class="hljs-keyword">if</span> (System.getSecurityManager() != <span class="hljs-literal">null</span>) &#123;<br>        AccessController.doPrivileged((PrivilegedAction&lt;Object&gt;) () -&gt; &#123;<br>            invokeAwareMethods(beanName, bean);<br>            <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>        &#125;, getAccessControlContext());<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        invokeAwareMethods(beanName, bean);<br>    &#125;<br><br>    <span class="hljs-comment">// 第二步：初始化前置处理（BeanPostProcessor的前置方法）</span><br>    <span class="hljs-type">Object</span> <span class="hljs-variable">wrappedBean</span> <span class="hljs-operator">=</span> bean;<br>    <span class="hljs-keyword">if</span> (mbd == <span class="hljs-literal">null</span> || !mbd.isSynthetic()) &#123;<br>        wrappedBean = applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);<br>    &#125;<br><br>    <span class="hljs-comment">// 第三步：执行初始化方法（InitializingBean + init-method）</span><br>    <span class="hljs-keyword">try</span> &#123;<br>        invokeInitMethods(beanName, wrappedBean, mbd);<br>    &#125; <span class="hljs-keyword">catch</span> (Throwable ex) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BeanCreationException</span>(<br>                (mbd != <span class="hljs-literal">null</span> ? mbd.getResourceDescription() : <span class="hljs-literal">null</span>),<br>                beanName, <span class="hljs-string">&quot;Invocation of init method failed&quot;</span>, ex);<br>    &#125;<br><br>    <span class="hljs-comment">// 第四步：初始化后置处理（BeanPostProcessor的后置方法）</span><br>    <span class="hljs-keyword">if</span> (mbd == <span class="hljs-literal">null</span> || !mbd.isSynthetic()) &#123;<br>        wrappedBean = applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> wrappedBean;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个方法的结构异常清晰，堪称模板方法模式的典范。我们可以将初始化流程概括为<strong>四部曲</strong>：</p>
+<ol>
+<li><strong>Aware接口回调</strong>：如果Bean实现了特定的<code>Aware</code>接口，Spring将注入相应的依赖。</li>
+<li><strong>BeanPostProcessor前置处理</strong>：调用所有<code>BeanPostProcessor</code>的<code>postProcessBeforeInitialization</code>方法。</li>
+<li><strong>执行初始化方法</strong>：调用<code>InitializingBean</code>的<code>afterPropertiesSet</code>方法和自定义的<code>init-method</code>。</li>
+<li><strong>BeanPostProcessor后置处理</strong>：调用所有<code>BeanPostProcessor</code>的<code>postProcessAfterInitialization</code>方法。</li>
+</ol>
+<p>下面，我们将逐一深入这四步的源码实现。</p>
+<h2 id="四、第一步：Aware-接口回调——让Bean感知容器"><a href="#四、第一步：Aware-接口回调——让Bean感知容器" class="headerlink" title="四、第一步：Aware 接口回调——让Bean感知容器"></a>四、第一步：Aware 接口回调——让Bean感知容器</h2><h3 id="4-1-invokeAwareMethods-源码解析"><a href="#4-1-invokeAwareMethods-源码解析" class="headerlink" title="4.1 invokeAwareMethods 源码解析"></a>4.1 invokeAwareMethods 源码解析</h3><p>先看第一步的<code>invokeAwareMethods</code>方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutowireCapableBeanFactory.java</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">invokeAwareMethods</span><span class="hljs-params">(<span class="hljs-keyword">final</span> String beanName, <span class="hljs-keyword">final</span> Object bean)</span> &#123;<br>    <span class="hljs-keyword">if</span> (bean <span class="hljs-keyword">instanceof</span> Aware) &#123;<br>        <span class="hljs-keyword">if</span> (bean <span class="hljs-keyword">instanceof</span> BeanNameAware) &#123;<br>            ((BeanNameAware) bean).setBeanName(beanName);<br>        &#125;<br>        <span class="hljs-keyword">if</span> (bean <span class="hljs-keyword">instanceof</span> BeanClassLoaderAware) &#123;<br>            <span class="hljs-type">ClassLoader</span> <span class="hljs-variable">bcl</span> <span class="hljs-operator">=</span> getBeanClassLoader();<br>            <span class="hljs-keyword">if</span> (bcl != <span class="hljs-literal">null</span>) &#123;<br>                ((BeanClassLoaderAware) bean).setBeanClassLoader(bcl);<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">if</span> (bean <span class="hljs-keyword">instanceof</span> BeanFactoryAware) &#123;<br>            ((BeanFactoryAware) bean).setBeanFactory(AbstractAutowireCapableBeanFactory.<span class="hljs-built_in">this</span>);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这段代码逻辑非常简单直接：检查Bean是否实现了特定的<code>Aware</code>接口，如果实现了，就调用对应的setter方法注入相关对象。</p>
+<p>这里Spring只处理了三种<code>Aware</code>接口：</p>
+<ul>
+<li><strong>BeanNameAware</strong>：注入当前Bean在容器中的名称。</li>
+<li><strong>BeanClassLoaderAware</strong>：注入加载当前Bean的ClassLoader。</li>
+<li><strong>BeanFactoryAware</strong>：注入当前Bean所属的BeanFactory（即容器本身）。</li>
+</ul>
+<h3 id="4-2-为什么只有这三种Aware？"><a href="#4-2-为什么只有这三种Aware？" class="headerlink" title="4.2 为什么只有这三种Aware？"></a>4.2 为什么只有这三种Aware？</h3><p>细心的读者可能会问：<code>ApplicationContextAware</code>在哪里？<code>EnvironmentAware</code>在哪里？</p>
+<p>答案是：<strong>此时BeanFactory还不具备处理这些Aware的能力</strong>。<code>BeanNameAware</code>、<code>BeanClassLoaderAware</code>和<code>BeanFactoryAware</code>是与BeanFactory平级的接口，它们的依赖可以直接从当前的BeanFactory中获取。而<code>ApplicationContextAware</code>等更高级的Aware接口，需要依赖<code>ApplicationContext</code>，这超出了BeanFactory的职责范围。</p>
+<p>那么，<code>ApplicationContextAware</code>是在哪里被调用的呢？答案是**通过<code>BeanPostProcessor</code>**。Spring提供了一个<code>ApplicationContextAwareProcessor</code>，它是一个<code>BeanPostProcessor</code>，在初始化前置处理阶段（<code>postProcessBeforeInitialization</code>）调用<code>ApplicationContextAware</code>、<code>EnvironmentAware</code>等接口的方法。这完美诠释了为什么<code>ApplicationContextAware</code>等接口的回调时机在<code>invokeAwareMethods</code>之后。</p>
+<h2 id="五、第二步：初始化前置处理——BeanPostProcessor-的舞台"><a href="#五、第二步：初始化前置处理——BeanPostProcessor-的舞台" class="headerlink" title="五、第二步：初始化前置处理——BeanPostProcessor 的舞台"></a>五、第二步：初始化前置处理——BeanPostProcessor 的舞台</h2><p>完成Aware回调后，进入初始化前置处理阶段</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutowireCapableBeanFactory.java</span><br><span class="hljs-keyword">public</span> Object <span class="hljs-title function_">applyBeanPostProcessorsBeforeInitialization</span><span class="hljs-params">(Object existingBean, String beanName)</span><br>        <span class="hljs-keyword">throws</span> BeansException &#123;<br><br>    <span class="hljs-type">Object</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> existingBean;<br>    <span class="hljs-comment">// 遍历所有的BeanPostProcessor</span><br>    <span class="hljs-keyword">for</span> (BeanPostProcessor processor : getBeanPostProcessors()) &#123;<br>        <span class="hljs-comment">// 调用前置处理方法</span><br>        <span class="hljs-type">Object</span> <span class="hljs-variable">current</span> <span class="hljs-operator">=</span> processor.postProcessBeforeInitialization(result, beanName);<br>        <span class="hljs-keyword">if</span> (current == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> result;<br>        &#125;<br>        result = current;<br>    &#125;<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个方法遍历容器中注册的所有<code>BeanPostProcessor</code>，逐个调用其<code>postProcessBeforeInitialization</code>方法。任何一个处理器返回null，都会中断后续处理器的执行</p>
+<h3 id="5-1-典型应用场景"><a href="#5-1-典型应用场景" class="headerlink" title="5.1 典型应用场景"></a>5.1 典型应用场景</h3><p>在这个阶段，Spring内置的一些<code>BeanPostProcessor</code>会执行特定的操作：</p>
+<ul>
+<li><strong>ApplicationContextAwareProcessor</strong>：回调<code>ApplicationContextAware</code>、<code>EnvironmentAware</code>等接口。</li>
+<li><strong>InitDestroyAnnotationBeanPostProcessor</strong>：负责处理<code>@PostConstruct</code>注解的方法。实际上，<code>@PostConstruct</code>标注的方法就是在这个阶段被调用的。</li>
+<li><strong>CommonAnnotationBeanPostProcessor</strong>：除了处理<code>@Resource</code>，也负责<code>@PostConstruct</code>和<code>@PreDestroy</code>。</li>
+</ul>
+<p>这里有一个重要的知识点：**<code>@PostConstruct</code>的执行时机早于<code>InitializingBean</code>的<code>afterPropertiesSet</code>和<code>init-method</code>**，因为它是在初始化前置处理阶段被调用的。</p>
+<h2 id="六、第三步：执行初始化方法——afterPropertiesSet-与-init-method"><a href="#六、第三步：执行初始化方法——afterPropertiesSet-与-init-method" class="headerlink" title="六、第三步：执行初始化方法——afterPropertiesSet 与 init-method"></a>六、第三步：执行初始化方法——afterPropertiesSet 与 init-method</h2><p>初始化前置处理完成后，Spring开始执行Bean自身的初始化逻辑。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutowireCapableBeanFactory.java</span><br><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">invokeInitMethods</span><span class="hljs-params">(String beanName, <span class="hljs-keyword">final</span> Object bean, <span class="hljs-meta">@Nullable</span> RootBeanDefinition mbd)</span><br>        <span class="hljs-keyword">throws</span> Throwable &#123;<br><br>    <span class="hljs-comment">// 首先检查是否实现了 InitializingBean 接口</span><br>    <span class="hljs-type">boolean</span> <span class="hljs-variable">isInitializingBean</span> <span class="hljs-operator">=</span> (bean <span class="hljs-keyword">instanceof</span> InitializingBean);<br>    <span class="hljs-keyword">if</span> (isInitializingBean &amp;&amp; (mbd == <span class="hljs-literal">null</span> || !mbd.isExternallyManagedInitMethod(<span class="hljs-string">&quot;afterPropertiesSet&quot;</span>))) &#123;<br>        <span class="hljs-keyword">if</span> (logger.isTraceEnabled()) &#123;<br>            logger.trace(<span class="hljs-string">&quot;Invoking afterPropertiesSet() on bean with name &#x27;&quot;</span> + beanName + <span class="hljs-string">&quot;&#x27;&quot;</span>);<br>        &#125;<br>        <span class="hljs-keyword">if</span> (System.getSecurityManager() != <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">try</span> &#123;<br>                AccessController.doPrivileged((PrivilegedExceptionAction&lt;Object&gt;) () -&gt; &#123;<br>                    ((InitializingBean) bean).afterPropertiesSet();<br>                    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;<br>                &#125;, getAccessControlContext());<br>            &#125; <span class="hljs-keyword">catch</span> (PrivilegedActionException pae) &#123;<br>                <span class="hljs-keyword">throw</span> pae.getException();<br>            &#125;<br>        &#125; <span class="hljs-keyword">else</span> &#123;<br>            <span class="hljs-comment">// 直接调用 afterPropertiesSet() 方法</span><br>            ((InitializingBean) bean).afterPropertiesSet();<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-comment">// 然后检查是否指定了自定义的 init-method</span><br>    <span class="hljs-keyword">if</span> (mbd != <span class="hljs-literal">null</span> &amp;&amp; bean.getClass() != NullBean.class) &#123;<br>        <span class="hljs-type">String</span> <span class="hljs-variable">initMethodName</span> <span class="hljs-operator">=</span> mbd.getInitMethodName();<br>        <span class="hljs-keyword">if</span> (StringUtils.hasLength(initMethodName) &amp;&amp;<br>                !(isInitializingBean &amp;&amp; <span class="hljs-string">&quot;afterPropertiesSet&quot;</span>.equals(initMethodName)) &amp;&amp;<br>                !mbd.isExternallyManagedInitMethod(initMethodName)) &#123;<br>            <span class="hljs-comment">// 通过反射调用自定义的初始化方法</span><br>            invokeCustomInitMethod(beanName, bean, mbd);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="6-1-执行顺序的深意"><a href="#6-1-执行顺序的深意" class="headerlink" title="6.1 执行顺序的深意"></a>6.1 执行顺序的深意</h3><p>这段代码清晰地表明：</p>
+<ol>
+<li>**先执行<code>afterPropertiesSet</code>**：如果Bean实现了<code>InitializingBean</code>接口，Spring会先调用其<code>afterPropertiesSet</code>方法。</li>
+<li>**后执行<code>init-method</code>**：如果配置了自定义的初始化方法（通过<code>@Bean(initMethod=&quot;...&quot;)</code>或XML的<code>init-method</code>属性），Spring随后会通过反射调用该方法。</li>
+</ol>
+<p>为什么是这个顺序？这体现了Spring的设计哲学：<strong>框架级别的接口优先于用户配置</strong>。<code>InitializingBean</code>是Spring框架提供的接口，而<code>init-method</code>是用户自定义的方法。框架认为自己的回调应该先执行，为用户方法做准备，用户方法可以在框架准备好的基础上进行后续操作。</p>
+<h3 id="6-2-两种方式的比较"><a href="#6-2-两种方式的比较" class="headerlink" title="6.2 两种方式的比较"></a>6.2 两种方式的比较</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>InitializingBean</th>
+<th>init-method</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>耦合度</td>
+<td>与Spring API耦合</td>
+<td>无侵入，POJO即可</td>
+</tr>
+<tr>
+<td>实现方式</td>
+<td>实现接口，重写方法</td>
+<td>通过反射调用任意方法</td>
+</tr>
+<tr>
+<td>执行时机</td>
+<td>较早，在init-method之前</td>
+<td>较晚，在afterPropertiesSet之后</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>需要明确感知Spring容器的场景</td>
+<td>希望与Spring解耦的场景</td>
+</tr>
+</tbody></table>
+<p>Spring官方推荐使用<code>init-method</code>（或<code>@PostConstruct</code>），因为它们不会让你的代码与Spring API绑定。</p>
+<h2 id="七、第四步：初始化后置处理——AOP的诞生之地"><a href="#七、第四步：初始化后置处理——AOP的诞生之地" class="headerlink" title="七、第四步：初始化后置处理——AOP的诞生之地"></a>七、第四步：初始化后置处理——AOP的诞生之地</h2><p>初始化方法的执行并非终点，Spring还有最后一项工作：初始化后置处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutowireCapableBeanFactory.java</span><br><span class="hljs-keyword">public</span> Object <span class="hljs-title function_">applyBeanPostProcessorsAfterInitialization</span><span class="hljs-params">(Object existingBean, String beanName)</span><br>        <span class="hljs-keyword">throws</span> BeansException &#123;<br><br>    <span class="hljs-type">Object</span> <span class="hljs-variable">result</span> <span class="hljs-operator">=</span> existingBean;<br>    <span class="hljs-comment">// 遍历所有的BeanPostProcessor</span><br>    <span class="hljs-keyword">for</span> (BeanPostProcessor processor : getBeanPostProcessors()) &#123;<br>        <span class="hljs-comment">// 调用后置处理方法</span><br>        <span class="hljs-type">Object</span> <span class="hljs-variable">current</span> <span class="hljs-operator">=</span> processor.postProcessAfterInitialization(result, beanName);<br>        <span class="hljs-keyword">if</span> (current == <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-keyword">return</span> result;<br>        &#125;<br>        result = current;<br>    &#125;<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="6-1-AOP代理创建的真正时机"><a href="#6-1-AOP代理创建的真正时机" class="headerlink" title="6.1 AOP代理创建的真正时机"></a>6.1 AOP代理创建的真正时机</h3><p>这里要揭示一个至关重要的结论：<strong>AOP代理对象正是在这个阶段创建的</strong>。</p>
+<p>让我们通过一个简单的AOP配置来验证。假设我们有一个<code>UserService</code>类，需要对其方法进行切面增强。通过debug跟踪可以发现，在<code>initializeBean</code>方法调用前，<code>exposedObject</code>是原始的<code>UserService</code>对象；经过<code>applyBeanPostProcessorsAfterInitialization</code>处理后，<code>exposedObject</code>变成了一个代理对象（可能是JDK动态代理或CGLIB代理）。</p>
+<p>这个代理是谁创建的？答案是**<code>AbstractAutoProxyCreator</code>**（通常的具体实现是<code>AnnotationAwareAspectJAutoProxyCreator</code>），它实现了<code>BeanPostProcessor</code>接口。在<code>postProcessAfterInitialization</code>方法中，它会检查当前Bean是否匹配任何切面（Advisor），如果匹配，就创建代理对象并返回。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// AbstractAutoProxyCreator.java（简化版）</span><br><span class="hljs-keyword">public</span> Object <span class="hljs-title function_">postProcessAfterInitialization</span><span class="hljs-params">(<span class="hljs-meta">@Nullable</span> Object bean, String beanName)</span> &#123;<br>    <span class="hljs-keyword">if</span> (bean != <span class="hljs-literal">null</span>) &#123;<br>        <span class="hljs-type">Object</span> <span class="hljs-variable">cacheKey</span> <span class="hljs-operator">=</span> getCacheKey(bean.getClass(), beanName);<br>        <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">this</span>.earlyProxyReferences.contains(cacheKey)) &#123;<br>            <span class="hljs-comment">// 如果需要被代理，这里会返回代理对象</span><br>            <span class="hljs-keyword">return</span> wrapIfNecessary(bean, beanName, cacheKey);<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> bean;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="6-2-为什么AOP代理在初始化后创建？"><a href="#6-2-为什么AOP代理在初始化后创建？" class="headerlink" title="6.2 为什么AOP代理在初始化后创建？"></a>6.2 为什么AOP代理在初始化后创建？</h3><p>这个问题涉及Spring解决循环依赖的设计。如果AOP代理在实例化后立即创建，那么在处理循环依赖时，三级缓存中存储的将是代理对象的早期引用，这会导致一些问题。Spring的巧妙之处在于：<strong>提前暴露原始Bean的早期引用，而在初始化完成后才创建代理</strong>。这样既保证了循环依赖的顺利解决，又确保了最终暴露给外部的是增强后的代理对象。</p>
+<h2 id="八、完整的初始化流程图解"><a href="#八、完整的初始化流程图解" class="headerlink" title="八、完整的初始化流程图解"></a>八、完整的初始化流程图解</h2><p>我将上述流程整合为以下时序图：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">doCreateBean<br>    ↓<br>createBeanInstance  (实例化)<br>    ↓<br>populateBean        (属性填充)<br>    ↓<br>initializeBean ──────────────────────────────────────────────────┐<br>    ↓                                                             │<br>invokeAwareMethods                                                │<br>    ├── BeanNameAware.setBeanName()                               │<br>    ├── BeanClassLoaderAware.setBeanClassLoader()                 │<br>    └── BeanFactoryAware.setBeanFactory()                         │<br>    ↓                                                             │<br>applyBeanPostProcessorsBeforeInitialization                       │<br>    ├── ApplicationContextAwareProcessor (回调ApplicationContext等)│<br>    ├── InitDestroyAnnotationBeanPostProcessor (调用@PostConstruct)│<br>    └── 其他自定义BeanPostProcessor                                │<br>    ↓                                                             │<br>invokeInitMethods                                                  │<br>    ├── InitializingBean.afterPropertiesSet()                     │<br>    └── 自定义init-method (通过反射)                               │<br>    ↓                                                             │<br>applyBeanPostProcessorsAfterInitialization                        │<br>    ├── AbstractAutoProxyCreator (创建AOP代理)                    │<br>    └── 其他自定义BeanPostProcessor                                │<br>    ↓                                                             │<br>返回最终的Bean (可能是原始Bean或代理对象) ←────────────────────────┘<br>    ↓<br>注册DisposableBean (用于销毁阶段)<br></code></pre></td></tr></table></figure>
+
+
+
+<h2 id="九、扩展机制：BeanPostProcessor-的魔力"><a href="#九、扩展机制：BeanPostProcessor-的魔力" class="headerlink" title="九、扩展机制：BeanPostProcessor 的魔力"></a>九、扩展机制：BeanPostProcessor 的魔力</h2><p>通过上述分析，相信读者已经意识到<code>BeanPostProcessor</code>在整个初始化流程中的核心地位。它不仅是AOP的实现基础，也是Spring众多扩展功能的入口。</p>
+<h3 id="8-1-BeanPostProcessor-接口定义"><a href="#8-1-BeanPostProcessor-接口定义" class="headerlink" title="8.1 BeanPostProcessor 接口定义"></a>8.1 BeanPostProcessor 接口定义</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BeanPostProcessor</span> &#123;<br>    <span class="hljs-comment">// 初始化前调用</span><br>    <span class="hljs-meta">@Nullable</span><br>    <span class="hljs-keyword">default</span> Object <span class="hljs-title function_">postProcessBeforeInitialization</span><span class="hljs-params">(Object bean, String beanName)</span> <span class="hljs-keyword">throws</span> BeansException &#123;<br>        <span class="hljs-keyword">return</span> bean;<br>    &#125;<br><br>    <span class="hljs-comment">// 初始化后调用</span><br>    <span class="hljs-meta">@Nullable</span><br>    <span class="hljs-keyword">default</span> Object <span class="hljs-title function_">postProcessAfterInitialization</span><span class="hljs-params">(Object bean, String beanName)</span> <span class="hljs-keyword">throws</span> BeansException &#123;<br>        <span class="hljs-keyword">return</span> bean;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="8-2-实战：自定义BeanPostProcessor"><a href="#8-2-实战：自定义BeanPostProcessor" class="headerlink" title="8.2 实战：自定义BeanPostProcessor"></a>8.2 实战：自定义BeanPostProcessor</h3><p>通过实现<code>BeanPostProcessor</code>，开发者可以干预每个Bean的初始化过程。以下是一个简单的示例，用于记录Bean初始化的耗时</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">TimeCostBeanPostProcessor</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">BeanPostProcessor</span> &#123;<br>    <br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Long&gt; startTimeMap = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcurrentHashMap</span>&lt;&gt;();<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> Object <span class="hljs-title function_">postProcessBeforeInitialization</span><span class="hljs-params">(Object bean, String beanName)</span> <span class="hljs-keyword">throws</span> BeansException &#123;<br>        startTimeMap.put(beanName, System.currentTimeMillis());<br>        <span class="hljs-keyword">return</span> bean;<br>    &#125;<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> Object <span class="hljs-title function_">postProcessAfterInitialization</span><span class="hljs-params">(Object bean, String beanName)</span> <span class="hljs-keyword">throws</span> BeansException &#123;<br>        <span class="hljs-type">Long</span> <span class="hljs-variable">start</span> <span class="hljs-operator">=</span> startTimeMap.remove(beanName);<br>        <span class="hljs-keyword">if</span> (start != <span class="hljs-literal">null</span>) &#123;<br>            <span class="hljs-type">long</span> <span class="hljs-variable">cost</span> <span class="hljs-operator">=</span> System.currentTimeMillis() - start;<br>            System.out.println(<span class="hljs-string">&quot;Bean &quot;</span> + beanName + <span class="hljs-string">&quot; 初始化耗时: &quot;</span> + cost + <span class="hljs-string">&quot;ms&quot;</span>);<br>        &#125;<br>        <span class="hljs-keyword">return</span> bean;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这个处理器会在每个Bean初始化前记录开始时间，初始化后计算耗时并输出。这种无侵入的增强方式正是<code>BeanPostProcessor</code>的魅力所在。</p>
+<h2 id="十、总结与思考"><a href="#十、总结与思考" class="headerlink" title="十、总结与思考"></a>十、总结与思考</h2><p>至此，我们从源码层面完整剖析了Spring Bean属性填充后的初始化流程。让我们回顾一下关键要点：</p>
+<ol>
+<li><strong>初始化流程包含四步</strong>：Aware回调 → 前置处理 → 初始化方法 → 后置处理，每一环都有其独特的设计意图。</li>
+<li><strong>Aware接口分两组</strong>：<code>BeanNameAware</code>等基础Aware在<code>invokeAwareMethods</code>中处理；<code>ApplicationContextAware</code>等高级Aware通过<code>ApplicationContextAwareProcessor</code>处理。</li>
+<li><strong>初始化方法有三类</strong>：<code>@PostConstruct</code>（前置处理中）、<code>afterPropertiesSet</code>（InitializingBean接口）、<code>init-method</code>（自定义方法），它们的执行顺序严格固定。</li>
+<li><strong>AOP代理创建于后置处理</strong>：<code>AbstractAutoProxyCreator</code>在<code>postProcessAfterInitialization</code>中生成代理对象，这是AOP与IoC整合的关键。</li>
+<li><strong>BeanPostProcessor是扩展之王</strong>：几乎所有的Spring扩展功能（AOP、注解处理、属性解析等）都依赖于这个核心接口</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
+      
+        <a href="/tags/Spring%E6%BA%90%E7%A0%81/">#Spring源码</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>深入理解Spring初始化流程</div>
+      <div>https://johnjoyjzw.github.io/2025/01/01/深入理解Spring初始化流程/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>JiangZW</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>January 1, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/02/08/MySQL%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E5%92%8C%E7%B4%A2%E5%BC%95%E7%9A%84%E5%AD%98%E5%82%A8%E5%A5%A5%E7%A7%98-%E4%BB%8E%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E5%88%B0%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E5%85%A8%E8%A7%A3%E6%9E%90/" title="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/12/22/%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E7%90%86%E8%A7%A3Spring%20Bean%E7%9A%84%E5%B1%9E%E6%80%A7%E5%A1%AB%E5%85%85/" title="从源码角度理解Spring Bean 的属性填充">
+                        <span class="hidden-mobile">从源码角度理解Spring Bean 的属性填充</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

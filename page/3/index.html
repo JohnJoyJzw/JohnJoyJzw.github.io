@@ -223,6 +223,86 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/" target="_self">
+          Redis实现-整数集合
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/" target="_self">
+        <div>
+          Redis实现-整数集合一、整数集合在Redis中的使用整数集合(intset)是集合键的底层实现之一。当一个集合只包含整数值元素，并且这个集合的元素数量不多时，Redis就会使用整数集合作为集合键的底层实现。 12345678127.0.0.1:6379&gt; sadd members 1 3 5 7 9(integer) 5127.0.0.1:6379&gt; smembers memb
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-09-10 14:12" pubdate>
+              2021-09-10
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Redis/">#Redis</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E8%B7%B3%E8%B7%83%E8%A1%A8/" target="_self">
+          Redis实现-跳跃表
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E8%B7%B3%E8%B7%83%E8%A1%A8/" target="_self">
+        <div>
+          Redis实现-跳跃表一、什么是跳跃表跳跃表(skiplist)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点的指针，从而达到快速访问节点的目的。 跳跃表支持平均O(logN)、最坏O(N)复杂度。 在大部分情况下，跳跃表的效率可以和平衡树相媲美，并且因为跳跃表的实现比平衡树要更简单。  123451. 一个跳跃表应该有若干个层（Level）链表组成2. 跳跃表中最底层的链表包含所
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-09-10 14:12" pubdate>
+              2021-09-10
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Redis/">#Redis</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2021/09/09/Redis%E5%AE%9E%E7%8E%B0-%E5%AD%97%E5%85%B8/" target="_self">
           Redis实现-字典
         </a>
@@ -543,95 +623,11 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/06/15/ReentrantLock/" target="_self">
-          ReentrantLock的使用
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/06/15/ReentrantLock/" target="_self">
-        <div>
-          ReentrantLock相对于synchronized，它具备的特点是：  可中断 可以设置超时时间 可以设置为公平锁 支持多个条件变量  与synchronized一样，都支持可重入。 基本语法： 12345678//获取锁reentrantLock.lock();try&#123;	//临界区&#125;finally&#123;	//释放锁	reentrantLock.unlock()
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-06-15 15:38" pubdate>
-              2021-06-15
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
-            
-              <a href="/tags/Java/">#Java</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/05/01/Docker/" target="_self">
-          Docker
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/05/01/Docker/" target="_self">
-        <div>
-          Dockerdocker中文网：https://vuepress.mirror.docker-practice.com/ 1、 什么是Docker什么是Docker 官方介绍： We have a complete container solution for you no matter who you are and where you are on your containerizatio
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-05-01 15:38" pubdate>
-              2021-05-01
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E5%B7%A5%E5%85%B7/">#工具</a>
-            
-              <a href="/tags/%E5%AE%B9%E5%99%A8/">#容器</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
 
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <a class="extend prev" rel="prev" href="/page/2/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/#board">4</a><a class="page-number" href="/page/5/#board">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/#board">7</a><a class="extend next" rel="next" href="/page/4/#board"><i class="iconfont icon-arrowright"></i></a>
+      <a class="extend prev" rel="prev" href="/page/2/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/#board">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/#board">4</a><a class="page-number" href="/page/5/#board">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/#board">8</a><a class="extend next" rel="next" href="/page/4/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 
