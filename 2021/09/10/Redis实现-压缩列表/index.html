@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="en" data-default-color-scheme=auto>
+<html lang="zh-CN" data-default-color-scheme=auto>
 
 
 
@@ -22,7 +22,7 @@
 <meta property="og:url" content="https://johnjoyjzw.github.io/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E5%8E%8B%E7%BC%A9%E5%88%97%E8%A1%A8/index.html">
 <meta property="og:site_name" content="JohnJoy blog">
 <meta property="og:description" content="Redis实现-压缩列表一、压缩列表在Redis中的使用压缩列表(ziplist)是列表键和哈希键的底层实现之一。压缩列表是Redis为了节约内存而开发的。 当一个列表项，并且每个列表项要么就是小整数值，要么就是比较短的字符串，那么Redis就会使用压缩列表来做列表键的底层实现。 12127.0.0.1:6379&gt; rpush lst 1 3 5 10086 &quot;hello&amp;qu">
-<meta property="og:locale" content="en_US">
+<meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210910172656.png">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210910175214.png">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/20210910180818.png">
@@ -127,7 +127,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/">
                 <i class="iconfont icon-home-fill"></i>
-                Home
+                首页
               </a>
             </li>
           
@@ -139,7 +139,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/archives/">
                 <i class="iconfont icon-archive-fill"></i>
-                Archives
+                归档
               </a>
             </li>
           
@@ -151,7 +151,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/categories/">
                 <i class="iconfont icon-category-fill"></i>
-                Categories
+                分类
               </a>
             </li>
           
@@ -163,7 +163,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/tags/">
                 <i class="iconfont icon-tags-fill"></i>
-                Tags
+                标签
               </a>
             </li>
           
@@ -175,7 +175,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
-                About
+                关于
               </a>
             </li>
           
@@ -220,7 +220,7 @@
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
         <time datetime="2021-09-10 19:55" pubdate>
-          September 10, 2021 pm
+          2021年9月10日 晚上
         </time>
       </span>
     
@@ -231,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          3.5k words
+          3.5k 字
         
       </span>
     
@@ -242,7 +242,7 @@
         
         
         
-          29 mins
+          29 分钟
         
       </span>
     
@@ -553,26 +553,26 @@
     <div class="license-meta">
       
         <div class="license-meta-item">
-          <div>Author</div>
+          <div>作者</div>
           <div>JiangZW</div>
         </div>
       
       
         <div class="license-meta-item license-meta-date">
-          <div>Posted on</div>
-          <div>September 10, 2021</div>
+          <div>发布于</div>
+          <div>2021年9月10日</div>
         </div>
       
       
       
         <div class="license-meta-item">
-          <div>Licensed under</div>
+          <div>许可协议</div>
           <div>
             
               
               
                 <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
-                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
                     <i class="iconfont icon-by"></i>
                   </span>
                 </a>
@@ -595,7 +595,7 @@
                       <a href="/2021/10/14/MySQL-%E6%97%A5%E5%BF%97/" title="MySQL 日志">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">MySQL 日志</span>
-                        <span class="visible-mobile">Previous</span>
+                        <span class="visible-mobile">上一篇</span>
                       </a>
                     
                   </article>
@@ -604,7 +604,7 @@
                     
                       <a href="/2021/09/10/Redis%E5%AE%9E%E7%8E%B0-%E6%95%B4%E6%95%B0%E9%9B%86%E5%90%88/" title="Redis实现-整数集合">
                         <span class="hidden-mobile">Redis实现-整数集合</span>
-                        <span class="visible-mobile">Next</span>
+                        <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
                     
@@ -623,7 +623,7 @@
       
   <aside class="sidebar" style="margin-left: -1rem">
     <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
@@ -678,7 +678,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header text-center">
-        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
         <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -686,7 +686,7 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
@@ -865,7 +865,7 @@
   
 
   <noscript>
-    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
   </noscript>
 </body>
 </html>
