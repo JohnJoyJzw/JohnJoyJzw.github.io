@@ -1,0 +1,917 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="MySQL InnoDB事务实现原理深度剖析一、引言​	在关系型数据库领域，事务机制因其原子性、一致性等特性深受开发者青睐。InnoDB作为MySQL的默认存储引擎，其事务实现兼顾了高性能与数据安全。本文将深入剖析InnoDB事务的实现细节，从源码角度解读其工作原理 二、事务基础概念2.1 ACID特性InnoDB严格遵循事务的ACID特性： 原子性（Atomicity）：事务作为一个整体被执">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL InnoDB事务实现原理深度剖析">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/05/12/MySQL%20InnoDB%E4%BA%8B%E5%8A%A1%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="MySQL InnoDB事务实现原理深度剖析一、引言​	在关系型数据库领域，事务机制因其原子性、一致性等特性深受开发者青睐。InnoDB作为MySQL的默认存储引擎，其事务实现兼顾了高性能与数据安全。本文将深入剖析InnoDB事务的实现细节，从源码角度解读其工作原理 二、事务基础概念2.1 ACID特性InnoDB严格遵循事务的ACID特性： 原子性（Atomicity）：事务作为一个整体被执">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181144955.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181055683.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181056432.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181057599.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181503064.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181515606.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181550837.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181722876.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181730789.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181733775.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181739575.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181749459.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181753127.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602182325124.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602182336104.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602182339504.png">
+<meta property="article:published_time" content="2025-05-12T07:38:36.000Z">
+<meta property="article:modified_time" content="2026-02-19T03:03:21.766Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602181144955.png">
+  
+  
+  
+  <title>MySQL InnoDB事务实现原理深度剖析 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/code-wallpaper-22.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MySQL InnoDB事务实现原理深度剖析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-05-12 15:38" pubdate>
+          May 12, 2025 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          10k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          87 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MySQL InnoDB事务实现原理深度剖析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="MySQL-InnoDB事务实现原理深度剖析"><a href="#MySQL-InnoDB事务实现原理深度剖析" class="headerlink" title="MySQL InnoDB事务实现原理深度剖析"></a>MySQL InnoDB事务实现原理深度剖析</h1><h2 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h2><p>​	在关系型数据库领域，事务机制因其原子性、一致性等特性深受开发者青睐。InnoDB作为MySQL的默认存储引擎，其事务实现兼顾了高性能与数据安全。本文将深入剖析InnoDB事务的实现细节，从源码角度解读其工作原理</p>
+<h2 id="二、事务基础概念"><a href="#二、事务基础概念" class="headerlink" title="二、事务基础概念"></a>二、事务基础概念</h2><h3 id="2-1-ACID特性"><a href="#2-1-ACID特性" class="headerlink" title="2.1 ACID特性"></a>2.1 ACID特性</h3><p>InnoDB严格遵循事务的ACID特性：</p>
+<p><strong>原子性（Atomicity）</strong>：事务作为一个整体被执行，对数据的修改要么全部执行，要么全部回滚。InnoDB通过undo log来保证原子性，在操作任何数据之前，首先将数据备份到undo log中，如果执行ROLLBACK语句，系统可以利用undo log将数据恢复到事务开始前的状态。</p>
+<p><strong>一致性（Consistency）</strong>：事务应确保数据库从一个一致状态转变到另一个一致状态。以转账为例，A账户和B账户在转账前后资金总额保持不变。InnoDB通过crash recovery和double write buffer机制保证数据的一致性。</p>
+<p><strong>隔离性（Isolation）</strong>：多个并发事务相互隔离，互不影响。InnoDB通过锁机制和MVCC（多版本并发控制）实现隔离性。</p>
+<p><strong>持久性（Durability）</strong>：事务一旦提交，对数据库的修改应永久保存。InnoDB通过redo log实现持久性，在事务提交前将redo log持久化到磁盘，即使系统崩溃也能根据redo log恢复数据。</p>
+<h3 id="2-2-事务实现原理"><a href="#2-2-事务实现原理" class="headerlink" title="2.2 事务实现原理"></a>2.2 事务实现原理</h3><p>在InnoDB中，事务ACID特性的实现原理是：</p>
+<ul>
+<li><p>原子性、一致性、持久性是根据<code>redo log和undo log</code>实现的</p>
+</li>
+<li><p>隔离性是根据<code>锁和MVCC</code>来实现的</p>
+</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181144955.png" srcset="/img/loading.gif" lazyload alt="事务原理"></p>
+<p>后面我们会详细介绍<code>redo log和undo log、mvcc</code>的原理，怎么保证事务的这些特点。</p>
+<h2 id="三、事务并发问题与隔离级别"><a href="#三、事务并发问题与隔离级别" class="headerlink" title="三、事务并发问题与隔离级别"></a>三、事务并发问题与隔离级别</h2><p>在多个事务并发执行时，若不加以控制，会出现数据不一致的问题。SQL标准定义了三种典型并发问题，并提出了四种隔离级别来权衡性能与一致性。</p>
+<h3 id="3-1-并发事务带来的问题"><a href="#3-1-并发事务带来的问题" class="headerlink" title="3.1 并发事务带来的问题"></a>3.1 并发事务带来的问题</h3><p><strong>脏读（Dirty Read）</strong><br>一个事务读取了另一个未提交事务修改的数据。如果那个事务最终回滚，则读取的数据是无效的。</p>
+<p>例如下图中，事务A将余额修改成200，但尚未提交；事务B读到200并基于此做业务处理；随后事务A回滚，余额恢复为1000，但事务B已使用了错误的数据。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181055683.png" srcset="/img/loading.gif" lazyload alt="脏独"></p>
+<p><strong>不可重复读（Non-Repeatable Read）</strong><br>一个事务内两次读取同一行数据，得到不同的结果。这是因为在两次读取之间，另一个事务提交了对该行的修改。</p>
+<p>例如，事务A第一次读取余额为100；事务B修改余额为200并提交；事务A再次读取得到200，导致前后不一致。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181056432.png" srcset="/img/loading.gif" lazyload alt="不可重复读"></p>
+<p><strong>幻读（Phantom Read）</strong><br>一个事务内两次执行相同的查询，但第二次返回了第一次没有出现的行（或少了行）。这是由于其他事务在区间内插入了新数据或删除了数据。</p>
+<p>例如，事务A查询所有余额大于100的客户，得到3条记录；事务B插入一个新客户且余额为150并提交；事务A再次查询得到4条记录，就像出现了“幻影”行。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181057599.png" srcset="/img/loading.gif" lazyload alt="幻读"></p>
+<h3 id="3-2-SQL标准定义的隔离级别"><a href="#3-2-SQL标准定义的隔离级别" class="headerlink" title="3.2 SQL标准定义的隔离级别"></a>3.2 SQL标准定义的隔离级别</h3><p>为了解决上述问题，SQL:1992标准定义了四个隔离级别，级别越高，一致性越强，但并发性能通常越低。</p>
+<ul>
+<li><strong>READ UNCOMMITTED（读未提交）</strong><br>允许脏读，即可能读到未提交的数据。实现最简单，通常不加锁或加极弱的锁。</li>
+<li><strong>READ COMMITTED（读已提交）</strong><br>禁止脏读，但可能发生不可重复读和幻读。大多数数据库的默认级别（Oracle、SQL Server等），但MySQL InnoDB的默认级别是可重复读。</li>
+<li><strong>REPEATABLE READ（可重复读）</strong><br>禁止脏读和不可重复读，但幻读仍可能发生。InnoDB通过多版本并发控制（MVCC）和间隙锁（Next-Key Lock）在可重复读级别下实际上解决了幻读问题。</li>
+<li><strong>SERIALIZABLE（可串行化）</strong><br>最高隔离级别，强制事务串行执行，避免所有并发问题，但性能最低。通常通过加锁（如表锁或行锁）实现，也可能使用MVCC加锁读。</li>
+</ul>
+<h2 id="四、事务原理-redolog"><a href="#四、事务原理-redolog" class="headerlink" title="四、事务原理-redolog"></a>四、事务原理-redolog</h2><p><strong>Redo Log</strong>被称为重做日志。记录了事务提交时数据也的数据修改，是用来实现事务的<strong>持久性</strong>。</p>
+<p>该日志文件有两部分组件：重做日志缓存（redo log buffer）以及重做日志文件（redo log file），前者是在内存中，后者是在磁盘中。</p>
+<p>当事务提交之后，会把所有修改信息都存到该日志文件中，用户在刷新脏页到磁盘，<strong>发生错误时，进行数据恢复使用</strong>。 </p>
+<p>我们抛出一个问题，来说明为啥需要redolog日志。</p>
+<h3 id="4-1-问题"><a href="#4-1-问题" class="headerlink" title="4.1 问题"></a>4.1 问题</h3><p>下面客户端对MySQL内的数据进行更新，其执行流程如下：</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> 当我们执行update语句时，首先会操作缓存区，查询是否有对应的数据。<br><span class="hljs-bullet">2.</span> 如果没有，会通过后台线程，将数据从磁盘中取出，然后缓存到缓存区中。<br><span class="hljs-bullet">3.</span> 执行update语句，执行缓存区的数据。此时缓存区的数据发生了变化，但是磁盘中的数据没有变化，此刻的数据页我们称只为<span class="hljs-strong">**脏页**</span><br><span class="hljs-bullet">4.</span> 后台线程需要将脏页刷新到磁盘中，这样缓存区的数据和磁盘的数据就保持一致了。<br></code></pre></td></tr></table></figure>
+
+<p>但是如果后台线程将脏页刷新到磁盘的过程，出现了问题。 此时事务已经提交，那么就会导致磁盘和缓存区的数据不一致了，那么持久性就无法保证了。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181503064.png" srcset="/img/loading.gif" lazyload alt="数据更新-无redolog"></p>
+<blockquote>
+<p>什么情况下会触发脏页刷新：</p>
+<ul>
+<li>内存写满了，这个时候就会引发 flush 操作，对应到 InnoDB 就是 redo log 写满了；</li>
+<li>系统的内存不足了，当需要新的内存页的时候，就会淘汰一些内存页，如果淘汰的是脏页这个时候就会触发 flush 操作；</li>
+<li>系统空闲的时候，MySQL 会同步内存中的数据到磁盘也会触发 flush 操作；</li>
+<li>MySQL 服务关闭的时候也会刷脏页，触发 flush 操作。</li>
+</ul>
+</blockquote>
+<h3 id="4-2-redolog如何解决"><a href="#4-2-redolog如何解决" class="headerlink" title="4.2 redolog如何解决"></a>4.2 redolog如何解决</h3><p>那么redolog是如何解决的这个问题呢？</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs markdown"><span class="hljs-bullet">1.</span> 在缓存池中执行的增删改之后，会将增删改之后的数据记录在<span class="hljs-code">`redolog buffer`</span>中，这里面会记录下数据页的变化。<br><span class="hljs-bullet">2.</span> 在事务提交时，会将<span class="hljs-code">`redolog buffer`</span>中数据页的变化刷新到磁盘中的<span class="hljs-code">`redolog file`</span>文件中。<br><span class="hljs-bullet">3.</span> 在进行脏页刷新时，如果出现异常，可以根据redo log进行数据恢复。<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181515606.png" srcset="/img/loading.gif" lazyload alt="数据更新-有redolog"></p>
+<blockquote>
+<p>注意：为啥我们不在事务提交时,进行脏页刷新到磁盘空间呢?还需要后台线程处理</p>
+<ul>
+<li>性能瓶颈：随机写 vs 顺序写<ul>
+<li><strong>脏页刷新是随机写</strong>‌：缓冲池（Buffer Pool）中的数据页是随机分布的。将脏页刷新到磁盘，意味着需要将分散在内存各处的数据，写入磁盘上不连续的物理位置。磁盘的随机写入性能极低，会成为系统吞吐量的瓶颈</li>
+<li><strong>Redo Log 是顺序写</strong>‌：Redo Log 记录的是数据页的物理修改日志，它以追加的方式顺序写入磁盘上的日志文件。顺序写入的效率远高于随机写入，是磁盘 I&#x2F;O 的最优模式。</li>
+</ul>
+</li>
+</ul>
+<p>如果在事务提交时就同步刷新所有脏页，数据库的性能将严重依赖于磁盘的随机写能力，这在高并发场景下是不可接受的。</p>
+</blockquote>
+<h2 id="五、事务原理-undolog"><a href="#五、事务原理-undolog" class="headerlink" title="五、事务原理-undolog"></a>五、事务原理-undolog</h2><h3 id="5-1-什么是Undo-Log？"><a href="#5-1-什么是Undo-Log？" class="headerlink" title="5.1 什么是Undo Log？"></a>5.1 什么是Undo Log？</h3><p><code>Undo:</code>意为撤销或取消，以撤销操作为目的，返回某个状态的操作。</p>
+<p><code>Undo Log:</code>数据库事务开始之前，会将要修改的记录放到Undo日志里，当事务回滚时或者数据库崩溃时，可以利用UndoLog撤销未提交事务对数据库产生的影响。</p>
+<p><strong>Undo Log是事务原子性的保证</strong>。在事务中更新数据的前置操作其实是要先写入一个Undo Log</p>
+<h3 id="5-2-undo-log的作用"><a href="#5-2-undo-log的作用" class="headerlink" title="5.2 undo log的作用"></a>5.2 undo log的作用</h3><p>在MySQL中，undo log日志的作用主要有两个：</p>
+<h4 id="5-2-1-提供回滚操作【实现事务的原子性】"><a href="#5-2-1-提供回滚操作【实现事务的原子性】" class="headerlink" title="5.2.1 提供回滚操作【实现事务的原子性】"></a>5.2.1 提供回滚操作【实现事务的原子性】</h4><p>我们在进行数据更新操作的时候，不仅会记录redo log，还会记录undo log，如果因为某些原因导致事务回滚，那么这个时候MySQL就要执行回滚（rollback）操作，利用undo log将数据恢复到事务开始之前的状态。</p>
+<p>如我们执行下面一条删除语句：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-keyword">delete</span> <span class="hljs-keyword">from</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">where</span> id <span class="hljs-operator">=</span> <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+
+<p>那么此时undo log会记录一条对应的insert 语句【反向操作的语句】，以保证在事务回滚时，将数据还原回去。</p>
+<p>再比如我们执行一条update语句：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">update</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">set</span> <span class="hljs-type">name</span> = &quot;李四&quot; <span class="hljs-keyword">where</span> id = <span class="hljs-number">1</span>;   <span class="hljs-comment">---修改之前name=张三</span><br></code></pre></td></tr></table></figure>
+
+<p>此时undo log会记录一条相反的update语句，如下：</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">update</span> <span class="hljs-keyword">user</span> <span class="hljs-keyword">set</span> <span class="hljs-type">name</span> = &quot;张三&quot; <span class="hljs-keyword">where</span> id = <span class="hljs-number">1</span>;<br></code></pre></td></tr></table></figure>
+
+<p>如果这个修改出现异常，可以使用undo log日志来实现回滚操作，以保证事务的一致性。</p>
+<h4 id="5-2-2-提供多版本控制【实现MVCC】"><a href="#5-2-2-提供多版本控制【实现MVCC】" class="headerlink" title="5.2.2 提供多版本控制【实现MVCC】"></a>5.2.2 提供多版本控制【实现MVCC】</h4><p>​	MVCC，即多版本控制。在MySQL数据库InnoDB存储引擎中，用undo Log来实现多版本并发控制(MVCC)。当读取的某一行被其他事务锁定时，它可以从undo log中分析出该行记录以前的数据版本是怎样的，从而让用户能够读取到当前事务操作之前的数据【快照读】。</p>
+<blockquote>
+<p>解释一下什么是快照读和当前读：</p>
+<p>快照读：SQL读取的数据是快照版本【可见版本】，也就是历史版本，不用加锁，普通的SELECT就是快照读。</p>
+<p>当前读：SQL读取的数据是最新版本。通过锁机制来保证读取的数据无法通过其他事务进行修改UPDATE、DELETE、INSERT、SELECT … LOCK IN SHARE MODE、SELECT … FOR UPDATE都是当前读。</p>
+</blockquote>
+<h3 id="5-3-undo-log存储"><a href="#5-3-undo-log存储" class="headerlink" title="5.3 undo log存储"></a>5.3 undo log存储</h3><p>​	Undo log的存储由InnoDB存储引擎实现，数据保存在InnoDB的数据文件中，innodb存储引擎对undo的管理采用段（segment）的方式，具体来说是一种命名为回滚段（rollback segment）的数据结构。</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs livecodeserver">回滚段（rollback <span class="hljs-keyword">segment</span>）中有<span class="hljs-number">1024</span>个undo <span class="hljs-built_in">log</span> <span class="hljs-keyword">segment</span>，以前旧版本只支持<span class="hljs-number">1</span>个rollback <span class="hljs-keyword">segment</span>，也即只能存储<span class="hljs-number">1024</span>个undo <span class="hljs-built_in">log</span> <span class="hljs-keyword">segment</span>，<br>MySQL5<span class="hljs-number">.5</span>版本之后，能支持<span class="hljs-number">128</span>个rollback <span class="hljs-keyword">segment</span>，也即<span class="hljs-number">128</span>*<span class="hljs-number">1024</span>个undo <span class="hljs-built_in">log</span> <span class="hljs-keyword">segment</span><br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-4-Undo-log的工作原理"><a href="#5-4-Undo-log的工作原理" class="headerlink" title="5.4 Undo log的工作原理"></a>5.4 Undo log的工作原理</h3><p>​	在更新数据之前，MySQL会提前生成undo log日志，当事务提交的时候，并不会立即删除undo log，因为后面可能需要进行回滚操作，要执行回滚（rollback）操作时，从缓存中读取数据。undo log日志的删除是通过通过后台purge线程进行回收处理的。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181550837.png" srcset="/img/loading.gif" lazyload alt="undolog工作原理"></p>
+<p>如上图：</p>
+<p>1、事务A执行update操作，此时事务还没提交，会将数据进行备份到对应的undo buffer，然后由undo buffer持久化到磁盘中的undo log文件中，此时undo log保存了未提交之前的操作日志，接着将操作的数据，也就是Teacher表的数据持久保存到InnoDB的数据文件IBD。<br>2、此时事务B进行查询操作，直接从undo buffer缓存中进行读取，这时事务A还没提交事务，如果要回滚（rollback）事务，是不读磁盘的，先直接从undo buffer缓存读取。</p>
+<h2 id="四、事务原理-多版本并发控制（MVCC）"><a href="#四、事务原理-多版本并发控制（MVCC）" class="headerlink" title="四、事务原理-多版本并发控制（MVCC）"></a>四、事务原理-多版本并发控制（MVCC）</h2><h3 id="4-1-MVCC的基本介绍"><a href="#4-1-MVCC的基本介绍" class="headerlink" title="4.1 MVCC的基本介绍"></a>4.1 MVCC的基本介绍</h3><p>​	MVCC是一种提高并发度的技术。在传统数据库系统中，只有<strong>读读操作可以并行</strong>；引入多版本后，只有<strong>写写操作相互阻塞</strong>，读写、写读都可以并行，大幅提升了并发性能。</p>
+<p>​	MVCC可以维护一个数据的多个版本，使得读写操作没有冲突。快照读为MySQL实现MVCC提供了一个非阻塞读功能。</p>
+<p>​	MVCC的实现还需要依赖于数据库记录中的三个隐式字段、undolog日志、readView。</p>
+<blockquote>
+<p>为什么需要MVCC呢？</p>
+<p>​	数据库通常使用锁来实现隔离性。最原生的锁，锁住一个资源后会禁止其他任何线程访问同一个资源。但是很多应用的一个特点都是读多写少的场景，很多数据的读取次数远大于修改的次数，而读取数据间互相排斥显得不是很必要。</p>
+<p>​	所以就使用了一种读写锁的方法，读锁和读锁之间不互斥，而写锁和写锁、读锁都互斥。这样就很大提升了系统的并发能力。</p>
+<p>​	之后人们发现并发度还是不够，又提出了能不能让读写之间也不冲突的方法，就是读取数据时通过一种类似快照的方式将数据保存下来，这样读锁就和写锁不冲突了，不同的事务session会看到自己特定版本的数据。当然快照是一种概念模型，不同的数据库可能用不同的方式来实现这种功能。</p>
+</blockquote>
+<h3 id="4-2-快照读和当前读"><a href="#4-2-快照读和当前读" class="headerlink" title="4.2 快照读和当前读"></a>4.2 快照读和当前读</h3><h4 id="4-2-1-快照读"><a href="#4-2-1-快照读" class="headerlink" title="4.2.1 快照读"></a>4.2.1 快照读</h4><p>简单的select（不加锁）就是快照读，快照读，读取的是记录数据的可见版本，有可能是历史数据，不加锁，是非阻塞读。</p>
+<p>​	Read Committed：每次select，都生成一个快照读。<br>​	Repeatable Read：开启事务后第一个select语句才是快照读的地方。<br>​	Serializable：快照读会退化为当前读</p>
+<h4 id="4-2-2-当前读"><a href="#4-2-2-当前读" class="headerlink" title="4.2.2 当前读"></a>4.2.2 当前读</h4><p>​	读取的是记录的最新版本，读取时还要保证其他并发事务不能修改当前记录，会对读取的记录进行加锁。对于我们日常的操作，如：select … lock in share mode(共享锁)，select …for update、update、insert、delete(排他锁)都是一种当前读。</p>
+<p>​	假设要update一条记录，但是另一个事务已经delete这条数据并且commit了，如果不加锁就会产生冲突。所以update的时候肯定要是当前读，得到最新的信息并且锁定相应的记录。</p>
+<h3 id="4-3-MVCC的实现原理"><a href="#4-3-MVCC的实现原理" class="headerlink" title="4.3 MVCC的实现原理"></a>4.3 MVCC的实现原理</h3><p>上节我们说过，MVCC的实现原理依赖三点： 三个隐式字段、undolog日志、readView，我们依次来介绍</p>
+<h4 id="4-3-1-隐式字段"><a href="#4-3-1-隐式字段" class="headerlink" title="4.3.1 隐式字段"></a>4.3.1 隐式字段</h4><p>我们user_stu这张表中，有三个字段(id字段非主键)，而右边则是三个隐藏字段。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181722876.png" srcset="/img/loading.gif" lazyload alt="隐式字段"></p>
+<p>三个隐式字段的含义：</p>
+<table>
+<thead>
+<tr>
+<th>隐藏字段</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DB_TRX_ID</td>
+<td>最近修改事务ID，记录插入这条记录或最后一次修改该记录的事务ID</td>
+</tr>
+<tr>
+<td>DB_ROLL_PTR</td>
+<td>回滚指针，指向这条记录的上一个版本，用于配合undo log，指向上一个版本。</td>
+</tr>
+<tr>
+<td>DB_ROW_ID</td>
+<td>隐藏主键，如果表结构没有指定主键，将会生成该隐藏字段。</td>
+</tr>
+</tbody></table>
+<p>这几个字段的具体使用，我们在下一节来讲解。</p>
+<h4 id="4-3-2-undo-log版本链"><a href="#4-3-2-undo-log版本链" class="headerlink" title="4.3.2 undo log版本链"></a>4.3.2 undo log版本链</h4><p>undo log是回滚日志，在insert、update、delete的时候产生的便于数据回滚的日志。</p>
+<p>当insert的时候，产生的undo log日志旨在回滚时需要，在事务提交后，可被立即删除。</p>
+<p>而update、delete的时候，产生的undo log日志不仅在回滚时需要，不会立即删除。</p>
+<p>我们以一个例子来解释下版本链的实现：</p>
+<p>以下有4个事务，他们先后开始执行执行SQL，同时对id为30的数据进行修改：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181730789.png" srcset="/img/loading.gif" lazyload alt="4个事务执行流程"></p>
+<p>此时最开始的记录是：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181733775.png" srcset="/img/loading.gif" lazyload alt="1. 开始数据记录"></p>
+<p>下面依次执行，我们看下每个时间点，记录的数据，以及undo log的记录。</p>
+<p><strong>第一次修改：事务2：修改id为30记录，age改为3</strong></p>
+<p>在事务2执行时，会在变更前首先写入一条undo log数据，这条undo log日志写入是变更之前的数据</p>
+<p>然后执行更新操作，在更新时，会将age更新3</p>
+<p>在更新的同时，还会更新DB_TRX_ID和DB_ROLL_PTR两个隐式字段。</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">`DB_TRX_ID`指向的最新修改的事务id，即为<span class="hljs-number">2</span>。<br>`DB_ROLL_PTR`指向的回滚指针，指向这条记录的上一个版本，在undolog中刚刚写入的就是<span class="hljs-number">0</span>x0001<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181739575.png" srcset="/img/loading.gif" lazyload alt="第一次修改"></p>
+<p><strong>第二次修改：事务3：修改id为30记录，name改为A3</strong></p>
+<p>在事务3执行时，会在变更前首先写入一条undo log数据，这条undo log日志写入是变更之前的数据</p>
+<p>然后执行更新操作，在更新时，会将name更新A3</p>
+<p>在更新的同时，还会更新DB_TRX_ID和DB_ROLL_PTR两个隐式字段。</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">`DB_TRX_ID`指向的最新修改的事务id，即为<span class="hljs-number">3</span>。<br>`DB_ROLL_PTR`指向的回滚指针，指向这条记录的上一个版本，在undolog中刚刚写入的就是<span class="hljs-number">0</span>x0002<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181749459.png" srcset="/img/loading.gif" lazyload alt="第二次修改"></p>
+<p><strong>第二次修改：事务4：修改id为30记录，age改为10</strong></p>
+<p>在事务4执行时，会在变更前首先写入一条undo log数据，这条undo log日志写入是变更之前的数据</p>
+<p>然后执行更新操作，在更新时，会将age更新10</p>
+<p>在更新的同时，还会更新DB_TRX_ID和DB_ROLL_PTR两个隐式字段。</p>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs autohotkey">`DB_TRX_ID`指向的最新修改的事务id，即为<span class="hljs-number">4</span>。<br>`DB_ROLL_PTR`指向的回滚指针，指向这条记录的上一个版本，在undolog中刚刚写入的就是<span class="hljs-number">0</span>x0003<br></code></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602181753127.png" srcset="/img/loading.gif" lazyload alt="第三次修改"></p>
+<p>这样就生成了unlog的版本链。会导致该记录的unlog生成一条记录版本链表，链表的头部的最新的旧纪录，链表的尾部就是最早的旧纪录。</p>
+<h4 id="4-3-3-readview"><a href="#4-3-3-readview" class="headerlink" title="4.3.3 readview"></a>4.3.3 readview</h4><p>readview(读视图)是<strong>快照读</strong>SQL执行时MVCC提取数据的依据，记录并维护系统当前的活跃的事务(未提交的)id。</p>
+<p>readview中包含了四个核心字段：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>含义</th>
+<th>作用</th>
+<th>判断规则</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>creator_trx_id</code>（创建者事务 ID）</td>
+<td>创建这个 Read View 的事务 ID（也就是当前事务）</td>
+<td><strong>自己改的数据，自己一定能看到</strong>，防止“看不到自己刚写的数据”</td>
+<td>如果 trx_id &#x3D;&#x3D; creator_trx_id → 可见</td>
+</tr>
+<tr>
+<td><code>m_ids</code>（活跃事务列表）</td>
+<td>在 Read View 创建时，系统中还没提交的事务 ID 集合</td>
+<td>这个集合中的事务还在跑，它们改的数据 <strong>不应该被看到</strong></td>
+<td>如果 trx_id ∈ m_ids → 不可见</td>
+</tr>
+<tr>
+<td><code>min_trx_id</code>（最小活跃事务 ID）</td>
+<td>m_ids 中最小的事务 ID</td>
+<td>比最早活跃事务还早，一定已经提交</td>
+<td>如果 trx_id &lt; min_trx_id → 可见</td>
+</tr>
+<tr>
+<td><code>max_trx_id</code>（下一个将分配的事务 ID）</td>
+<td>系统将要分配的下一个事务 ID（不是最大活跃事务）</td>
+<td>属于“未来事务”，Read View 创建时还不存在</td>
+<td>如果 trx_id &gt;&#x3D; max_trx_id → 不可见</td>
+</tr>
+</tbody></table>
+<p><strong>可见性规则：</strong>一致性视图通过一系列规则来决定哪些版本的数据对当前事务是可见的。这些规则通常基于事务的隔离级别（如读已提交、可重复读、串行化等）。</p>
+<ul>
+<li>读已提交：事务只能看到在它开始之前已经提交的版本。</li>
+<li>可重复读：事务只能看到在它开始之前已经提交的版本，并且在事务执行期间，其他事务对数据的修改不会影响当前事务的视图。</li>
+</ul>
+<p><strong>readview</strong>的核心作用就是在可重复读（RR）和读已提交（RC）隔离级别下，确保：</p>
+<ul>
+<li><strong>可重复读</strong>：事务内多次读取同一数据的结果一致。</li>
+<li><strong>读已提交</strong>：只能读取其他事务已提交的数据。</li>
+</ul>
+<p>我们在基于上面readview的规则，我们看下事务5中的readview中的字段，并且确定下它读取的是那一条数据？</p>
+<p><strong>在RC隔离级别的<code>readview</code>：</strong>在RC隔离级别下，每次查询都会生成一个readview。</p>
+<p>事务5第一次查询时，readview中对应字段是：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">m_ids</span> : (<span class="hljs-number">3</span>,<span class="hljs-number">4</span>,<span class="hljs-number">5</span>)<br><span class="hljs-attribute">min_trx_id</span>  : <span class="hljs-number">3</span><br><span class="hljs-attribute">max_trx_id</span>  : <span class="hljs-number">6</span><br><span class="hljs-attribute">creator_trx_id</span> : <span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
+
+<p>那么它对应读取的是undolog的拿一条数据呢？我们依次判断下：</p>
+<ul>
+<li>首先判断当前的记录，trx_id &#x3D; 4时，发现，第二条<code>trx_id &lt; min_rrx_id</code>不满足</li>
+<li>然后判断第二条，trx_id &#x3D; 3时，发现，第四条<code>min_rrx_id&lt;=trx_id &lt;=max_trx_id</code>不满足</li>
+<li>然后判断第三条，trx_id &#x3D; 2时，发现这四个条件都可以满足。</li>
+</ul>
+<p><strong>因此事务5中第一次查询，是读取的trx_id&#x3D;2数据</strong></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602182325124.png" srcset="/img/loading.gif" lazyload alt="rc隔离级别下readview-第一次读取"></p>
+<p>事务5第二次查询时，readview中对应字段是：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs apache"><span class="hljs-attribute">m_ids</span> : (<span class="hljs-number">4</span>,<span class="hljs-number">5</span>)<br><span class="hljs-attribute">min_trx_id</span>  : <span class="hljs-number">4</span><br><span class="hljs-attribute">max_trx_id</span>  : <span class="hljs-number">6</span><br><span class="hljs-attribute">creator_trx_id</span> : <span class="hljs-number">5</span><br></code></pre></td></tr></table></figure>
+
+<p>那么它对应读取的是undolog的拿一条数据呢？我们依次判断下：</p>
+<ul>
+<li>首先判断当前的记录，trx_id &#x3D; 4时，发现，第二条<code>trx_id &lt; min_rrx_id</code>不满足</li>
+<li>然后判断第二条，trx_id &#x3D; 3时，发现，第二条<code>trx_id &lt;=min_rrx_id</code>满足</li>
+</ul>
+<p><strong>因此事务5中第一次查询，是读取的trx_id&#x3D;3数据</strong></p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602182336104.png" srcset="/img/loading.gif" lazyload alt="rc隔离级别下readview-第二次读取"></p>
+<p><strong>在RR隔离级别的<code>readview</code>：</strong>在RR隔离级别下，仅在事务第一次执行快照读是生成<code>readview</code>，后续会复用这个<code>readview</code>。</p>
+<p>此时readview中的各个字段为：</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602182339504.png" srcset="/img/loading.gif" lazyload alt="RR隔离级别下的readview"></p>
+<h2 id="五、怎么解决幻读问题？"><a href="#五、怎么解决幻读问题？" class="headerlink" title="五、怎么解决幻读问题？"></a>五、怎么解决幻读问题？</h2><p>​	在InnoDB存储引擎的可重复读（RR）隔离级别下，MVCC与间隙锁（Next-Key Lock）的组合机制能够有效避免绝大多数幻读场景，<strong>但严格来说，并非在所有情况下都能“完全”解决，其效果取决于操作类型（快照读或当前读）和索引结构。</strong></p>
+<h3 id="5-1-MVCC-如何解决部分幻读（快照读）"><a href="#5-1-MVCC-如何解决部分幻读（快照读）" class="headerlink" title="5.1 MVCC 如何解决部分幻读（快照读）"></a>5.1 MVCC 如何解决部分幻读（快照读）</h3><p>MVCC（多版本并发控制）通过为事务创建一致性视图（Read View）来实现快照读，从而避免了由其他事务插入新记录导致的幻读。</p>
+<ul>
+<li><strong>机制</strong>‌：在RR隔离级别下，事务在第一次执行<code>SELECT</code>时生成一个Read View，此后所有普通的<code>SELECT</code>（快照读）都基于这个快照，看不到其他事务在此之后提交的新增记录。</li>
+<li>‌<strong>效果</strong>‌：对于纯粹的查询操作，MVCC能完美避免幻读。例如，事务A第一次查询<code>age &gt; 20</code>得到5条记录，即使事务B插入了一条<code>age=25</code>的记录并提交，事务A后续的快照读仍然只看到最初的5条记录。</li>
+</ul>
+<h3 id="5-2-间隙锁（Next-Key-Lock）如何解决当前读导致的幻读"><a href="#5-2-间隙锁（Next-Key-Lock）如何解决当前读导致的幻读" class="headerlink" title="5.2 间隙锁（Next-Key Lock）如何解决当前读导致的幻读"></a>5.2 间隙锁（Next-Key Lock）如何解决当前读导致的幻读</h3><p>当事务执行“当前读”操作时，MVCC的快照机制失效，必须依赖锁机制来防止幻读。</p>
+<ul>
+<li>‌<strong>当前读操作</strong>‌：包括<code>SELECT ... FOR UPDATE</code>、<code>SELECT ... LOCK IN SHARE MODE</code>、<code>UPDATE</code>、<code>DELETE</code>和<code>INSERT</code>。这些操作会读取数据的最新版本，并加锁。</li>
+<li>‌间隙锁与Next-Key Lock：InnoDB在RR级别下，对范围查询的当前读会自动使用Next-Key Lock（记录锁 + 间隙锁的组合），锁定索引记录及其前后的“间隙”，阻止其他事务在该范围内插入新记录。<ul>
+<li>例如，执行<code>SELECT * FROM users WHERE age &gt; 20 FOR UPDATE</code>，InnoDB会锁定所有<code>age &gt; 20</code>的现有记录，以及<code>age</code>值大于20的“间隙”（如(20, 25)、(25, 30)等），从而阻止事务B插入<code>age=22</code>的记录。</li>
+</ul>
+</li>
+<li>‌<strong>效果</strong>‌：通过Next-Key Lock，InnoDB在当前读场景下彻底防止了幻读，确保事务在修改数据时，其查询范围内的数据“一致性”不会被其他事务的插入破坏。</li>
+</ul>
+<h3 id="5-3-为什么说“并非完全解决”？"><a href="#5-3-为什么说“并非完全解决”？" class="headerlink" title="5.3 为什么说“并非完全解决”？"></a>5.3 为什么说“并非完全解决”？</h3><p>尽管InnoDB的机制非常完善，但在特定边界条件下，仍可能出现“幻读”现象，这更多是由于‌<strong>事务内部操作的混合</strong>‌导致的：</p>
+<ol>
+<li>‌<strong>快照读与当前读混合的场景</strong>‌：<ul>
+<li>事务A先执行快照读（<code>SELECT * FROM users WHERE age &gt; 20</code>），看到5条记录。</li>
+<li>事务B插入一条<code>age=25</code>的记录并提交。</li>
+<li>事务A随后执行<code>UPDATE users SET name=&#39;test&#39; WHERE age &gt; 20</code>（当前读），此时会看到事务B插入的这条新记录，并成功更新它。</li>
+<li>事务A再次执行<code>SELECT * FROM users WHERE age &gt; 20</code>（此时仍是当前读，因为事务中已发生过修改，快照已更新），会看到6条记录。</li>
+<li>‌<strong>结论</strong>‌：这并非InnoDB机制失效，而是事务A自身通过“当前读”引入了新数据，导致结果集变化。这符合数据库的“可重复读”语义——事务内的一致性是基于“事务开始时的快照”，但一旦事务修改了数据，快照就会更新。</li>
+</ul>
+</li>
+<li>‌<strong>唯一索引的特殊情况</strong>‌：<ul>
+<li>对于唯一索引的等值查询（如<code>SELECT * FROM users WHERE id = 5 FOR UPDATE</code>），如果<code>id=5</code>存在，InnoDB会将Next-Key Lock“降级”为记录锁，因为唯一索引保证了不会有重复值插入，无需锁间隙。</li>
+<li>但如果查询的值不存在（如<code>SELECT * FROM users WHERE id = 100 FOR UPDATE</code>，而表中最大id为90），InnoDB仍会锁住<code>(90, +∞)</code>的间隙，防止插入<code>id=100</code>的记录。</li>
+</ul>
+</li>
+</ol>
+<h2 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h2><p>本文深入剖析了MySQL InnoDB存储引擎的事务实现原理，系统阐述了其如何通过核心机制保障事务的ACID特性，并解决并发环境下的数据一致性问题。</p>
+<ul>
+<li><strong>事务基础</strong>：InnoDB严格遵循ACID，其中<strong>原子性</strong>通过undo log保证，<strong>持久性</strong>依赖redo log实现，<strong>隔离性</strong>由锁与MVCC共同支撑，<strong>一致性</strong>则通过崩溃恢复、double write等机制维护。</li>
+<li><strong>并发问题与隔离级别</strong>：脏读、不可重复读、幻读是事务并发的主要风险。SQL标准定义了四种隔离级别，InnoDB默认采用<strong>可重复读（RR）</strong>，并通过MVCC和间隙锁在该级别下有效解决了幻读问题，实际隔离程度高于标准。</li>
+<li><strong>Redo Log</strong>：作为持久性的核心，采用预写日志（WAL）策略，将数据页的物理修改以顺序写方式记录，确保事务提交后即使脏页未刷盘也能通过重做日志恢复，平衡了性能与安全。</li>
+<li><strong>Undo Log</strong>：一方面支持事务回滚（原子性），另一方面与隐式字段（DB_TRX_ID、DB_ROLL_PTR）共同构建<strong>版本链</strong>，为MVCC提供多版本数据，使得快照读无需加锁即可读取历史版本。</li>
+<li><strong>MVCC实现</strong>：通过一致性视图（readview）结合版本链，实现非阻塞读。在RC隔离级别下，每次查询生成新的readview；在RR级别下，事务首次快照读生成readview并复用，从而保证可重复读。</li>
+<li><strong>幻读解决</strong>：<ul>
+<li><strong>快照读</strong>由MVCC直接避免，事务始终基于初始视图读取数据。</li>
+<li><strong>当前读</strong>（如<code>SELECT ... FOR UPDATE</code>、UPDATE等）通过<strong>Next-Key Lock（记录锁+间隙锁）</strong>锁定索引范围，阻止其他事务插入新记录。</li>
+<li>但严格而言，在<strong>快照读与当前读混合</strong>或<strong>唯一索引等值查询不存在值</strong>等特殊场景下，仍可能出现结果集变化，这并非机制缺陷，而是事务自身操作导致的一致视图更新。</li>
+</ul>
+</li>
+</ul>
+<p>综上，InnoDB通过redo log、undo log、MVCC及锁机制的精密协作，在保证数据一致性的同时实现了高并发处理。理解这些底层原理，对于数据库性能调优、问题排查及架构设计具有重要意义。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MySQL InnoDB事务实现原理深度剖析</div>
+      <div>https://johnjoyjzw.github.io/2025/05/12/MySQL InnoDB事务实现原理深度剖析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>May 12, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/02/08/MySQL%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E5%92%8C%E7%B4%A2%E5%BC%95%E7%9A%84%E5%AD%98%E5%82%A8%E5%A5%A5%E7%A7%98-%E4%BB%8E%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E5%88%B0%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E5%85%A8%E8%A7%A3%E6%9E%90/" title="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析">
+                        <span class="hidden-mobile">MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>

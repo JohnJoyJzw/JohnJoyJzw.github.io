@@ -223,6 +223,46 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2021/07/09/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E8%AE%BE%E8%AE%A1/" target="_self">
+          消息中间件的设计
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/07/09/%E6%B6%88%E6%81%AF%E4%B8%AD%E9%97%B4%E4%BB%B6%E7%9A%84%E8%AE%BE%E8%AE%A1/" target="_self">
+        <div>
+          消息中间件的设计一、什么是消息中间件消息中间件的运用  上图是一个基于消息中间件的分布式系统架构。 用户想要实现某种功能，比如注册、创建订单、支付等。并没有通过前台系统直接去调用其他的子系统。而是将这个请求包装成消息和数据，暂时存放在消息中间件中。而其他子系统接受到这些消息后会去处理对应的请求。 好处： 解决系统之间的耦合。我们并没有实现系统与系统之间的直接调用。而是通过中间件的转换。 因此，
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-07-09 20:30" pubdate>
+              2021-07-09
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2021/07/05/Redis%E5%AE%9E%E7%8E%B0-%E9%93%BE%E8%A1%A8/" target="_self">
           Redis实现 -- 链表
         </a>
@@ -415,9 +455,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E5%B7%A5%E5%85%B7/">#工具</a>
-            
               <a href="/tags/%E5%AE%B9%E5%99%A8/">#容器</a>
+            
+              <a href="/tags/%E5%B7%A5%E5%85%B7/">#工具</a>
             
           </div>
         
@@ -522,48 +562,6 @@
       <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" target="_self">
         <div>
           垃圾回收机制 垃圾回收，不是Java语言的伴生产物。早在1960年，第一门开始使用内存动态分配和垃圾收集技术的Lisp语言诞生。 关于垃圾回收有三个问题：  什么是垃圾 什么时候回收 如何回收  垃圾回收机制是Java的招牌。极大地提高了开发效率。 如今，垃圾回收几乎成为了现代语言的标配，即使经过如此长时间的发展，Java的垃圾收集机制仍然在不断的演进，不同大小的设备、不同的特征的应用场景，对
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-02-05 15:30" pubdate>
-              2021-02-05
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Java/">#Java</a>
-            
-              <a href="/tags/JVM/">#JVM</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
-          类加载机制
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
-        <div>
-          虚拟机类加载机制1.概述虚拟机把描述类的数据从Class文件加载到内存中，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。 12345在Java中数据类型分为基本数据类型和引用数据类型。基本数据类型有虚拟机预先定义，引用数据类型需要进行类的加载。在Java语言中，类型的加载、连接和初始化过程都是在程序运行期间完成的，这种策略虽然会令类加
         </div>
       </a>
 
