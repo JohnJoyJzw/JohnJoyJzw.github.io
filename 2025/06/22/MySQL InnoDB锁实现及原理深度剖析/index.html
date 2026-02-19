@@ -1,0 +1,1081 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="John Joy">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="MySQL InnoDB锁实现及原理深度剖析一、引言​	在数据库系统中，锁是保证数据一致性和隔离性的核心机制。MySQL的InnoDB存储引擎以其卓越的行级锁和高并发处理能力著称。然而，很多数据库开发者对锁的理解往往停留在“加锁会阻塞”的层面，对于锁在内存中长什么样、如何组织、如何等待、如何检测死锁等底层原理知之甚少。 ​	本文将深入剖析InnoDB锁的实现原理。建立起完整的锁知识体系，从而在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL InnoDB锁实现及原理深度剖析">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/06/22/MySQL%20InnoDB%E9%94%81%E5%AE%9E%E7%8E%B0%E5%8F%8A%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="MySQL InnoDB锁实现及原理深度剖析一、引言​	在数据库系统中，锁是保证数据一致性和隔离性的核心机制。MySQL的InnoDB存储引擎以其卓越的行级锁和高并发处理能力著称。然而，很多数据库开发者对锁的理解往往停留在“加锁会阻塞”的层面，对于锁在内存中长什么样、如何组织、如何等待、如何检测死锁等底层原理知之甚少。 ​	本文将深入剖析InnoDB锁的实现原理。建立起完整的锁知识体系，从而在">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191114885.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191114375.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191250019.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191254166.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191309640.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191315046.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191328356.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191330451.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191333304.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191351014.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191352605.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191358859.png">
+<meta property="og:image" content="c:\Users\jiang\AppData\Roaming\Typora\typora-user-images\image-20260219135933466.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191409651.png">
+<meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191409248.png">
+<meta property="article:published_time" content="2025-06-22T14:38:36.000Z">
+<meta property="article:modified_time" content="2026-02-19T06:28:31.205Z">
+<meta property="article:author" content="John Joy">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602191114885.png">
+  
+  
+  
+  <title>MySQL InnoDB锁实现及原理深度剖析 - Hexo</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/image/code-wallpaper-22.jpg') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="MySQL InnoDB锁实现及原理深度剖析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-06-22 22:38" pubdate>
+          June 22, 2025 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          11k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          95 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">MySQL InnoDB锁实现及原理深度剖析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="MySQL-InnoDB锁实现及原理深度剖析"><a href="#MySQL-InnoDB锁实现及原理深度剖析" class="headerlink" title="MySQL InnoDB锁实现及原理深度剖析"></a>MySQL InnoDB锁实现及原理深度剖析</h1><h2 id="一、引言"><a href="#一、引言" class="headerlink" title="一、引言"></a>一、引言</h2><p>​	在数据库系统中，锁是保证数据一致性和隔离性的核心机制。MySQL的InnoDB存储引擎以其卓越的行级锁和高并发处理能力著称。然而，很多数据库开发者对锁的理解往往停留在“加锁会阻塞”的层面，对于锁在内存中长什么样、如何组织、如何等待、如何检测死锁等底层原理知之甚少。</p>
+<p>​	本文将深入剖析InnoDB锁的实现原理。建立起完整的锁知识体系，从而在性能优化、死锁排查时能够游刃有余。</p>
+<h2 id="二、锁的硬件基石：从MESI到内存屏障"><a href="#二、锁的硬件基石：从MESI到内存屏障" class="headerlink" title="二、锁的硬件基石：从MESI到内存屏障"></a>二、锁的硬件基石：从MESI到内存屏障</h2><p>在讨论InnoDB的锁之前，我们必须先理解锁的底层实现依赖于硬件和操作系统的支持。锁的本质是解决并发编程中对共享资源的互斥访问。</p>
+<h3 id="2-1-缓存一致性协议（MESI）"><a href="#2-1-缓存一致性协议（MESI）" class="headerlink" title="2.1 缓存一致性协议（MESI）"></a>2.1 缓存一致性协议（MESI）</h3><p>​	在多核处理器系统中，每个CPU核心都有自己的L1&#x2F;L2缓存。如果两个核心同时读取内存中的同一个变量，它们都会缓存这个变量的副本。当其中一个核心修改了这个变量，如何保证另一个核心知道这个变化？这就是缓存一致性协议要解决的问题。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191114885.png" srcset="/img/loading.gif" lazyload alt="CPU缓存架构"></p>
+<h4 id=""><a href="#" class="headerlink" title=""></a></h4><blockquote>
+<p>缓存行（Cache line）</p>
+<ul>
+<li>缓存行是指在缓存中的最小数据单元。</li>
+</ul>
+</blockquote>
+<p>最常见的MESI协议定义了四种缓存行状态：</p>
+<table>
+<thead>
+<tr>
+<th>四种缓存状态</th>
+<th>描述</th>
+<th>监听任务</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>E 独享</td>
+<td>该Cache line有效，数据被修改，和内存数据一致，数据只存在本Cahe中</td>
+<td>必须监听所有试图读该缓存行的操作，操作必须在该缓存行写回主存并将状态变为S后执行</td>
+</tr>
+<tr>
+<td>M 修改</td>
+<td>该Cache line有效，数据被修改，和内存数据不一致，数据只存在本Cahe中</td>
+<td>必须监听所有试图读该缓存行的操作，操作必须在该缓存行写回主存并将状态变为S后执行</td>
+</tr>
+<tr>
+<td>S 共享</td>
+<td>该Cache line有效，数据和内存数据一致，数据存在多个Cache中</td>
+<td>必须监听其它缓存使该缓存无效或独享该缓存的请求，并将该缓存行变为无效</td>
+</tr>
+<tr>
+<td>I 失效</td>
+<td>该Cache line无效</td>
+<td>无</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>注意：</p>
+<p>对于M和E状态而言总是精确的，他们在和该缓存行的真正状态是一致的，而S状态可能是非一致的。如果一个处于S状态的缓存失效，另外一个缓存行可能已经独享了该缓存行，但是不会升迁为独享状态，因为失效并不会立即广播给其它缓存行。</p>
+</blockquote>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191114375.png" srcset="/img/loading.gif" lazyload alt="缓存状态转换"></p>
+<p>当一个核心修改了处于Shared状态的变量时，它会发送消息通知其他核心将该变量的缓存行置为Invalid状态。这就是硬件级别的锁基础。</p>
+<h3 id="2-2-原子操作与CAS"><a href="#2-2-原子操作与CAS" class="headerlink" title="2.2 原子操作与CAS"></a>2.2 原子操作与CAS</h3><p>​	InnoDB的锁实现离不开原子操作。在x86架构下，通过<code>LOCK</code>前缀可以实现原子指令。例如<code>LOCK CMPXCHG</code>（Compare and Exchange）是CAS（Compare-And-Swap）操作的硬件实现。</p>
+<p>​	CAS操作的原型：<code>CAS(address, expected, new)</code>。其语义是：如果地址<code>address</code>处的值等于<code>expected</code>，则将其更新为<code>new</code>，并返回true；否则返回false。整个操作是原子的。</p>
+<p>​	InnoDB在实现信号量（即线程间同步机制）、spin lock（自旋锁）时，会大量使用CAS操作。例如，InnoDB自定义的<code>os_atomic_test_and_set</code>函数底层就是封装了CAS指令。</p>
+<h3 id="2-3-内存屏障"><a href="#2-3-内存屏障" class="headerlink" title="2.3 内存屏障"></a>2.3 内存屏障</h3><p>​	由于编译器和CPU都可能对指令进行重排序，为了保证锁的正确性，需要内存屏障指令。x86架构中，<code>mfence</code>指令保证所有之前的内存操作完成后才执行之后的内存操作。InnoDB在实现自己的读写锁（rw_lock）时，会在关键位置插入内存屏障，防止因重排序导致的锁状态不一致。</p>
+<h2 id="三、InnoDB锁类型全解"><a href="#三、InnoDB锁类型全解" class="headerlink" title="三、InnoDB锁类型全解"></a>三、InnoDB锁类型全解</h2><p>InnoDB的锁类型丰富多样，从不同维度可以分为：表锁与行锁、共享锁与排他锁、意向锁、间隙锁、Next-Key锁、插入意向锁、自增锁等。</p>
+<h3 id="3-1-全局锁（Global-Lock）"><a href="#3-1-全局锁（Global-Lock）" class="headerlink" title="3.1 全局锁（Global Lock）"></a>3.1 全局锁（Global Lock）</h3><p>​	全局锁是对整个MySQL实例加锁，最典型的是通过 <code>FLUSH TABLES WITH READ LOCK</code>（简称FTWRL）命令实现的全局读锁。执行该命令后，整个数据库处于只读状态，所有对数据的写操作（包括DML和DDL）都会被阻塞。全局锁通常用于全库备份，以保证备份数据的一致性。</p>
+<h4 id="3-1-1-实现原理"><a href="#3-1-1-实现原理" class="headerlink" title="3.1.1 实现原理"></a>3.1.1 实现原理</h4><p>FTWRL的执行过程大致如下：</p>
+<ol>
+<li><strong>加全局读锁</strong>：MySQL Server层会获取一个全局的读锁，本质上是向所有表加锁，并阻塞所有写操作。</li>
+<li><strong>刷新表缓存</strong>：关闭所有打开的表，并刷新表缓存。</li>
+<li><strong>返回成功</strong>：之后所有对表的写请求都会进入等待状态，直到释放全局读锁（通过 <code>UNLOCK TABLES</code> 或会话结束）。</li>
+</ol>
+<p>在InnoDB内部，全局锁的实现并不依赖于复杂的行锁结构，而是通过一个简单的计数器或标志位来控制。当持有全局读锁时，所有需要获取写锁（包括表锁的IX锁、X锁）的请求都会在Server层被阻塞，不会进入存储引擎层。</p>
+<h4 id="3-1-2-与其它锁的关系"><a href="#3-1-2-与其它锁的关系" class="headerlink" title="3.1.2 与其它锁的关系"></a>3.1.2 与其它锁的关系</h4><p>全局锁是最高优先级的锁，它会影响所有表，包括MyISAM、InnoDB等。在InnoDB中，即使某张表上没有活动事务，只要全局锁存在，任何修改操作都无法进行。</p>
+<h3 id="3-2-表锁"><a href="#3-2-表锁" class="headerlink" title="3.2 表锁"></a>3.2 表锁</h3><h4 id="3-2-1-表锁-表共享读锁-x2F-表共享写锁"><a href="#3-2-1-表锁-表共享读锁-x2F-表共享写锁" class="headerlink" title="3.2.1 表锁 - 表共享读锁&#x2F;表共享写锁"></a>3.2.1 表锁 - 表共享读锁&#x2F;表共享写锁</h4><p>用户可以通过 <code>LOCK TABLES tbl_name READ | WRITE</code> 显式地为表加锁。这类锁由Server层管理，但会下推到InnoDB层。</p>
+<ul>
+<li><strong>READ锁</strong>：相当于表级的共享锁（S锁）。持有该锁的会话可以读表，但不能写；其他会话可以读，但写会被阻塞。</li>
+<li><strong>WRITE锁</strong>：相当于表级的排他锁（X锁）。持有该锁的会话可以读写表，其他会话的所有操作都被阻塞。</li>
+</ul>
+<p>当执行 <code>LOCK TABLES ... WRITE</code> 时，InnoDB会先获取表的IX锁（因为意图修改行），然后再获取表级的X锁。但需要注意，<code>LOCK TABLES</code> 会隐式提交当前事务，并且解锁只能通过 <code>UNLOCK TABLES</code> 或会话结束。</p>
+<p>READ锁：该锁的会话可以读表，但不能写；其他会话可以读，但写会被阻塞</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191250019.png" srcset="/img/loading.gif" lazyload alt="READ锁"></p>
+<p>WRITE锁：持有该锁的会话可以读写表，其他会话的所有操作都被阻塞。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191254166.png" srcset="/img/loading.gif" lazyload alt="write锁"></p>
+<h4 id="3-2-2-表锁-元数据锁"><a href="#3-2-2-表锁-元数据锁" class="headerlink" title="3.2.2 表锁 - 元数据锁"></a>3.2.2 表锁 - 元数据锁</h4><pre><code class="hljs"> MDL是Server层的锁，它的加锁过程是系统自动控制的，用于保护数据库对象的元数据（如表结构），为了避免DML与DDL冲突，保证读写的正确性。
+</code></pre>
+<p>​	当执行DDL语句（如ALTER TABLE）或DML语句（如SELECT、UPDATE）时，会自动获取MDL。</p>
+<p>MDL分为：</p>
+<ul>
+<li><strong>MDL读锁（共享 SHAREN_READ,SHAREN_WRITE）</strong>：DML语句需要MDL读锁，允许并发执行。</li>
+<li><strong>MDL写锁（排他 EXCLUSIVE）</strong>：DDL语句需要MDL写锁，会阻塞其他所有MDL读锁和写锁。</li>
+</ul>
+<p>下表是各个类型的SQL时，加不同类型的元数据锁：</p>
+<table>
+<thead>
+<tr>
+<th>对应SQL类型</th>
+<th>锁类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>lock tables xxx read&#x2F;write</td>
+<td>SHAREB_READ_ONLY&#x2F;SHARED_NO_READ_WRITE</td>
+<td></td>
+</tr>
+<tr>
+<td>select 、 select … lock in share mode</td>
+<td>SHARED_READ</td>
+<td>与SHARED_READ、SHARED_WRITE兼容，与EXCLUSIVE互斥</td>
+</tr>
+<tr>
+<td>insert、update、delete、select … for   update</td>
+<td>SHARED_WRITE</td>
+<td>与SHARED_READ、SHARED_WRITE兼容，与EXCLUSIVE互斥</td>
+</tr>
+<tr>
+<td>alter table</td>
+<td>EXCLUSIVE</td>
+<td>与其他的MDL互斥</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>​	MDL与InnoDB的表锁是两个独立但协作的锁系统。MDL保证了表结构在语句执行期间不被修改，而InnoDB的表锁（意向锁）保证了行锁与表锁的兼容性。两者的关系可概括为：</p>
+<ul>
+<li>MDL锁在Server层，InnoDB表锁在存储引擎层。</li>
+<li>执行DML时，先加MDL读锁，再进入InnoDB加意向锁。</li>
+<li>执行DDL时，先加MDL写锁（等待所有MDL读锁释放），然后可能还需要等待InnoDB的表锁释放（如果DDL需要排他访问表数据）。</li>
+</ul>
+</blockquote>
+<h4 id="3-2-3-表锁-意向锁"><a href="#3-2-3-表锁-意向锁" class="headerlink" title="3.2.3 表锁 - 意向锁"></a>3.2.3 表锁 - 意向锁</h4><p>​	意向锁是表级别的锁，它解决的是多粒度锁共存的问题。</p>
+<p>​	InnoDB支持行锁和表锁共存，如果没有意向锁，当需要给整个表加X锁时，就必须遍历所有行锁来判断是否有行被锁定，这显然效率极低。</p>
+<p>比如下面这张图，线程A给id为3的数据加上了行数，此时线程B想给这张表加一个表锁，那么他就需要遍历整个表的数据，判断是否有行数。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191309640.png" srcset="/img/loading.gif" lazyload alt="意向锁"></p>
+<p>在加入意向锁之后，线程A加上行锁时，会同时加上意向锁，而线程B检测到这张表加了意向锁，会阻塞，直到线程A释放意向锁。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191315046.png" srcset="/img/loading.gif" lazyload alt="加入意向锁之后"></p>
+<p>意向锁的引入，使得表锁和行锁的协作变得高效。它分为两种：</p>
+<ul>
+<li><strong>意向共享锁（Intention Shared Lock，IS锁）</strong>：表示事务意图在表的某些行上设置共享锁。例如 <code>SELECT ... LOCK IN SHARE MODE</code> 会先获取表的IS锁。</li>
+<li><strong>意向排他锁（Intention Exclusive Lock，IX锁）</strong>：表示事务意图在表的某些行上设置排他锁。例如 <code>SELECT ... FOR UPDATE</code>、<code>INSERT</code>、<code>UPDATE</code>、<code>DELETE</code> 都会先获取表的IX锁。</li>
+</ul>
+<p>意向锁的协议非常简单且重要：<strong>事务在获取行上的S锁之前，必须先获取表上的IS锁或更强的锁；在获取行上的X锁之前，必须先获取表上的IX锁</strong>。</p>
+<p>​	</p>
+<p>​	表级锁类型的兼容性矩阵如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>X</strong></th>
+<th><strong>IX</strong></th>
+<th><strong>S</strong></th>
+<th><strong>IS</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>X</strong></td>
+<td>冲突</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>冲突</td>
+</tr>
+<tr>
+<td><strong>IX</strong></td>
+<td>冲突</td>
+<td><strong>兼容</strong></td>
+<td>冲突</td>
+<td><strong>兼容</strong></td>
+</tr>
+<tr>
+<td><strong>S</strong></td>
+<td>冲突</td>
+<td>冲突</td>
+<td><strong>兼容</strong></td>
+<td><strong>兼容</strong></td>
+</tr>
+<tr>
+<td><strong>IS</strong></td>
+<td>冲突</td>
+<td><strong>兼容</strong></td>
+<td><strong>兼容</strong></td>
+<td><strong>兼容</strong></td>
+</tr>
+</tbody></table>
+<p><strong>关键发现</strong>：意向锁之间是互相兼容的！因为IX和IX都是表示“意图”做某事，而非真正的锁定。两个事务都可以有“意图”在同一个表上加排他锁，这并不妨碍它们，它们只是在不同的行上操作罢了</p>
+<h3 id="3-3-行锁"><a href="#3-3-行锁" class="headerlink" title="3.3 行锁"></a>3.3 行锁</h3><p>行级锁，每次操作锁住对应的行数据。锁定粒度最小，发生锁冲突的概率最低，并发度最高，应用在InnoDB存储引擎中。</p>
+<p>InnoDB的数据是基于索引组织的，行锁是通过对索引上的索引项加锁来实现的，而不是对记录加的锁。对应行级锁，主要分成三类：行锁、间隙锁、</p>
+<h4 id="3-3-1-行锁-Record-Lock"><a href="#3-3-1-行锁-Record-Lock" class="headerlink" title="3.3.1 行锁(Record Lock)"></a>3.3.1 行锁(Record Lock)</h4><p><strong>行锁（Record Lock）</strong>：锁定单个行记录的锁，防止其他事务对此行进行update和delete。在RR和RC隔离级别下都支持</p>
+<p>比如下面这条数据，会将34这条数据锁住，而其他事务无法对这条数据进行update和delete。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191328356.png" srcset="/img/loading.gif" lazyload alt="行锁"></p>
+<p>InnoDB实现了两种类型的行锁：</p>
+<ul>
+<li><p><strong>共享锁（Shared Lock，S锁）</strong>：允许持有锁的事务读取行。</p>
+</li>
+<li><p><strong>排他锁（Exclusive Lock，X锁）</strong>：允许持有锁的事务更新或删除行。</p>
+</li>
+</ul>
+<p>它们的兼容性矩阵如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>S锁(共享锁)</th>
+<th>X锁(排他锁)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>S锁(共享锁)</strong></td>
+<td>兼容</td>
+<td>冲突</td>
+</tr>
+<tr>
+<td><strong>X锁(排他锁)</strong></td>
+<td>冲突</td>
+<td>冲突</td>
+</tr>
+</tbody></table>
+<p>不同SQL类型加的行锁类型：</p>
+<table>
+<thead>
+<tr>
+<th>SQL</th>
+<th>行锁类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>insert …</td>
+<td>排他锁</td>
+<td>自动加锁</td>
+</tr>
+<tr>
+<td>update …</td>
+<td>排他锁</td>
+<td>自动加锁</td>
+</tr>
+<tr>
+<td>delete …</td>
+<td>排他锁</td>
+<td>自动加锁</td>
+</tr>
+<tr>
+<td>select …</td>
+<td>不加任何锁</td>
+<td></td>
+</tr>
+<tr>
+<td>select … lock in share mode</td>
+<td>共享锁</td>
+<td>需要手动在select之后加lock in share mode</td>
+</tr>
+<tr>
+<td>select … for update</td>
+<td>排他锁</td>
+<td>需要手动在select之后加for update</td>
+</tr>
+</tbody></table>
+<h4 id="3-3-2-间隙锁-Gap-Lock"><a href="#3-3-2-间隙锁-Gap-Lock" class="headerlink" title="3.3.2 间隙锁(Gap Lock)"></a>3.3.2 间隙锁(Gap Lock)</h4><p>间隙锁：锁住两条记录之间的间隙，但不包括记录本身。它是“纯抑制性”的，唯一目的是防止其他事务向间隙中插入数据，产生幻读，在在RR隔离级别下支持。</p>
+<p>比如下图中，对29，34两条数据之间的添加锁，保证了两条记录之间间隙不变</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191330451.png" srcset="/img/loading.gif" lazyload alt="间隙锁"></p>
+<h4 id="3-3-3-临键锁-Next-Key锁"><a href="#3-3-3-临键锁-Next-Key锁" class="headerlink" title="3.3.3 临键锁(Next-Key锁)"></a>3.3.3 临键锁(Next-Key锁)</h4><p>Next-Key锁：记录锁和间隙锁的组合，锁住一个范围，并且包含记录本身。</p>
+<p>比如下图中，对29，34两条数据之间的添加锁，同时对34这条数据添加了锁</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191333304.png" srcset="/img/loading.gif" lazyload alt="临键锁"></p>
+<p>默认情况下，InnoDB在RR事务的隔离级别下运行，InnoDB使用 next key 锁进行搜索和索引扫描，以防止幻读。</p>
+<ol>
+<li><p>索引上的等值查询(唯一索引)，给不存在的记录加锁时，优化为间隙锁。</p>
+<p>比如如下图：我们对一个不存在的id为5 的数据进行更新操作。</p>
+</li>
+</ol>
+<p>​	<img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191351014.png" srcset="/img/loading.gif" lazyload alt="不存在的记录加锁2">	</p>
+<p>​	</p>
+<p>​	然后我们查询，这张表的锁，可以看到已经加上了排他锁和间隙锁，并且锁住的是3-8之间的数据。</p>
+<p>​	然后，我们执行insert id为7的语句时，发现SQL执行阻塞住了。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191352605.png" srcset="/img/loading.gif" lazyload alt="不存在的记录加锁2"></p>
+<ol start="2">
+<li><p>索引上的等值查询(普通索引)，向右遍历时最后一个值不满足查询需求时，next-key lock退化为间隙锁。</p>
+<p>对age字段创建一个普通索引，然后查询。</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191358859.png" srcset="/img/loading.gif" lazyload alt="image-20260219135842748"></p>
+<p>​	然后我们查询这张表的锁，发现有3个锁</p>
+<p>​	第一个锁：对3之间的数据及这条记录给锁住</p>
+<p>​	第二个锁：对当前的这条3加上锁</p>
+<p>​	第三个锁：间隙锁，将3和7之间的数据给数据</p>
+<p>为什么要加这些锁呢？主要是因为age这个字段是非唯一索引，可以其他的事务 会在3-7只间的间隙中插入数据</p>
+<p><img src="C:\Users\jiang\AppData\Roaming\Typora\typora-user-images\image-20260219135933466.png" srcset="/img/loading.gif" lazyload alt="image-20260219135933466"></p>
+<ol start="3">
+<li>索引上的范围查询(唯一索引) – 会访问到不满足条件的第一个值为止。</li>
+</ol>
+<p>​	我们基于逐渐id查询，查询范围大于等于19的数据。</p>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191409651.png" srcset="/img/loading.gif" lazyload alt="image-20260219140911566"></p>
+<p>​	我们看下会加上那些锁：</p>
+<ul>
+<li>首先会对19这条数据加行锁</li>
+<li>然后第二个锁，supermum pseudo-record， 对25之后的数据加上临键锁</li>
+<li>最后会对25加临键锁</li>
+</ul>
+<p><img src="https://gitee.com/Akihij/PicGo/raw/master/img/202602191409248.png" srcset="/img/loading.gif" lazyload alt="image-20260219140955087"></p>
+<h2 id="四、锁的请求与授予"><a href="#四、锁的请求与授予" class="headerlink" title="四、锁的请求与授予"></a>四、锁的请求与授予</h2><p>下面我们来看看一个事务是如何请求并获取锁的。</p>
+<h3 id="4-1-加锁流程概览"><a href="#4-1-加锁流程概览" class="headerlink" title="4.1 加锁流程概览"></a>4.1 加锁流程概览</h3><p>当一个事务执行一条SQL（例如 <code>UPDATE t1 SET name=&#39;a&#39; WHERE id=10</code>），InnoDB决定需要对记录加X锁时，会经历以下步骤：</p>
+<ol>
+<li><strong>加表级意向锁</strong>：首先，事务需要获取表<code>t1</code>的IX锁。它会在表的<code>locks</code>链表中检查是否存在冲突的锁（如S锁或X锁）。如果没有，则创建或复用IX锁结构，加入链表，状态为<code>GRANTED</code>。</li>
+<li><strong>查找行锁哈希表</strong>：接下来，根据索引<code>PRIMARY</code>和记录<code>id=10</code>所在的页（<code>space_id</code>， <code>page_no</code>），计算出哈希值，找到<code>lock_sys-&gt;rec_hash</code>中对应的槽位。</li>
+<li><strong>遍历行锁链表</strong>：遍历该槽位下的行锁链表，寻找针对<strong>同一个页</strong>的锁结构。</li>
+<li><strong>判断锁冲突</strong>：<ul>
+<li>如果在链表中找到了一个锁结构，其<code>type_mode</code>与当前请求不兼容，并且该锁结构的状态为<code>GRANTED</code>，则当前请求必须等待。</li>
+<li>如果没有找到任何冲突的锁结构，则需要创建或复用锁结构。</li>
+</ul>
+</li>
+<li><strong>创建&#x2F;复用锁结构</strong>：<ul>
+<li>检查是否有针对这个页的、<code>type_mode</code>与当前请求完全相同的锁结构。如果有，则尝试通过位图“合并”。（例如，如果另一个X锁结构已经锁住了这个页的id&#x3D;5，现在想锁id&#x3D;10，如果模式相同，就在那个锁结构的位图中将id&#x3D;10对应的位设置为1，实现复用）。</li>
+<li>如果没有可复用的，则创建新的<code>lock_t</code>对象，初始化位图，并将其插入到<code>rec_hash</code>对应槽位的链表头部，同时也插入到事务的<code>trx_locks</code>链表头部。</li>
+</ul>
+</li>
+</ol>
+<h3 id="4-2-锁结构复用条件"><a href="#4-2-锁结构复用条件" class="headerlink" title="4.2 锁结构复用条件"></a>4.2 锁结构复用条件</h3><p>多个锁结构能合并共用的条件非常严格，必须<strong>同时满足</strong>：</p>
+<ol>
+<li>属于同一个事务。</li>
+<li>作用于同一个索引的同一个数据页。</li>
+<li>锁的基本模式相同（同为S锁或同为X锁）。</li>
+<li>锁的精确模式相同（同为记录锁、或同为间隙锁、或同为Next-Key锁）。</li>
+<li>锁的等待状态相同（同为已授予或同为等待）。</li>
+</ol>
+<p>这种精细的复用机制，使得InnoDB在加大量行锁时，内存开销远小于行数。</p>
+<h3 id="4-3-锁的等待与排队"><a href="#4-3-锁的等待与排队" class="headerlink" title="4.3 锁的等待与排队"></a>4.3 锁的等待与排队</h3><p>当请求的锁因冲突无法立即授予时，事务必须进入等待状态。这个过程就像去银行办业务，需要先取号排队，然后等着叫号。</p>
+<h4 id="4-3-1-排队：加入等待队列"><a href="#4-3-1-排队：加入等待队列" class="headerlink" title="4.3.1 排队：加入等待队列"></a>4.3.1 排队：加入等待队列</h4><ol>
+<li><strong>申请锁结构</strong>：事务会申请一个新的锁结构，这个锁结构的状态是<code>LOCK_WAIT</code>（<code>type_mode</code>的第9位置为1）。</li>
+<li><strong>插入链表</strong>：<ul>
+<li><strong>对于表锁</strong>：将这个等待的锁结构插入到表对象的<code>locks</code>链表<strong>末尾</strong>。</li>
+<li><strong>对于行锁</strong>：将这个等待的锁结构插入到<code>rec_hash</code>槽位对应的行锁链表<strong>末尾</strong>。</li>
+</ul>
+</li>
+</ol>
+<h4 id="4-3-2-登记：利用Slot机制"><a href="#4-3-2-登记：利用Slot机制" class="headerlink" title="4.3.2 登记：利用Slot机制"></a>4.3.2 登记：利用Slot机制</h4><p>仅仅加入队列还不够，InnoDB还需要一种机制来管理所有等待的线程，以便超时检测和死锁检测。这就是<code>waiting_threads</code>数组的作用。</p>
+<p><code>lock_sys-&gt;waiting_threads</code>指向一片连续的内存区域，里面有<code>max_threads</code>个slot。每个slot（<code>srv_slot_t</code>）可以记录一个等待事务的信息。</p>
+<p>当发生锁等待时，InnoDB会：</p>
+<ol>
+<li><strong>找空闲slot</strong>：遍历<code>waiting_threads</code>数组，找到一个未使用的slot（<code>in_use == false</code>）。</li>
+<li><strong>登记信息</strong>：将当前事务的ID、等待的锁结构、等待超时时间等信息填入slot，并将<code>in_use</code>设为true。</li>
+<li><strong>等待</strong>：事务线程随后会进入条件等待（wait on condition）。它会被挂起，不再占用CPU。</li>
+</ol>
+<p>这个slot机制就像一个“候诊区”的挂号单，后台线程（如锁超时检测线程）通过检查这些slot，就知道有哪些事务在等待，已经等了多久。</p>
+<h2 id="五、不同SQL语句的加锁规则"><a href="#五、不同SQL语句的加锁规则" class="headerlink" title="五、不同SQL语句的加锁规则"></a>五、不同SQL语句的加锁规则</h2><p>理解了锁的结构和请求机制，现在我们来分析实际SQL语句的加锁行为。这是最容易产生误解的地方，也是死锁和性能问题的高发区。加锁规则主要与事务隔离级别、索引类型、查询条件有关。</p>
+<h3 id="5-1-SELECT-查询（快照读）"><a href="#5-1-SELECT-查询（快照读）" class="headerlink" title="5.1 SELECT 查询（快照读）"></a>5.1 SELECT 查询（快照读）</h3><p>在<code>READ COMMITTED</code>和<code>REPEATABLE READ</code>隔离级别下，普通的<code>SELECT</code>语句是<strong>快照读</strong>，通过MVCC（多版本并发控制，即通过版本链和Read View实现无锁读）读取数据，<strong>不加任何锁</strong>（除非在<code>SERIALIZABLE</code>级别下，普通<code>SELECT</code>会退化为<code>SELECT ... LOCK IN SHARE MODE</code>）。</p>
+<h3 id="5-2-锁定读：FOR-SHARE-和-FOR-UPDATE"><a href="#5-2-锁定读：FOR-SHARE-和-FOR-UPDATE" class="headerlink" title="5.2 锁定读：FOR SHARE 和 FOR UPDATE"></a>5.2 锁定读：FOR SHARE 和 FOR UPDATE</h3><p>锁定读取语句会显式地加锁。</p>
+<ul>
+<li><code>SELECT ... FOR SHARE</code>：在扫描到的索引记录上加<strong>S锁</strong>（Next-Key锁）。</li>
+<li><code>SELECT ... FOR UPDATE</code>：在扫描到的索引记录上加<strong>X锁</strong>（Next-Key锁）。</li>
+</ul>
+<h3 id="5-3-加锁规则详解（以REPEATABLE-READ为例）"><a href="#5-3-加锁规则详解（以REPEATABLE-READ为例）" class="headerlink" title="5.3 加锁规则详解（以REPEATABLE READ为例）"></a>5.3 加锁规则详解（以REPEATABLE READ为例）</h3><h4 id="5-3-1-主键等值查询"><a href="#5-3-1-主键等值查询" class="headerlink" title="5.3.1 主键等值查询"></a>5.3.1 主键等值查询</h4><ul>
+<li><p><strong>情况A：记录存在</strong></p>
+<p>sql</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- id 是主键</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> t <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">10</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>加锁结果</strong>：只在主键索引 <code>id = 10</code> 的记录上加一个<strong>记录锁</strong>。这是一个精准锁，不需要锁间隙，因为唯一索引能唯一确定一行，幻读无从发生。</p>
+</li>
+<li><p><strong>情况B：记录不存在</strong></p>
+<p>sql</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs n1ql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> t <span class="hljs-keyword">WHERE</span> id = <span class="hljs-number">12</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>假设表中有id&#x3D;10和id&#x3D;15的记录。<br><strong>加锁结果</strong>：在（10，15）这个间隙上，加一个<strong>间隙锁</strong>。它防止其他事务插入id&#x3D;12的记录，从而避免了幻读。</p>
+</li>
+</ul>
+<h4 id="5-3-2-唯一索引等值查询"><a href="#5-3-2-唯一索引等值查询" class="headerlink" title="5.3.2 唯一索引等值查询"></a>5.3.2 唯一索引等值查询</h4><ul>
+<li><p><strong>情况A：记录存在</strong></p>
+<p>sql</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs sql"><span class="hljs-comment">-- id 是唯一索引</span><br><span class="hljs-keyword">SELECT</span> <span class="hljs-operator">*</span> <span class="hljs-keyword">FROM</span> t <span class="hljs-keyword">WHERE</span> id <span class="hljs-operator">=</span> <span class="hljs-number">10</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>加锁结果</strong>：</p>
+<ol>
+<li>在<strong>唯一索引</strong> <code>id = 10</code> 的记录上加一个<strong>记录锁</strong>（锁定这个索引项）。</li>
+<li>在<strong>主键索引</strong>对应的行记录上加一个<strong>记录锁</strong>（防止其他事务通过主键修改这条记录）。</li>
+</ol>
+</li>
+<li><p><strong>情况B：记录不存在</strong> 与主键不存在类似，锁住唯一索引上该值所在的间隙。</p>
+</li>
+</ul>
+<h4 id="5-3-3-非唯一索引等值查询"><a href="#5-3-3-非唯一索引等值查询" class="headerlink" title="5.3.3 非唯一索引等值查询"></a>5.3.3 非唯一索引等值查询</h4><p>这是最复杂的加锁场景，也是产生死锁的温床。</p>
+<p>sql</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-comment">-- name 是非唯一索引，有记录 &#x27;apple&#x27;,  &#x27;banana&#x27;</span><br><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> t <span class="hljs-keyword">WHERE</span> <span class="hljs-type">name</span> = <span class="hljs-string">&#x27;apple&#x27;</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>假设主键id是1到10，’apple’对应的id是3和5。<br><strong>加锁结果</strong>：</p>
+<ol>
+<li><strong>遍历扫描</strong>：从非唯一索引的非叶子节点开始，定位到第一个name&#x3D;’apple’的索引项。由于是非唯一索引，InnoDB必须向右扫描，直到遇到第一个不等于’apple’的值（即’banana’）才停止。这个<strong>扫描过程中访问到的所有索引项</strong>都会加锁。</li>
+<li><strong>锁的类型</strong>：<ul>
+<li>对于等于’apple’的索引项（id&#x3D;3，5），加的是 <strong>Next-Key锁</strong>。它不仅锁住这个索引项，还锁住了它前面的间隙。例如，锁住第一个’apple’（id&#x3D;3）前面的间隙（即从’ap’之前的某个值到id&#x3D;3之间的间隙），以及两个’apple’之间的间隙（id&#x3D;3到id&#x3D;5的间隙）。</li>
+<li>对于停止点，即第一个不等于’apple’的索引项（’banana’），加的是<strong>间隙锁</strong>。它锁住了最后一个’apple’（id&#x3D;5）和’banana’之间的间隙。</li>
+<li>同时，所有被锁的非唯一索引项对应的<strong>主键记录</strong>，也会被加上X锁。</li>
+</ul>
+</li>
+</ol>
+<p><strong>为什么要锁间隙和下一个值？</strong> 这是为了防止幻读。如果在事务执行过程中，另一个事务插入了一条新的name&#x3D;’apple’的记录（例如id&#x3D;4），如果不锁住（3，5）这个间隙，这个新记录就会被插入，导致当前事务再次查询时，结果集多了id&#x3D;4这条记录，也就是幻读。</p>
+<h4 id="5-3-4-范围查询"><a href="#5-3-4-范围查询" class="headerlink" title="5.3.4 范围查询"></a>5.3.4 范围查询</h4><p>sql</p>
+<figure class="highlight n1ql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs n1ql"><span class="hljs-keyword">SELECT</span> * <span class="hljs-keyword">FROM</span> t <span class="hljs-keyword">WHERE</span> id &gt;= <span class="hljs-number">10</span> <span class="hljs-keyword">AND</span> id &lt; <span class="hljs-number">20</span> <span class="hljs-keyword">FOR</span> <span class="hljs-keyword">UPDATE</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>加锁结果</strong>：</p>
+<ul>
+<li>扫描到的所有索引记录，加上 <strong>Next-Key锁</strong>。</li>
+<li>特别地，对于第一个不满足条件的记录（例如id&#x3D;20），也会被加锁（通常是间隙锁，如果是扫描过程中访问到了，就是Next-Key锁，但最终会因为不满足条件而释放？这里存在优化，但规则是：扫描到的就要加锁）。</li>
+<li>最终效果是锁住了整个范围[10， 20)以及20之前的间隙。这实际上是一个<strong>范围锁</strong>。</li>
+</ul>
+<h3 id="5-4-UPDATE-和-DELETE-的加锁"><a href="#5-4-UPDATE-和-DELETE-的加锁" class="headerlink" title="5.4 UPDATE 和 DELETE 的加锁"></a>5.4 UPDATE 和 DELETE 的加锁</h3><p><code>UPDATE</code>和<code>DELETE</code>的加锁规则和<code>SELECT ... FOR UPDATE</code><strong>完全一致</strong>。它们也是锁定读取，需要先找到要修改的记录（找到的过程加锁），然后才执行修改。这就是为什么一个<code>UPDATE</code>语句即使在<code>WHERE</code>条件过滤后只有一行要更新，也可能锁住一大片范围的原因。</p>
+<h3 id="5-5-INSERT-的加锁"><a href="#5-5-INSERT-的加锁" class="headerlink" title="5.5 INSERT 的加锁"></a>5.5 INSERT 的加锁</h3><p><code>INSERT</code>操作相对特殊，它主要涉及两个阶段的加锁：</p>
+<ol>
+<li><strong>插入意向锁</strong>：在插入前，会在插入的间隙上设置插入意向锁。这是一个等待机制，表示它想在这个间隙里插入数据。</li>
+<li><strong>行锁</strong>：成功插入后，会在新插入的记录上加上<strong>X锁</strong>（记录锁）。这个X锁是为了防止其他事务修改或删除这条刚刚插入的记录。</li>
+</ol>
+<p><strong>唯一键冲突</strong>：如果<code>INSERT</code>因为唯一键冲突而失败，InnoDB会在冲突的索引记录上加一个<strong>S锁</strong>（共享锁）。这是很多人忽略的一个点，也是导致死锁的经典场景之一。</p>
+<h3 id="5-6-LOCK-TABLES-语句的加锁"><a href="#5-6-LOCK-TABLES-语句的加锁" class="headerlink" title="5.6 LOCK TABLES 语句的加锁"></a>5.6 LOCK TABLES 语句的加锁</h3><p>考虑以下显式加表锁的场景：</p>
+<p>sql</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-keyword">LOCK</span> <span class="hljs-keyword">TABLES</span> t1 <span class="hljs-keyword">WRITE</span>;<br><span class="hljs-comment">-- 执行一些DML...</span><br>UNLOCK <span class="hljs-keyword">TABLES</span>;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>执行流程：</p>
+<ol>
+<li><strong>提交当前事务</strong>：<code>LOCK TABLES</code>会隐式提交当前事务。</li>
+<li><strong>加MDL写锁</strong>：Server层先获取表的MDL写锁，防止DDL并发。</li>
+<li><strong>加InnoDB表锁</strong>：InnoDB层会先获取表的IX锁（因为可能做写操作），然后获取表级的X锁（<code>LOCK_X</code>）。这个X锁会记录在表对象的<code>locks</code>链表中。</li>
+<li><strong>执行DML</strong>：后续的DML语句不再需要单独获取行锁？实际上，在持有表级X锁的情况下，DML操作可以跳过行锁的竞争检查，直接修改数据（因为已经独占全表）。但InnoDB为了保持一致性，仍然会加行锁，只不过这些行锁不会被阻塞（因为表锁已经保证了排他性）。</li>
+<li><strong>释放锁</strong>：<code>UNLOCK TABLES</code>释放所有表锁，同时也会释放MDL锁。</li>
+</ol>
+<h2 id="六、锁等待与死锁"><a href="#六、锁等待与死锁" class="headerlink" title="六、锁等待与死锁"></a>六、锁等待与死锁</h2><p>当多个事务互相等待对方释放锁时，就会形成锁等待。如果这种等待形成了一个循环，就变成了死锁。</p>
+<h3 id="6-1-锁等待超时"><a href="#6-1-锁等待超时" class="headerlink" title="6.1 锁等待超时"></a>6.1 锁等待超时</h3><p>如果一个事务等待时间超过了阈值（由参数<code>innodb_lock_wait_timeout</code>设置，默认50秒），InnoDB会放弃这个锁请求，并回滚该事务。InnoDB依靠后台线程定期检查<code>waiting_threads</code>数组中的slot，计算等待时间是否超时。</p>
+<h3 id="6-2-死锁检测与处理"><a href="#6-2-死锁检测与处理" class="headerlink" title="6.2 死锁检测与处理"></a>6.2 死锁检测与处理</h3><p>死锁的代价比锁等待超时更大。InnoDB采用了<strong>等待图（Wait-for Graph）</strong>算法来主动检测死锁。</p>
+<h4 id="6-2-1-等待图的构建"><a href="#6-2-1-等待图的构建" class="headerlink" title="6.2.1 等待图的构建"></a>6.2.1 等待图的构建</h4><p>等待图是一个有向图。节点是事务。有向边 <code>T1 -&gt; T2</code> 表示 <code>T1</code> 在等待 <code>T2</code> 释放锁。<br>InnoDB在每次加锁请求不能立即满足时，就会在内存中更新这个等待图。图的信息可以从锁的等待队列中推导出来。</p>
+<h4 id="6-2-2-死锁检测时机"><a href="#6-2-2-死锁检测时机" class="headerlink" title="6.2.2 死锁检测时机"></a>6.2.2 死锁检测时机</h4><p>当发生锁等待（即加锁请求需要排队时），InnoDB会将新加入的等待事务作为起点，尝试进行深度优先搜索（DFS），检查图中是否存在环。如果存在环，则说明发生了死锁。</p>
+<h4 id="6-2-3-选择牺牲者"><a href="#6-2-3-选择牺牲者" class="headerlink" title="6.2.3 选择牺牲者"></a>6.2.3 选择牺牲者</h4><p>一旦检测到死锁，InnoDB必须打破它。它会选择其中一个事务作为“牺牲者”，将其回滚。选择的标准通常是：</p>
+<ol>
+<li><strong>影响最小</strong>：优先选择<strong>持有锁最少</strong>的事务（即修改行数最少、或undo log最小的）回滚。</li>
+<li>或者回滚代价最小的事务。</li>
+</ol>
+<p>被选中的事务会被回滚，并释放其持有的所有锁，从而让其他事务得以继续。客户端会收到类似 <code>Deadlock found when trying to get lock; try restarting transaction</code> 的错误。</p>
+<h4 id="6-2-4-性能开销"><a href="#6-2-4-性能开销" class="headerlink" title="6.2.4 性能开销"></a>6.2.4 性能开销</h4><p>死锁检测在并发极高、锁冲突频繁的场景下，可能会成为性能瓶颈。因为每次等待都要遍历整个等待图。MySQL 5.7及之后，提供了一种优化：对于使用<code>innodb_deadlock_detect</code>参数（默认ON），可以将其关闭。关闭后，系统依靠<code>innodb_lock_wait_timeout</code>来处理死锁。这在某些超高并发场景（如秒杀）下，有时反而能提升性能，但代价是可能频繁出现锁超时。</p>
+<h3 id="6-3-经典死锁案例分析"><a href="#6-3-经典死锁案例分析" class="headerlink" title="6.3 经典死锁案例分析"></a>6.3 经典死锁案例分析</h3><h4 id="案例1：AB-BA死锁"><a href="#案例1：AB-BA死锁" class="headerlink" title="案例1：AB-BA死锁"></a>案例1：AB-BA死锁</h4><p>事务1：<code>UPDATE t SET name=&#39;a&#39; WHERE id=1；</code> – 锁住id&#x3D;1的X锁<br>事务2：<code>UPDATE t SET name=&#39;b&#39; WHERE id=2；</code> – 锁住id&#x3D;2的X锁<br>事务1：<code>UPDATE t SET name=&#39;a2&#39; WHERE id=2；</code> – 等待事务2释放id&#x3D;2的锁<br>事务2：<code>UPDATE t SET name=&#39;b2&#39; WHERE id=1；</code> – 等待事务1释放id&#x3D;1的锁，形成循环。</p>
+<p><strong>解法</strong>：保证访问资源的顺序一致。例如都先更新id小的，再更新id大的。</p>
+<h4 id="案例2：唯一键冲突死锁"><a href="#案例2：唯一键冲突死锁" class="headerlink" title="案例2：唯一键冲突死锁"></a>案例2：唯一键冲突死锁</h4><p>这是最容易被忽视的死锁场景。</p>
+<p>sql</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-comment">-- 表结构：CREATE TABLE t1 (i INT， PRIMARY KEY (i)) ENGINE = InnoDB；</span><br><span class="hljs-comment">-- 假设表中已有数据 (1)</span><br>时间点<span class="hljs-number">1</span>： 事务<span class="hljs-number">1</span>：<span class="hljs-keyword">DELETE</span> <span class="hljs-keyword">FROM</span> t1 <span class="hljs-keyword">WHERE</span> i = <span class="hljs-number">1</span>；   <span class="hljs-comment">-- 成功，持有X锁 on (1)</span><br>时间点<span class="hljs-number">2</span>： 事务<span class="hljs-number">2</span>：<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> t1 <span class="hljs-keyword">VALUES</span>(<span class="hljs-number">1</span>)；     <span class="hljs-comment">-- 检测到唯一键冲突，试图在 (1) 上加S锁（等待）</span><br>时间点<span class="hljs-number">3</span>： 事务<span class="hljs-number">3</span>：<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> t1 <span class="hljs-keyword">VALUES</span>(<span class="hljs-number">1</span>)；     <span class="hljs-comment">-- 检测到唯一键冲突，试图在 (1) 上加S锁（等待）</span><br>时间点<span class="hljs-number">4</span>： 事务<span class="hljs-number">1</span>：<span class="hljs-keyword">COMMIT</span>；                        <span class="hljs-comment">-- 释放 (1) 的X锁</span><br>时间点<span class="hljs-number">5</span>： 事务<span class="hljs-number">2</span>：获得S锁 <span class="hljs-keyword">on</span> (<span class="hljs-number">1</span>)；事务<span class="hljs-number">3</span>：获得S锁 <span class="hljs-keyword">on</span> (<span class="hljs-number">1</span>)；  <span class="hljs-comment">-- 两者都获得了S锁</span><br>时间点<span class="hljs-number">6</span>： 事务<span class="hljs-number">2</span>：试图将S锁升级为X锁（因为它是<span class="hljs-keyword">INSERT</span>，需要最终持有X锁），但事务<span class="hljs-number">3</span>也持有S锁，所以事务<span class="hljs-number">2</span>等待事务<span class="hljs-number">3</span>。<br>时间点<span class="hljs-number">7</span>： 事务<span class="hljs-number">3</span>：试图将S锁升级为X锁，但事务<span class="hljs-number">2</span>也持有S锁，所以事务<span class="hljs-number">3</span>等待事务<span class="hljs-number">2</span>。死锁形成。<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>解法</strong>：设计业务逻辑，避免并发插入相同唯一键值。</p>
+<h4 id="案例3：表锁与行锁的相互作用【强化】"><a href="#案例3：表锁与行锁的相互作用【强化】" class="headerlink" title="案例3：表锁与行锁的相互作用【强化】"></a>案例3：表锁与行锁的相互作用【强化】</h4><p>sql</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs pgsql"><span class="hljs-comment">-- 表t1有大量数据</span><br><span class="hljs-comment">-- 事务1：执行全表更新（可能会锁很多行）</span><br>事务<span class="hljs-number">1</span>: <span class="hljs-keyword">UPDATE</span> t1 <span class="hljs-keyword">SET</span> c=<span class="hljs-number">1</span> <span class="hljs-keyword">WHERE</span> id&gt;<span class="hljs-number">1000</span>;<br><span class="hljs-comment">-- 事务2：执行LOCK TABLES t1 WRITE</span><br>事务<span class="hljs-number">2</span>: <span class="hljs-keyword">LOCK</span> <span class="hljs-keyword">TABLES</span> t1 <span class="hljs-keyword">WRITE</span>;  <span class="hljs-comment">-- 等待事务1释放其持有的行锁及意向锁</span><br><span class="hljs-comment">-- 事务2被阻塞，直到事务1提交或回滚</span><br></code></pre></td></tr></table></figure>
+
+
+
+<p>在这种情况下，事务2的显式表锁需要等待事务1的所有行锁释放，因为表锁与行锁冲突（X锁与IX锁不兼容，但实际上事务1持有IX锁和大量行X锁，事务2的显式X锁需要等待所有IX锁释放）。这展示了表锁与行锁的层级阻塞关系。</p>
+<h2 id="七、总结"><a href="#七、总结" class="headerlink" title="七、总结"></a>七、总结</h2><p>​	InnoDB的锁机制是一个庞大而精密的系统工程。它从硬件原子操作出发，构建了灵活多样的锁类型，包括全局锁、表锁（意向锁、显式表锁）、行锁（记录锁、间隙锁、Next-Key锁）等；</p>
+<p>​	在表锁层面，我们详细剖析了意向锁如何实现多粒度锁的协作，显式表锁（<code>LOCK TABLES</code>）的底层实现，以及元数据锁（MDL）与InnoDB表锁的关系。这些知识对于诊断高并发下的锁竞争至关重要。</p>
+<p>​	理解InnoDB锁的原理，不仅仅是知道有哪些锁，更要了解锁请求是如何被处理的。只有这样，当线上出现突发的锁等待或死锁时，才能透过现象看本质，迅速定位问题根源。无论是优化慢SQL，还是调整事务逻辑，亦或是进行参数调优，都能做到有理有据，胸有成竹。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>MySQL InnoDB锁实现及原理深度剖析</div>
+      <div>https://johnjoyjzw.github.io/2025/06/22/MySQL InnoDB锁实现及原理深度剖析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>John Joy</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>June 22, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/05/12/MySQL%20InnoDB%E4%BA%8B%E5%8A%A1%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" title="MySQL InnoDB事务实现原理深度剖析">
+                        <span class="hidden-mobile">MySQL InnoDB事务实现原理深度剖析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
