@@ -1,7 +1,7 @@
 
 
 <!DOCTYPE html>
-<html lang="zh-CN" data-default-color-scheme=auto>
+<html lang="en" data-default-color-scheme=auto>
 
 
 
@@ -22,7 +22,7 @@
 <meta property="og:url" content="https://johnjoyjzw.github.io/2023/04/08/Redis%E5%AE%9E%E7%8E%B0-%E4%BB%8E%E9%94%AE%E7%A9%BA%E9%97%B4%E5%88%B0%E8%BF%87%E6%9C%9F%E7%AD%96%E7%95%A5/index.html">
 <meta property="og:site_name" content="JohnJoy blog">
 <meta property="og:description" content="Redis实现-从键空间到过期策略一、引言​	Redis 是一个高性能的键值对数据库，其核心功能之一就是数据库的管理。每个 Redis 服务器可以包含多个数据库，每个数据库本质上是一个字典（键空间），存储着所有的键值对。除此之外，数据库还需要处理键的过期时间、持久化、通知等功能。 ​	本文深入剖析 Redis 数据库的底层原理，包括服务器中数据库的表示、客户端切换数据库的机制、键空间的操作、过">
-<meta property="og:locale" content="zh_CN">
+<meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602162333094.png">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602170012528.png">
 <meta property="og:image" content="https://gitee.com/Akihij/PicGo/raw/master/img/202602170018032.png">
@@ -127,7 +127,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/">
                 <i class="iconfont icon-home-fill"></i>
-                首页
+                Home
               </a>
             </li>
           
@@ -139,7 +139,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/archives/">
                 <i class="iconfont icon-archive-fill"></i>
-                归档
+                Archives
               </a>
             </li>
           
@@ -151,7 +151,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/categories/">
                 <i class="iconfont icon-category-fill"></i>
-                分类
+                Categories
               </a>
             </li>
           
@@ -163,7 +163,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/tags/">
                 <i class="iconfont icon-tags-fill"></i>
-                标签
+                Tags
               </a>
             </li>
           
@@ -175,7 +175,7 @@
             <li class="nav-item">
               <a class="nav-link" href="/about/">
                 <i class="iconfont icon-user-fill"></i>
-                关于
+                About
               </a>
             </li>
           
@@ -220,7 +220,7 @@
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
         <time datetime="2023-04-08 15:38" pubdate>
-          2023年4月8日 下午
+          April 8, 2023 pm
         </time>
       </span>
     
@@ -231,7 +231,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          5.6k 字
+          5.6k words
         
       </span>
     
@@ -242,7 +242,7 @@
         
         
         
-          48 分钟
+          48 mins
         
       </span>
     
@@ -460,26 +460,26 @@
     <div class="license-meta">
       
         <div class="license-meta-item">
-          <div>作者</div>
+          <div>Author</div>
           <div>JiangZW</div>
         </div>
       
       
         <div class="license-meta-item license-meta-date">
-          <div>发布于</div>
-          <div>2023年4月8日</div>
+          <div>Posted on</div>
+          <div>April 8, 2023</div>
         </div>
       
       
       
         <div class="license-meta-item">
-          <div>许可协议</div>
+          <div>Licensed under</div>
           <div>
             
               
               
                 <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
-                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
                     <i class="iconfont icon-by"></i>
                   </span>
                 </a>
@@ -502,7 +502,7 @@
                       <a href="/2023/07/09/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%BB%84%E4%BB%B6-%E6%9C%8D%E5%8A%A1%E6%B2%BB%E7%90%86/" title="微服务组件 -- 服务治理">
                         <i class="iconfont icon-arrowleft"></i>
                         <span class="hidden-mobile">微服务组件 -- 服务治理</span>
-                        <span class="visible-mobile">上一篇</span>
+                        <span class="visible-mobile">Previous</span>
                       </a>
                     
                   </article>
@@ -511,7 +511,7 @@
                     
                       <a href="/2023/03/08/Redis%E5%AE%9E%E7%8E%B0-%E6%8C%81%E4%B9%85%E5%8C%96/" title="Redis实现-持久化">
                         <span class="hidden-mobile">Redis实现-持久化</span>
-                        <span class="visible-mobile">下一篇</span>
+                        <span class="visible-mobile">Next</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
                     
@@ -530,7 +530,7 @@
       
   <aside class="sidebar" style="margin-left: -1rem">
     <div id="toc">
-  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
   <div class="toc-body" id="toc-body"></div>
 </div>
 
@@ -585,7 +585,7 @@
   <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header text-center">
-        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
         <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -593,7 +593,7 @@
       <div class="modal-body mx-3">
         <div class="md-form mb-5">
           <input type="text" id="local-search-input" class="form-control validate">
-          <label data-error="x" data-success="v" for="local-search-input">关键词</label>
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
         </div>
         <div class="list-group" id="local-search-result"></div>
       </div>
@@ -772,7 +772,7 @@
   
 
   <noscript>
-    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
   </noscript>
 </body>
 </html>

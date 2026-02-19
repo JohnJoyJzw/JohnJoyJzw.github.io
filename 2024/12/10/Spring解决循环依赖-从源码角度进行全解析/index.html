@@ -1,0 +1,699 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="JiangZW">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="Spring如何解决解决循环依赖问题？一、什么是循环依赖？循环依赖是指两个或多个Bean之间相互持有引用，形成一个闭环。例如： 1234567891011@Componentpublic class A &amp;#123;    @Autowired    private B b;&amp;#125;@Componentpublic class B &amp;#123;    @Autowired    priva">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring如何解决解决循环依赖问题？">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2024/12/10/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96-%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E8%BF%9B%E8%A1%8C%E5%85%A8%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="JohnJoy blog">
+<meta property="og:description" content="Spring如何解决解决循环依赖问题？一、什么是循环依赖？循环依赖是指两个或多个Bean之间相互持有引用，形成一个闭环。例如： 1234567891011@Componentpublic class A &amp;#123;    @Autowired    private B b;&amp;#125;@Componentpublic class B &amp;#123;    @Autowired    priva">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2024-12-10T04:38:36.000Z">
+<meta property="article:modified_time" content="2026-02-19T13:18:44.137Z">
+<meta property="article:author" content="JiangZW">
+<meta property="article:tag" content="框架">
+<meta property="article:tag" content="Srping源码">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Spring如何解决解决循环依赖问题？ - JohnJoy blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Spring如何解决解决循环依赖问题？"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2024-12-10 12:38" pubdate>
+          December 10, 2024 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          5.8k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          48 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Spring如何解决解决循环依赖问题？</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="Spring如何解决解决循环依赖问题？"><a href="#Spring如何解决解决循环依赖问题？" class="headerlink" title="Spring如何解决解决循环依赖问题？"></a>Spring如何解决解决循环依赖问题？</h1><h2 id="一、什么是循环依赖？"><a href="#一、什么是循环依赖？" class="headerlink" title="一、什么是循环依赖？"></a>一、什么是循环依赖？</h2><p>循环依赖是指两个或多个Bean之间相互持有引用，形成一个闭环。例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">A</span> &#123;<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> B b;<br>&#125;<br><br><span class="hljs-meta">@Component</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">B</span> &#123;<br>    <span class="hljs-meta">@Autowired</span><br>    <span class="hljs-keyword">private</span> A a;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>当Spring尝试创建A时，发现需要注入B，于是去创建B；而创建B时又发现需要注入A，这就形成了死循环。如果不加处理，容器将陷入无限递归，最终导致栈溢出。</p>
+<h2 id="二、Spring解决循环依赖的前提"><a href="#二、Spring解决循环依赖的前提" class="headerlink" title="二、Spring解决循环依赖的前提"></a>二、Spring解决循环依赖的前提</h2><p>Spring解决循环依赖并非万能，它必须满足以下条件：</p>
+<ol>
+<li><strong>作用域为单例（singleton）</strong>：Spring仅对单例模式的Bean提供循环依赖解决方案。原型（prototype）模式的Bean由于每次创建都是新实例，无法缓存早期暴露的对象，因此遇到循环依赖会直接抛出<code>BeanCurrentlyInCreationException</code>。</li>
+<li><strong>通过setter注入（或字段注入）</strong>：这种注入方式允许对象先通过无参构造器实例化，再设置属性，从而能够提前暴露对象。<strong>构造器注入无法解决循环依赖</strong>，因为构造器必须在实例化阶段就传入依赖，此时对象还未创建完成，无法提前暴露。</li>
+</ol>
+<h2 id="三、Spring解决循环依赖的核心：三级缓存"><a href="#三、Spring解决循环依赖的核心：三级缓存" class="headerlink" title="三、Spring解决循环依赖的核心：三级缓存"></a>三、Spring解决循环依赖的核心：三级缓存</h2><p>Spring在<code>DefaultSingletonBeanRegistry</code>中维护了三级缓存，正是这三张表化解了循环依赖的难题。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs Java"><span class="hljs-comment">// DefaultSingletonBeanRegistry.java</span><br><span class="hljs-comment">/** 一级缓存：单例对象的缓存，存放完全初始化好的 Bean（成品） */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Object&gt; singletonObjects = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcurrentHashMap</span>&lt;&gt;(<span class="hljs-number">256</span>);<br><br><span class="hljs-comment">/** 二级缓存：早期单例对象的缓存，存放原始的 Bean 对象（半成品，尚未填充属性） */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, Object&gt; earlySingletonObjects = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConcurrentHashMap</span>&lt;&gt;(<span class="hljs-number">16</span>);<br><br><span class="hljs-comment">/** 三级缓存：单例工厂的缓存，存放 ObjectFactory，可以生成早期对象（提前暴露的引用） */</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Map&lt;String, ObjectFactory&lt;?&gt;&gt; singletonFactories = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;(<span class="hljs-number">16</span>);<br></code></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li><strong>一级缓存</strong>：最终存放已经完成属性填充、初始化等所有步骤的Bean，是给外部使用的完整Bean。</li>
+<li><strong>二级缓存</strong>：存放实例化完成但尚未属性填充和初始化的原始Bean（或者被AOP代理后的早期对象）。当Bean正在创建时，其他Bean可以从二级缓存中获取它的早期引用。</li>
+<li><strong>三级缓存</strong>：存放<code>ObjectFactory</code>，这是一个函数式接口，调用其<code>getObject()</code>方法可以获取早期引用。它的作用是<strong>延迟代理对象的生成</strong>，避免在Bean实例化后立即进行AOP代理，从而破坏循环依赖。</li>
+</ul>
+<h2 id="四、源码流程剖析：以A和B互相依赖为例"><a href="#四、源码流程剖析：以A和B互相依赖为例" class="headerlink" title="四、源码流程剖析：以A和B互相依赖为例"></a>四、源码流程剖析：以A和B互相依赖为例</h2><p>让我们通过源码一步步跟踪A和B的创建过程。</p>
+<h3 id="1-开始创建A"><a href="#1-开始创建A" class="headerlink" title="1. 开始创建A"></a>1. 开始创建A</h3><p>调用<code>getBean(&quot;a&quot;)</code>，进入<code>doGetBean</code>，由于A不在缓存中，开始创建流程。A被标记为正在创建（<code>singletonsCurrentlyInCreation.add(beanName)</code>）。</p>
+<h3 id="2-实例化A"><a href="#2-实例化A" class="headerlink" title="2. 实例化A"></a>2. 实例化A</h3><p>执行<code>createBeanInstance</code>，通过反射调用A的无参构造器，实例化出一个原始的A对象（此时A的属性b还是null）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 实例化后，在doCreateBean中执行以下代码</span><br><span class="hljs-type">boolean</span> <span class="hljs-variable">earlySingletonExposure</span> <span class="hljs-operator">=</span> (mbd.isSingleton() &amp;&amp; <span class="hljs-built_in">this</span>.allowCircularReferences &amp;&amp;<br>        isSingletonCurrentlyInCreation(beanName));<br><span class="hljs-keyword">if</span> (earlySingletonExposure) &#123;<br>    <span class="hljs-comment">// 将A的早期引用以ObjectFactory的形式添加到三级缓存</span><br>    addSingletonFactory(beanName, () -&gt; getEarlyBeanReference(beanName, mbd, bean));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>addSingletonFactory</code>的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">addSingletonFactory</span><span class="hljs-params">(String beanName, ObjectFactory&lt;?&gt; singletonFactory)</span> &#123;<br>    Assert.notNull(singletonFactory, <span class="hljs-string">&quot;Singleton factory must not be null&quot;</span>);<br>    <span class="hljs-keyword">synchronized</span> (<span class="hljs-built_in">this</span>.singletonObjects) &#123;<br>        <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">this</span>.singletonObjects.containsKey(beanName)) &#123;<br>            <span class="hljs-built_in">this</span>.singletonFactories.put(beanName, singletonFactory);<br>            <span class="hljs-built_in">this</span>.earlySingletonObjects.remove(beanName);<br>            <span class="hljs-built_in">this</span>.registeredSingletons.add(beanName);<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>此时三级缓存中有了一个可以产生A早期引用的工厂。</p>
+<h3 id="3-填充A的属性"><a href="#3-填充A的属性" class="headerlink" title="3. 填充A的属性"></a>3. 填充A的属性</h3><p>继续执行<code>populateBean</code>，尝试为A注入属性b。发现b需要从容器获取，于是调用<code>getBean(&quot;b&quot;)</code>。</p>
+<h3 id="4-创建B"><a href="#4-创建B" class="headerlink" title="4. 创建B"></a>4. 创建B</h3><p><code>getBean(&quot;b&quot;)</code>同样进入创建流程。B实例化后，也将自己的<code>ObjectFactory</code>放入三级缓存。然后开始填充B的属性，发现需要注入A。</p>
+<h3 id="5-B获取A的引用"><a href="#5-B获取A的引用" class="headerlink" title="5. B获取A的引用"></a>5. B获取A的引用</h3><p>B调用<code>getBean(&quot;a&quot;)</code>。此时A已经在创建中（<code>isSingletonCurrentlyInCreation(&quot;a&quot;)</code>为true），于是进入<code>getSingleton</code>的缓存获取逻辑：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> Object <span class="hljs-title function_">getSingleton</span><span class="hljs-params">(String beanName, <span class="hljs-type">boolean</span> allowEarlyReference)</span> &#123;<br>    <span class="hljs-comment">// 从一级缓存获取</span><br>    <span class="hljs-type">Object</span> <span class="hljs-variable">singletonObject</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.singletonObjects.get(beanName);<br>    <span class="hljs-keyword">if</span> (singletonObject == <span class="hljs-literal">null</span> &amp;&amp; isSingletonCurrentlyInCreation(beanName)) &#123;<br>        <span class="hljs-comment">// 从二级缓存获取</span><br>        singletonObject = <span class="hljs-built_in">this</span>.earlySingletonObjects.get(beanName);<br>        <span class="hljs-keyword">if</span> (singletonObject == <span class="hljs-literal">null</span> &amp;&amp; allowEarlyReference) &#123;<br>            <span class="hljs-comment">// 从三级缓存获取ObjectFactory</span><br>            ObjectFactory&lt;?&gt; singletonFactory = <span class="hljs-built_in">this</span>.singletonFactories.get(beanName);<br>            <span class="hljs-keyword">if</span> (singletonFactory != <span class="hljs-literal">null</span>) &#123;<br>                singletonObject = singletonFactory.getObject(); <span class="hljs-comment">// 执行getEarlyBeanReference</span><br>                <span class="hljs-comment">// 将对象从三级缓存提升到二级缓存</span><br>                <span class="hljs-built_in">this</span>.earlySingletonObjects.put(beanName, singletonObject);<br>                <span class="hljs-built_in">this</span>.singletonFactories.remove(beanName);<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> singletonObject;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>关键步骤：</p>
+<ul>
+<li>一级缓存<code>singletonObjects</code>中还没有A（因为A还没创建完）。</li>
+<li>二级缓存<code>earlySingletonObjects</code>中也没有A。</li>
+<li>三级缓存<code>singletonFactories</code>中存在A的工厂，于是调用<code>factory.getObject()</code>。</li>
+</ul>
+<p><code>getObject()</code>执行的是我们之前放入的Lambda：<code>() -&gt; getEarlyBeanReference(beanName, mbd, bean)</code>。<code>getEarlyBeanReference</code>会遍历所有<code>SmartInstantiationAwareBeanPostProcessor</code>，如果存在AOP代理的需求（例如A被<code>@Transactional</code>或<code>@Async</code>标记），则会在这里返回代理对象；否则返回原始对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> Object <span class="hljs-title function_">getEarlyBeanReference</span><span class="hljs-params">(String beanName, RootBeanDefinition mbd, Object bean)</span> &#123;<br>    <span class="hljs-type">Object</span> <span class="hljs-variable">exposedObject</span> <span class="hljs-operator">=</span> bean;<br>    <span class="hljs-keyword">if</span> (!mbd.isSynthetic() &amp;&amp; hasInstantiationAwareBeanPostProcessors()) &#123;<br>        <span class="hljs-keyword">for</span> (BeanPostProcessor bp : getBeanPostProcessors()) &#123;<br>            <span class="hljs-keyword">if</span> (bp <span class="hljs-keyword">instanceof</span> SmartInstantiationAwareBeanPostProcessor) &#123;<br>                <span class="hljs-type">SmartInstantiationAwareBeanPostProcessor</span> <span class="hljs-variable">ibp</span> <span class="hljs-operator">=</span> (SmartInstantiationAwareBeanPostProcessor) bp;<br>                exposedObject = ibp.getEarlyBeanReference(exposedObject, beanName);<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> exposedObject;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>假设A不需要代理，则直接返回原始的A对象。B拿到了A的引用（虽然A此时还没完成属性注入，但已经是一个可用的对象了），然后将A的引用注入到自己的属性a中。</p>
+<p>B拿到A后，继续完成自己的属性填充、初始化等步骤，最终成为一个完整的Bean。B创建完成后，会被放入一级缓存<code>singletonObjects</code>，并从三级&#x2F;二级缓存中移除。</p>
+<h3 id="6-回到A的创建"><a href="#6-回到A的创建" class="headerlink" title="6. 回到A的创建"></a>6. 回到A的创建</h3><p>B创建完毕并返回给A的<code>populateBean</code>方法，A将自己的属性b设置为B的引用。随后A执行初始化方法等，也成为一个完整Bean，被放入一级缓存。</p>
+<p>至此，循环依赖圆满解决。</p>
+<h2 id="五、为什么三级缓存不能简化成二级？"><a href="#五、为什么三级缓存不能简化成二级？" class="headerlink" title="五、为什么三级缓存不能简化成二级？"></a>五、为什么三级缓存不能简化成二级？</h2><p>有的同学可能会问：既然二级缓存<code>earlySingletonObjects</code>可以直接存放早期对象，为什么还需要三级缓存<code>singletonFactories</code>？直接用二级缓存存储原始对象不行吗？</p>
+<p><strong>答案是：为了处理AOP代理。</strong> 如果Bean需要被AOP代理，那么我们希望在循环依赖中，其他Bean注入的应该是<strong>代理对象</strong>，而不是原始对象。但AOP代理的创建通常是在Bean初始化完成后，通过<code>BeanPostProcessor</code>（如<code>AbstractAutoProxyCreator</code>）的<code>postProcessAfterInitialization</code>生成的。如果等初始化完成再生成代理，那么早期暴露的对象就是原始对象，会导致后续注入的依赖不一致。</p>
+<p>因此，Spring引入了三级缓存，通过<code>ObjectFactory</code>实现<strong>延迟代理</strong>：当其他Bean需要获取早期引用时，才通过工厂方法决定是否生成代理。如果不需要代理，工厂直接返回原始对象；如果需要代理，工厂返回代理对象。这样既保证了循环依赖的正确性，又保证了AOP语义的一致性。</p>
+<p><code>AbstractAutoProxyCreator</code>正是通过实现<code>SmartInstantiationAwareBeanPostProcessor</code>的<code>getEarlyBeanReference</code>方法，在早期暴露时就创建代理，并将代理放入二级缓存。这样后续获取到的都是同一个代理对象。</p>
+<h2 id="六、为什么构造器注入无法解决循环依赖？"><a href="#六、为什么构造器注入无法解决循环依赖？" class="headerlink" title="六、为什么构造器注入无法解决循环依赖？"></a>六、为什么构造器注入无法解决循环依赖？</h2><p>因为构造器注入要求依赖对象在实例化时就必须传入，也就是说在<code>createBeanInstance</code>阶段就需要依赖对象。而此时对象尚未实例化完成，无法提前暴露自己的早期引用给其他Bean，因此无法打破循环。如果两个Bean通过构造器相互依赖，Spring将抛出<code>BeanCurrentlyInCreationException</code>。</p>
+<h2 id="七、其他注意事项"><a href="#七、其他注意事项" class="headerlink" title="七、其他注意事项"></a>七、其他注意事项</h2><ul>
+<li><strong><code>allowCircularReferences</code>开关</strong>：Spring允许通过<code>setAllowCircularReferences(false)</code>关闭循环依赖支持，默认是true。</li>
+<li><strong>原型模式下的循环依赖</strong>：由于原型Bean每次创建都是新对象，无法缓存，因此检测到循环依赖时会直接抛出异常。</li>
+<li><strong>不仅仅是字段注入</strong>：setter注入同样适用，因为setter注入也是先实例化再设值。</li>
+</ul>
+<h2 id="八、总结"><a href="#八、总结" class="headerlink" title="八、总结"></a>八、总结</h2><p>Spring通过三级缓存巧妙地解决了单例模式下setter注入的循环依赖问题：</p>
+<ul>
+<li><strong>一级缓存</strong>：存放完整Bean。</li>
+<li><strong>二级缓存</strong>：存放早期暴露的对象（可能是原始对象或代理对象），作为过渡。</li>
+<li><strong>三级缓存</strong>：存放<code>ObjectFactory</code>，延迟生成早期对象，以支持AOP代理。</li>
+</ul>
+<p>当A依赖B，B依赖A时：</p>
+<ol>
+<li>A实例化后，将自身工厂放入三级缓存。</li>
+<li>A填充属性时发现需要B，转而去创建B。</li>
+<li>B实例化后，也将自身工厂放入三级缓存。</li>
+<li>B填充属性时发现需要A，从三级缓存拿到A的工厂，生成A的早期引用（原始或代理），注入给自己，B完成创建。</li>
+<li>A继续填充属性，得到B的完整引用，最终完成创建。</li>
+</ol>
+<p>这一设计既保证了对象的正确创建，又兼顾了AOP等高级特性，是Spring IoC容器最精彩的内核之一。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
+      
+        <a href="/tags/Srping%E6%BA%90%E7%A0%81/">#Srping源码</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Spring如何解决解决循环依赖问题？</div>
+      <div>https://johnjoyjzw.github.io/2024/12/10/Spring解决循环依赖-从源码角度进行全解析/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>JiangZW</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>December 10, 2024</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/02/08/MySQL%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E5%92%8C%E7%B4%A2%E5%BC%95%E7%9A%84%E5%AD%98%E5%82%A8%E5%A5%A5%E7%A7%98-%E4%BB%8E%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E5%88%B0%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E5%85%A8%E8%A7%A3%E6%9E%90/" title="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2024/11/12/Spring%20Bean%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96-%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E8%BF%9B%E8%A1%8C%E5%85%A8%E8%A7%A3%E6%9E%90/" title="Spring Bean的实例化 - 从源码角度进行全解析">
+                        <span class="hidden-mobile">Spring Bean的实例化 - 从源码角度进行全解析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
