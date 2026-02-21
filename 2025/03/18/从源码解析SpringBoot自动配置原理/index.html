@@ -1,0 +1,756 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="JiangZW">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="从源码解析SpringBoot自动配置原理前言：从”配置地狱”到”开箱即用”​	还记得那些年在SSM（Spring + SpringMVC + MyBatis）中挣扎的日子吗？那时候，搭建一个项目的基础环境往往需要半天甚至更长的时间。我们需要配置web.xml，配置Spring容器，配置SpringMVC的DispatcherServlet，配置数据库连接池，配置事务管理器，配置MyBatis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring的AOP：从使用到源码原理进行全解析">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/03/18/%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86/index.html">
+<meta property="og:site_name" content="JohnJoy blog">
+<meta property="og:description" content="从源码解析SpringBoot自动配置原理前言：从”配置地狱”到”开箱即用”​	还记得那些年在SSM（Spring + SpringMVC + MyBatis）中挣扎的日子吗？那时候，搭建一个项目的基础环境往往需要半天甚至更长的时间。我们需要配置web.xml，配置Spring容器，配置SpringMVC的DispatcherServlet，配置数据库连接池，配置事务管理器，配置MyBatis">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-03-18T03:28:16.000Z">
+<meta property="article:modified_time" content="2026-02-21T02:30:14.024Z">
+<meta property="article:author" content="JiangZW">
+<meta property="article:tag" content="框架">
+<meta property="article:tag" content="Spring源码">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Spring的AOP：从使用到源码原理进行全解析 - JohnJoy blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Spring的AOP：从使用到源码原理进行全解析"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-03-18 11:28" pubdate>
+          March 18, 2025 am
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          13k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          112 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">Spring的AOP：从使用到源码原理进行全解析</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h1 id="从源码解析SpringBoot自动配置原理"><a href="#从源码解析SpringBoot自动配置原理" class="headerlink" title="从源码解析SpringBoot自动配置原理"></a>从源码解析SpringBoot自动配置原理</h1><h2 id="前言：从”配置地狱”到”开箱即用”"><a href="#前言：从”配置地狱”到”开箱即用”" class="headerlink" title="前言：从”配置地狱”到”开箱即用”"></a>前言：从”配置地狱”到”开箱即用”</h2><p>​	还记得那些年在SSM（Spring + SpringMVC + MyBatis）中挣扎的日子吗？那时候，搭建一个项目的基础环境往往需要半天甚至更长的时间。我们需要配置<code>web.xml</code>，配置Spring容器，配置SpringMVC的<code>DispatcherServlet</code>，配置数据库连接池，配置事务管理器，配置MyBatis的<code>SqlSessionFactory</code>……大量的XML配置充斥在项目中，稍有不慎就会报错，这种状态被称为”配置地狱”（Configuration Hell）。</p>
+<p>​	SpringBoot的出现彻底终结了这一切。它提出了”约定优于配置”（Convention Over Configuration）的理念，通过<strong>自动配置（Auto Configuration）</strong>机制，让我们在几分钟内就能快速搭建起一个独立运行的、生产级别的Spring应用。你只需要引入一个<code>starter</code>依赖，SpringBoot就会自动为你配置好相关的Bean。</p>
+<p>​	那么，这种”开箱即用”的魔法背后究竟隐藏着怎样的秘密？今天，就让我们戴上源码的眼镜，彻底撕开自动配置的神秘面纱。本文我们将基于 <strong>SpringBoot 2.7.x</strong> 版本进行剖析。</p>
+<h2 id="一、从启动类的-SpringBootApplication说起"><a href="#一、从启动类的-SpringBootApplication说起" class="headerlink" title="一、从启动类的@SpringBootApplication说起"></a>一、从启动类的<code>@SpringBootApplication</code>说起</h2><p>任何一个SpringBoot应用的起点，都是一个带有<code>main</code>方法的类，而这个类上通常会标注一个无比关键的注解：<code>@SpringBootApplication</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@SpringBootApplication</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MyApplication</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        SpringApplication.run(MyApplication.class, args);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>这个<code>@SpringBootApplication</code>注解聚合了所有自动配置的秘密。点进去看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Target(ElementType.TYPE)</span><br><span class="hljs-meta">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="hljs-meta">@Documented</span><br><span class="hljs-meta">@Inherited</span><br><span class="hljs-meta">@SpringBootConfiguration</span><br><span class="hljs-meta">@EnableAutoConfiguration</span><br><span class="hljs-meta">@ComponentScan(excludeFilters = &#123; @Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),</span><br><span class="hljs-meta">        @Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) &#125;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> SpringBootApplication &#123;<br>    <span class="hljs-comment">// ... 省略了一些属性别名方法</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>可以清晰地看到，<code>@SpringBootApplication</code>是一个复合注解（组合注解）。它的三个核心”左膀右臂”分别是：</p>
+<ol>
+<li>**<code>@SpringBootConfiguration</code>**：它实际上就是<code>@Configuration</code>的派生，表示当前类是一个配置类。这意味着你可以直接在启动类中通过<code>@Bean</code>注解向容器注册Bean。</li>
+<li><strong><code>@ComponentScan</code><strong>：启动组件扫描。默认情况下，它会扫描</strong>当前启动类所在包及其所有子包</strong>下的所有直接带有<code>@Component</code>及其派生注解（如<code>@Service</code>、<code>@Repository</code>、<code>@Controller</code>）的类，并将其注册为Spring的Bean 。</li>
+<li><strong><code>@EnableAutoConfiguration</code><strong>：这才是自动配置的</strong>核心总开关</strong>。它的作用就是开启SpringBoot的自动配置功能，让SpringBoot根据类路径下的依赖（jar包）、配置文件和已有Bean的情况，来猜测你需要配置哪些Bean 。</li>
+</ol>
+<p>既然<code>@EnableAutoConfiguration</code>是核心，那我们的分析就从它入手。</p>
+<h2 id="二、深入-EnableAutoConfiguration"><a href="#二、深入-EnableAutoConfiguration" class="headerlink" title="二、深入@EnableAutoConfiguration"></a>二、深入<code>@EnableAutoConfiguration</code></h2><p>打开<code>@EnableAutoConfiguration</code>的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Target(ElementType.TYPE)</span><br><span class="hljs-meta">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="hljs-meta">@Documented</span><br><span class="hljs-meta">@Inherited</span><br><span class="hljs-meta">@AutoConfigurationPackage</span><br><span class="hljs-meta">@Import(AutoConfigurationImportSelector.class)</span><br><span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> EnableAutoConfiguration &#123;<br>    <span class="hljs-comment">// 用于覆盖或排除自动配置类的属性</span><br>    <span class="hljs-type">String</span> <span class="hljs-variable">ENABLED_OVERRIDE_PROPERTY</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;spring.boot.enableautoconfiguration&quot;</span>;<br><br>    <span class="hljs-comment">// 排除指定的自动配置类</span><br>    Class&lt;?&gt;[] exclude() <span class="hljs-keyword">default</span> &#123;&#125;;<br><br>    <span class="hljs-comment">// 排除指定的自动配置类名</span><br>    String[] excludeName() <span class="hljs-keyword">default</span> &#123;&#125;;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>这个注解又引入了两个核心组件：</p>
+<ol>
+<li>**<code>@AutoConfigurationPackage</code>**：自动配置包，主要用来注册当前启动类所在的包，供后续使用。</li>
+<li>**<code>@Import(AutoConfigurationImportSelector.class)</code>**：这是自动配置逻辑真正执行的入口。<code>@Import</code>是Spring框架中用来导入配置类的一个重要注解，而<code>AutoConfigurationImportSelector</code>是一个<code>ImportSelector</code>的实现类，它的<code>selectImports</code>方法会返回一批需要注册到容器中的类的全限定名 。</li>
+</ol>
+<h2 id="三、揭秘-AutoConfigurationPackage"><a href="#三、揭秘-AutoConfigurationPackage" class="headerlink" title="三、揭秘@AutoConfigurationPackage"></a>三、揭秘<code>@AutoConfigurationPackage</code></h2><p>先来看第一个小谜题：<code>@AutoConfigurationPackage</code>是做什么的？</p>
+<p>源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Target(ElementType.TYPE)</span><br><span class="hljs-meta">@Retention(RetentionPolicy.RUNTIME)</span><br><span class="hljs-meta">@Documented</span><br><span class="hljs-meta">@Inherited</span><br><span class="hljs-meta">@Import(AutoConfigurationPackages.Registrar.class)</span> <span class="hljs-comment">// 又见@Import</span><br><span class="hljs-keyword">public</span> <span class="hljs-meta">@interface</span> AutoConfigurationPackage &#123;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>它通过<code>@Import</code>导入了<code>AutoConfigurationPackages.Registrar</code>。这是一个<code>ImportBeanDefinitionRegistrar</code>接口的实现类，它的作用是在运行时向容器中注册Bean定义 。</p>
+<p>打开<code>Registrar</code>的源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Registrar</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">ImportBeanDefinitionRegistrar</span>, DeterminableImports &#123;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">registerBeanDefinitions</span><span class="hljs-params">(AnnotationMetadata metadata, BeanDefinitionRegistry registry)</span> &#123;<br>        <span class="hljs-comment">// 核心：注册一个包含基础包名的Bean</span><br>        register(registry, <span class="hljs-keyword">new</span> <span class="hljs-title class_">PackageImport</span>(metadata).getPackageName());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><code>new PackageImport(metadata).getPackageName()</code>这行代码是关键。<code>metadata</code>封装了标注了<code>@AutoConfigurationPackage</code>注解的类的信息。在启动类上，这个类就是<code>MyApplication</code>本身。通过<code>metadata</code>，它获取了<code>MyApplication</code>所在包的包名（例如 <code>com.example.myapp</code>）。</p>
+<p>接着调用<code>AutoConfigurationPackages.register</code>方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">register</span><span class="hljs-params">(BeanDefinitionRegistry registry, String... packageNames)</span> &#123;<br>    <span class="hljs-keyword">if</span> (registry.containsBeanDefinition(BEAN)) &#123;<br>        <span class="hljs-comment">// 如果已经存在该Bean，则往Bean的构造函数参数中添加新的包名</span><br>        <span class="hljs-type">BeanDefinition</span> <span class="hljs-variable">beanDefinition</span> <span class="hljs-operator">=</span> registry.getBeanDefinition(BEAN);<br>        <span class="hljs-type">ConstructorArgumentValues</span> <span class="hljs-variable">constructorArguments</span> <span class="hljs-operator">=</span> beanDefinition.getConstructorArgumentValues();<br>        constructorArguments.addIndexedArgumentValue(<span class="hljs-number">0</span>, addBasePackages(constructorArguments, packageNames));<br>    &#125; <span class="hljs-keyword">else</span> &#123;<br>        <span class="hljs-comment">// 如果不存在，则创建一个新的Bean，其类型为BasePackages，构造函数参数为包名数组</span><br>        <span class="hljs-type">GenericBeanDefinition</span> <span class="hljs-variable">beanDefinition</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">GenericBeanDefinition</span>();<br>        beanDefinition.setBeanClass(BasePackages.class);<br>        beanDefinition.getConstructorArgumentValues().addIndexedArgumentValue(<span class="hljs-number">0</span>, packageNames);<br>        beanDefinition.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);<br>        registry.registerBeanDefinition(BEAN, beanDefinition);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><strong>逻辑小结</strong>：<br><code>@AutoConfigurationPackage</code>的核心作用就是将<strong>主启动类所在的包</strong>注册为一个名为<code>org.springframework.boot.autoconfigure.AutoConfigurationPackages</code>的Bean。这个Bean内部维护了一个包名的列表。这样，容器中的其他组件如果需要获取”根包”路径（例如用于JPA实体扫描），就可以通过<code>AutoConfigurationPackages.get()</code>方法来获取 。</p>
+<h2 id="四、AutoConfigurationImportSelector的源码解剖"><a href="#四、AutoConfigurationImportSelector的源码解剖" class="headerlink" title="四、AutoConfigurationImportSelector的源码解剖"></a>四、<code>AutoConfigurationImportSelector</code>的源码解剖</h2><p>现在，让我们聚焦于自动配置的真正大脑——<code>AutoConfigurationImportSelector</code>。它实现了<code>DeferredImportSelector</code>接口，而<code>DeferredImportSelector</code>继承自<code>ImportSelector</code>。<code>DeferredImportSelector</code>的特殊之处在于，它的执行时机是在所有<code>@Configuration</code>配置类都处理完毕<strong>之后</strong>，这样可以保证自动配置类的优先级低于用户自定义的配置，确保用户覆盖的有效性 。</p>
+<h3 id="4-1-入口方法：selectImports"><a href="#4-1-入口方法：selectImports" class="headerlink" title="4.1 入口方法：selectImports"></a>4.1 入口方法：<code>selectImports</code></h3><p>当Spring容器处理<code>@Import(AutoConfigurationImportSelector.class)</code>注解时，会调用其<code>selectImports</code>方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Override</span><br><span class="hljs-keyword">public</span> String[] selectImports(AnnotationMetadata annotationMetadata) &#123;<br>    <span class="hljs-comment">// 1. 检查自动配置开关是否开启</span><br>    <span class="hljs-keyword">if</span> (!isEnabled(annotationMetadata)) &#123;<br>        <span class="hljs-keyword">return</span> NO_IMPORTS;<br>    &#125;<br>    <span class="hljs-comment">// 2. 获取自动配置条目</span><br>    <span class="hljs-type">AutoConfigurationEntry</span> <span class="hljs-variable">autoConfigurationEntry</span> <span class="hljs-operator">=</span> getAutoConfigurationEntry(annotationMetadata);<br>    <span class="hljs-comment">// 3. 将配置类的全限定名转换为String数组返回</span><br>    <span class="hljs-keyword">return</span> StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="4-2-开关检查：isEnabled"><a href="#4-2-开关检查：isEnabled" class="headerlink" title="4.2 开关检查：isEnabled"></a>4.2 开关检查：<code>isEnabled</code></h3><p>这一步检查自动配置功能是否被全局禁用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> <span class="hljs-type">boolean</span> <span class="hljs-title function_">isEnabled</span><span class="hljs-params">(AnnotationMetadata metadata)</span> &#123;<br>    <span class="hljs-comment">// 判断当前类是不是AutoConfigurationImportSelector本身</span><br>    <span class="hljs-keyword">if</span> (getClass() == AutoConfigurationImportSelector.class) &#123;<br>        <span class="hljs-comment">// 从Environment中读取配置属性 spring.boot.enableautoconfiguration，默认为true</span><br>        <span class="hljs-keyword">return</span> getEnvironment().getProperty(EnableAutoConfiguration.ENABLED_OVERRIDE_PROPERTY, Boolean.class, <span class="hljs-literal">true</span>);<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>如果你想彻底关闭自动配置，可以在<code>application.properties</code>中设置：<code>spring.boot.enableautoconfiguration=false</code> 。</p>
+<h3 id="4-3-核心逻辑：getAutoConfigurationEntry"><a href="#4-3-核心逻辑：getAutoConfigurationEntry" class="headerlink" title="4.3 核心逻辑：getAutoConfigurationEntry"></a>4.3 核心逻辑：<code>getAutoConfigurationEntry</code></h3><p>这是自动配置最核心的方法，整个流程的精华都浓缩在这里。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> AutoConfigurationEntry <span class="hljs-title function_">getAutoConfigurationEntry</span><span class="hljs-params">(AnnotationMetadata annotationMetadata)</span> &#123;<br>    <span class="hljs-comment">// 再次检查开关，虽然前面查过，但这里是protected方法，可能被子类直接调用</span><br>    <span class="hljs-keyword">if</span> (!isEnabled(annotationMetadata)) &#123;<br>        <span class="hljs-keyword">return</span> EMPTY_ENTRY;<br>    &#125;<br>    <span class="hljs-comment">// 获取@EnableAutoConfiguration注解的属性，比如exclude和excludeName</span><br>    <span class="hljs-type">AnnotationAttributes</span> <span class="hljs-variable">attributes</span> <span class="hljs-operator">=</span> getAttributes(annotationMetadata);<br>    <span class="hljs-comment">// 【重点】1. 获取所有候选的自动配置类（从配置文件中加载）</span><br>    List&lt;String&gt; configurations = getCandidateConfigurations(annotationMetadata, attributes);<br>    <span class="hljs-comment">// 2. 去除重复项（因为多个jar包中的spring.factories可能有重复）</span><br>    configurations = removeDuplicates(configurations);<br>    <span class="hljs-comment">// 3. 获取需要排除的自动配置类（根据注解属性中的exclude/excludeName）</span><br>    Set&lt;String&gt; exclusions = getExclusions(annotationMetadata, attributes);<br>    <span class="hljs-comment">// 4. 检查排除类是否有效（排除的类必须是候选类，否则抛出异常）</span><br>    checkExcludedClasses(configurations, exclusions);<br>    <span class="hljs-comment">// 5. 从候选列表中移除被排除的类</span><br>    configurations.removeAll(exclusions);<br>    <span class="hljs-comment">// 【重点】6. 应用过滤器，根据条件注解（@Conditional）进行过滤</span><br>    configurations = getConfigurationClassFilter().filter(configurations);<br>    <span class="hljs-comment">// 7. 触发自动配置导入事件，用于记录日志和条件评估报告</span><br>    fireAutoConfigurationImportEvents(configurations, exclusions);<br>    <span class="hljs-comment">// 8. 封装成AutoConfigurationEntry返回</span><br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">AutoConfigurationEntry</span>(configurations, exclusions);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h4 id="4-3-1-获取候选配置：getCandidateConfigurations"><a href="#4-3-1-获取候选配置：getCandidateConfigurations" class="headerlink" title="4.3.1 获取候选配置：getCandidateConfigurations"></a>4.3.1 获取候选配置：<code>getCandidateConfigurations</code></h4><p>这个方法负责加载所有可能的自动配置类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">protected</span> List&lt;String&gt; <span class="hljs-title function_">getCandidateConfigurations</span><span class="hljs-params">(AnnotationMetadata metadata, AnnotationAttributes attributes)</span> &#123;<br>    <span class="hljs-comment">// 通过SpringFactoriesLoader加载</span><br>    List&lt;String&gt; configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(),<br>            getBeanClassLoader());<br>    <span class="hljs-comment">// 从Spring Boot 2.7开始，增加了一种新的加载方式：从META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports加载</span><br>    ImportCandidates.load(AutoConfiguration.class, getBeanClassLoader()).forEach(configurations::add);<br>    Assert.notEmpty(configurations,<br>            <span class="hljs-string">&quot;No auto configuration classes found in META-INF/spring.factories nor in META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports. If you &quot;</span><br>                    + <span class="hljs-string">&quot;are using a custom packaging, make sure that file is correct.&quot;</span>);<br>    <span class="hljs-keyword">return</span> configurations;<br>&#125;<br><br><span class="hljs-comment">// 返回的是EnableAutoConfiguration.class，作为SpringFactoriesLoader的key</span><br><span class="hljs-keyword">protected</span> Class&lt;?&gt; getSpringFactoriesLoaderFactoryClass() &#123;<br>    <span class="hljs-keyword">return</span> EnableAutoConfiguration.class;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p><code>SpringFactoriesLoader.loadFactoryNames</code>方法会扫描classpath下所有jar包中的<code>META-INF/spring.factories</code>文件，找到key为<code>org.springframework.boot.autoconfigure.EnableAutoConfiguration</code>对应的所有value值（即自动配置类的全限定名），并将其加载进来 。</p>
+<p>在<code>spring-boot-autoconfigure</code>这个jar包中，就包含了数百个自动配置类的定义。例如：<br><code>org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration</code><br><code>org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration</code></p>
+<h4 id="4-3-2-配置过滤：getConfigurationClassFilter-filter"><a href="#4-3-2-配置过滤：getConfigurationClassFilter-filter" class="headerlink" title="4.3.2 配置过滤：getConfigurationClassFilter().filter()"></a>4.3.2 配置过滤：<code>getConfigurationClassFilter().filter()</code></h4><p>过滤这一步至关重要。虽然我们加载了上百个自动配置类，但它们并不会全部生效。只有满足了特定条件的才会被实例化，这就是<strong>按需装配</strong>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// ConfigurationClassFilter的内部类</span><br>List&lt;String&gt; <span class="hljs-title function_">filter</span><span class="hljs-params">(List&lt;String&gt; configurations)</span> &#123;<br>    <span class="hljs-type">long</span> <span class="hljs-variable">startTime</span> <span class="hljs-operator">=</span> System.nanoTime();<br>    <span class="hljs-comment">// 创建一个候选数组，初始状态为true</span><br>    <span class="hljs-type">boolean</span>[] matches = <span class="hljs-keyword">new</span> <span class="hljs-title class_">boolean</span>[configurations.size()];<br>    <span class="hljs-type">int</span> <span class="hljs-variable">matchCount</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-comment">// 遍历所有的过滤器，这里是AutoConfigurationImportFilter的实例</span><br>    <span class="hljs-keyword">for</span> (AutoConfigurationImportFilter filter : <span class="hljs-built_in">this</span>.filters) &#123;<br>        <span class="hljs-comment">// 批量匹配，返回布尔数组</span><br>        <span class="hljs-type">boolean</span>[] filterMatches = filter.match(configurations, <span class="hljs-built_in">this</span>.autoConfigurationMetadata);<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; filterMatches.length; i++) &#123;<br>            <span class="hljs-keyword">if</span> (!filterMatches[i]) &#123;<br>                matches[i] = <span class="hljs-literal">false</span>;<br>            &#125;<br>        &#125;<br>    &#125;<br>    <span class="hljs-comment">// 收集匹配的结果</span><br>    List&lt;String&gt; result = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayList</span>&lt;&gt;();<br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; configurations.size(); i++) &#123;<br>        <span class="hljs-keyword">if</span> (matches[i]) &#123;<br>            result.add(configurations.get(i));<br>        &#125;<br>    &#125;<br>    <span class="hljs-keyword">return</span> result;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<p>常见的<code>AutoConfigurationImportFilter</code>实现有：</p>
+<ul>
+<li>**<code>OnClassCondition</code>**：检查类路径下是否存在指定的类（对应<code>@ConditionalOnClass</code>和<code>@ConditionalOnMissingClass</code>）。</li>
+<li>**<code>OnWebApplicationCondition</code>**：检查是否是Web环境（对应<code>@ConditionalOnWebApplication</code>）。</li>
+<li>**<code>OnBeanCondition</code>**：检查容器中是否存在指定的Bean（对应<code>@ConditionalOnBean</code>、<code>@ConditionalOnMissingBean</code>、<code>@ConditionalOnSingleCandidate</code>）。</li>
+</ul>
+<p>正是通过这一层过滤，自动配置类才能展现出智能的一面 。</p>
+<h2 id="五、解析RedisAutoConfiguration"><a href="#五、解析RedisAutoConfiguration" class="headerlink" title="五、解析RedisAutoConfiguration"></a>五、解析<code>RedisAutoConfiguration</code></h2><p>光看理论不够过瘾，我们来剖析一个活生生的自动配置类——<code>RedisAutoConfiguration</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@AutoConfiguration</span> <span class="hljs-comment">// Spring Boot 2.7 后新引入的注解，替代了 @Configuration</span><br><span class="hljs-meta">@ConditionalOnClass(RedisOperations.class)</span> <span class="hljs-comment">// 关键条件：类路径下必须有 RedisOperations 类</span><br><span class="hljs-meta">@EnableConfigurationProperties(RedisProperties.class)</span> <span class="hljs-comment">// 启用属性绑定，将前缀为spring.redis的属性注入</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RedisAutoConfiguration</span> &#123;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-meta">@ConditionalOnMissingBean(name = &quot;redisTemplate&quot;)</span> <span class="hljs-comment">// 关键条件：容器中不存在名为&quot;redisTemplate&quot;的Bean</span><br>    <span class="hljs-meta">@ConditionalOnSingleCandidate(RedisConnectionFactory.class)</span><br>    <span class="hljs-keyword">public</span> RedisTemplate&lt;Object, Object&gt; <span class="hljs-title function_">redisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> &#123;<br>        <span class="hljs-comment">// 创建默认的RedisTemplate</span><br>        RedisTemplate&lt;Object, Object&gt; template = <span class="hljs-keyword">new</span> <span class="hljs-title class_">RedisTemplate</span>&lt;&gt;();<br>        template.setConnectionFactory(redisConnectionFactory);<br>        <span class="hljs-keyword">return</span> template;<br>    &#125;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-meta">@ConditionalOnMissingBean</span> <span class="hljs-comment">// 关键条件：容器中不存在StringRedisTemplate类型的Bean</span><br>    <span class="hljs-meta">@ConditionalOnSingleCandidate(RedisConnectionFactory.class)</span><br>    <span class="hljs-keyword">public</span> StringRedisTemplate <span class="hljs-title function_">stringRedisTemplate</span><span class="hljs-params">(RedisConnectionFactory redisConnectionFactory)</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StringRedisTemplate</span>(redisConnectionFactory);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-1-条件注解的魔法"><a href="#5-1-条件注解的魔法" class="headerlink" title="5.1 条件注解的魔法"></a>5.1 条件注解的魔法</h3><ol>
+<li>**<code>@ConditionalOnClass(RedisOperations.class)</code>**：<br>当你在<code>pom.xml</code>中引入了<code>spring-boot-starter-data-redis</code>依赖后，<code>RedisOperations</code>类就被添加到了classpath中。这个条件通过，<code>RedisAutoConfiguration</code>配置类才可能被加载。如果没有引入相关依赖，这个配置类会被直接跳过 。</li>
+<li><strong><code>@ConditionalOnMissingBean(name = &quot;redisTemplate&quot;)</code><strong>：<br>即使classpath中有Redis的类，<code>RedisAutoConfiguration</code>也不会</strong>霸蛮</strong>地创建<code>redisTemplate</code> Bean。它会先看看容器里有没有你自己定义的<code>redisTemplate</code>。如果你已经定义了一个，它就认为你”有自定义需求”，尊重你的选择，不再创建默认的。这正是”允许覆盖”原则的体现 。</li>
+<li>**<code>@EnableConfigurationProperties(RedisProperties.class)</code>**：<br>这个注解让<code>RedisProperties</code>这个属性类生效。<code>RedisProperties</code>上标注了<code>@ConfigurationProperties(prefix = &quot;spring.redis&quot;)</code>，它会将配置文件中所有以<code>spring.redis</code>开头的属性值，如<code>spring.redis.host</code>、<code>spring.redis.port</code>，绑定到这个类的字段上。然后，<code>RedisAutoConfiguration</code>就可以从注入的<code>RedisProperties</code>对象中读取配置，来创建相应的连接工厂或模板 。</li>
+</ol>
+<h2 id="六、如何手写一个Starter"><a href="#六、如何手写一个Starter" class="headerlink" title="六、如何手写一个Starter"></a>六、如何手写一个Starter</h2><p>理解源码的最终目的是为了更好地应用和扩展。下面我们简单梳理一下如何自定义一个Starter。</p>
+<h3 id="6-1-Starter的命名规范"><a href="#6-1-Starter的命名规范" class="headerlink" title="6.1 Starter的命名规范"></a>6.1 Starter的命名规范</h3><ul>
+<li>官方Starter：<code>spring-boot-starter-&#123;模块&#125;</code></li>
+<li>自定义Starter：<code>&#123;模块&#125;-spring-boot-starter</code></li>
+</ul>
+<h3 id="6-2-Starter的模块结构"><a href="#6-2-Starter的模块结构" class="headerlink" title="6.2 Starter的模块结构"></a>6.2 Starter的模块结构</h3><p>一个完整的Starter通常包含两个模块：</p>
+<ol>
+<li><strong><code>autoconfigure</code>模块</strong>：包含自动配置代码和<code>@ConfigurationProperties</code>。</li>
+<li><strong><code>starter</code>模块</strong>：是一个空jar，仅用于依赖管理，它依赖了<code>autoconfigure</code>模块以及其他必要的依赖。</li>
+</ol>
+<h3 id="6-3-关键步骤"><a href="#6-3-关键步骤" class="headerlink" title="6.3 关键步骤"></a>6.3 关键步骤</h3><ol>
+<li><p><strong>编写属性绑定类</strong>：创建<code>XxxProperties</code>类，用于映射配置文件中的属性。</p>
+</li>
+<li><p><strong>编写自动配置类</strong>：创建<code>XxxAutoConfiguration</code>类，使用<code>@ConditionalOnClass</code>、<code>@ConditionalOnMissingBean</code>等注解来控制配置是否生效，并在其中定义<code>@Bean</code>方法创建服务类。同时通过<code>@EnableConfigurationProperties(XxxProperties.class)</code>注入属性。</p>
+</li>
+<li><p><strong>配置spring.factories</strong>：<br>在<code>resources/META-INF/spring.factories</code>文件中添加：</p>
+<p>properties</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs stylus">org<span class="hljs-selector-class">.springframework</span><span class="hljs-selector-class">.boot</span><span class="hljs-selector-class">.autoconfigure</span>.EnableAutoConfiguration=\<br>com<span class="hljs-selector-class">.example</span><span class="hljs-selector-class">.starter</span><span class="hljs-selector-class">.config</span>.XxxAutoConfiguration<br></code></pre></td></tr></table></figure>
+
+<p><strong>（Spring Boot 2.7+ 新方式）</strong>：或者创建<code>resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports</code>文件，直接写入自动配置类的全限定名，一行一个。</p>
+</li>
+</ol>
+<h2 id="七、总结"><a href="#七、总结" class="headerlink" title="七、总结"></a>七、总结</h2><p><strong>核心思想</strong>：Spring Boot 自动配置通过 <code>@EnableAutoConfiguration</code> 注解开启，利用 <code>AutoConfigurationImportSelector</code> 中的 <code>selectImports</code> 方法，批量加载所有 <code>META-INF/spring.factories</code> 或 <code>AutoConfiguration.imports</code> 文件中注册的配置类。然后，再通过一系列条件注解（<code>@Conditional</code>）进行筛选，最终只将满足条件的配置类（及其定义的 Bean）注入到 Spring 容器中 。</p>
+<p><strong>一句话总结</strong>：<strong>自动配置 &#x3D; 批量注册配置类 + 条件装配</strong>。</p>
+<blockquote>
+<p>常见问题：</p>
+<ol>
+<li><strong>问</strong>：<code>@SpringBootApplication</code> 是什么？<br><strong>答</strong>：是一个组合注解，包含 <code>@SpringBootConfiguration</code>、<code>@EnableAutoConfiguration</code> 和 <code>@ComponentScan</code>。相当于把这三个注解的功能聚合在了一起。</li>
+<li><strong>问</strong>：<code>@EnableAutoConfiguration</code> 是如何工作的？<br><strong>答</strong>：它通过 <code>@Import(AutoConfigurationImportSelector.class)</code> 导入了一个 <code>ImportSelector</code>。<code>AutoConfigurationImportSelector</code> 会去读取 classpath 下的 <code>META-INF/spring.factories</code> 或 <code>AutoConfiguration.imports</code> 文件，获取所有自动配置类的名字，经过排除和条件过滤后，返回给 Spring 容器进行注册。</li>
+<li><strong>问</strong>：Spring Boot 如何做到”按需配置”？<br><strong>答</strong>：通过条件注解，如 <code>@ConditionalOnClass</code>、<code>@ConditionalOnMissingBean</code> 等。自动配置类上标注了这些注解，只有当指定的类存在、Bean 不存在等特定条件满足时，该自动配置类才会生效，从而实现了按需加载。</li>
+<li><strong>问</strong>：如何覆盖 Spring Boot 的自动配置？<br><strong>答</strong>：有多种方式，最常用的有两种：1）直接定义自己的 Bean，因为很多自动配置类上都有 <code>@ConditionalOnMissingBean</code>，当检测到你的自定义 Bean 后，它就不会创建默认 Bean。2）在配置文件中通过 <code>exclude</code> 属性排除特定的自动配置类，例如 <code>@SpringBootApplication(exclude = &#123;DataSourceAutoConfiguration.class&#125;)</code>。</li>
+<li><strong>问</strong>：如何在自定义 Starter 中读取配置文件？<br><strong>答</strong>：创建一个 <code>@ConfigurationProperties</code> 注解的属性类来绑定配置，然后在自动配置类上使用 <code>@EnableConfigurationProperties</code> 来引入该属性类，这样就可以在自动配置类中通过依赖注入获取配置值，并在 <code>@Bean</code> 方法中使用。</li>
+</ol>
+</blockquote>
+<p>希望这篇从源码角度的深度解析，能帮你彻底掌握 Spring Boot 的自动配置原理。理解它，不仅能让你在日常开发中更加得心应手，更能在遇到奇怪问题时，拥有深入底层定位问题的能力。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
+      
+        <a href="/tags/Spring%E6%BA%90%E7%A0%81/">#Spring源码</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Spring的AOP：从使用到源码原理进行全解析</div>
+      <div>https://johnjoyjzw.github.io/2025/03/18/从源码解析SpringBoot自动配置原理/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>JiangZW</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>March 18, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/05/12/MySQL%20InnoDB%E4%BA%8B%E5%8A%A1%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%E6%B7%B1%E5%BA%A6%E5%89%96%E6%9E%90/" title="MySQL InnoDB事务实现原理深度剖析">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">MySQL InnoDB事务实现原理深度剖析</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/02/08/MySQL%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E5%92%8C%E7%B4%A2%E5%BC%95%E7%9A%84%E5%AD%98%E5%82%A8%E5%A5%A5%E7%A7%98-%E4%BB%8E%E7%A3%81%E7%9B%98%E7%BB%93%E6%9E%84%E5%88%B0%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9A%84%E5%85%A8%E8%A7%A3%E6%9E%90/" title="MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析">
+                        <span class="hidden-mobile">MySQL底层数据和索引的存储-从磁盘结构到内存管理的全解析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
