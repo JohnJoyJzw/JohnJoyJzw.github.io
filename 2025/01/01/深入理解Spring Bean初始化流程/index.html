@@ -16,15 +16,15 @@
   <meta name="author" content="JiangZW">
   <meta name="keywords" content="">
   
-    <meta name="description" content="深入理解Spring初始化流程一、前言​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：实例化（Instantiation）、属性填充（Populate）和初始化（Initialization）。 ​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、Bean正式">
+    <meta name="description" content="深入理解Spring Bean初始化流程一、前言​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：实例化（Instantiation）、属性填充（Populate）和初始化（Initialization）。 ​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、B">
 <meta property="og:type" content="article">
-<meta property="og:title" content="深入理解Spring初始化流程">
-<meta property="og:url" content="https://johnjoyjzw.github.io/2025/01/01/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Spring%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/index.html">
+<meta property="og:title" content="深入理解Spring Bean初始化流程">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/01/01/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Spring%20Bean%E5%88%9D%E5%A7%8B%E5%8C%96%E6%B5%81%E7%A8%8B/index.html">
 <meta property="og:site_name" content="JohnJoy blog">
-<meta property="og:description" content="深入理解Spring初始化流程一、前言​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：实例化（Instantiation）、属性填充（Populate）和初始化（Initialization）。 ​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、Bean正式">
+<meta property="og:description" content="深入理解Spring Bean初始化流程一、前言​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：实例化（Instantiation）、属性填充（Populate）和初始化（Initialization）。 ​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、B">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2025-01-01T02:28:37.000Z">
-<meta property="article:modified_time" content="2026-02-19T14:42:17.981Z">
+<meta property="article:modified_time" content="2026-02-19T14:44:07.203Z">
 <meta property="article:author" content="JiangZW">
 <meta property="article:tag" content="框架">
 <meta property="article:tag" content="Spring源码">
@@ -32,7 +32,7 @@
   
   
   
-  <title>深入理解Spring初始化流程 - JohnJoy blog</title>
+  <title>深入理解Spring Bean初始化流程 - JohnJoy blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -197,7 +197,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="深入理解Spring初始化流程"></span>
+            <span id="subtitle" data-typed-text="深入理解Spring Bean初始化流程"></span>
           
         </div>
 
@@ -269,14 +269,14 @@
         <div id="board">
           <article class="post-content mx-auto">
             <!-- SEO header -->
-            <h1 style="display: none">深入理解Spring初始化流程</h1>
+            <h1 style="display: none">深入理解Spring Bean初始化流程</h1>
             
             
               <div class="markdown-body">
                 
                 <meta name="referrer" content="no-referrer" />
 
-<h1 id="深入理解Spring初始化流程"><a href="#深入理解Spring初始化流程" class="headerlink" title="深入理解Spring初始化流程"></a>深入理解Spring初始化流程</h1><h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：<strong>实例化（Instantiation）</strong>、<strong>属性填充（Populate）</strong>和<strong>初始化（Initialization）</strong>。</p>
+<h1 id="深入理解Spring-Bean初始化流程"><a href="#深入理解Spring-Bean初始化流程" class="headerlink" title="深入理解Spring Bean初始化流程"></a>深入理解Spring Bean初始化流程</h1><h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>​	如果说Spring的IoC容器是一座精密的工厂，那么Bean的创建就是这座工厂最核心的生产流水线。在这条流水线上，一个Bean从无到有，大体经历三个关键工序：<strong>实例化（Instantiation）</strong>、<strong>属性填充（Populate）</strong>和<strong>初始化（Initialization）</strong>。</p>
 <p>​	很多开发者对Bean的实例化和属性注入相对熟悉，但对于属性填充完成后、Bean正式投入使用前的那段“初始化”旅程，往往只有一个模糊的概念——好像会调用<code>afterPropertiesSet</code>和<code>init-method</code>，好像还有一些<code>BeanPostProcessor</code>会插手。至于这些环节的先后顺序、源码实现细节、以及Spring设计背后的深意，却知之甚少。</p>
 <p>​	本文将以<strong>源码深度解析</strong>的形式，为你全景式展现Spring Bean在属性填充完成后的初始化流程。我们将从<code>doCreateBean</code>方法切入，逐行分析<code>initializeBean</code>的每一行代码，深入探讨<code>Aware</code>接口的回调、<code>BeanPostProcessor</code>的前后置处理、<code>InitializingBean</code>和<code>init-method</code>的调用机制，并揭示AOP代理对象创建的真正时机。</p>
 <h2 id="二、从-doCreateBean-说起：初始化流程的入口"><a href="#二、从-doCreateBean-说起：初始化流程的入口" class="headerlink" title="二、从 doCreateBean 说起：初始化流程的入口"></a>二、从 doCreateBean 说起：初始化流程的入口</h2><p>​	在Spring源码中，Bean的创建核心逻辑封装在<code>AbstractAutowireCapableBeanFactory</code>类的<code>doCreateBean</code>方法中。这个方法的名字很直白——“执行创建Bean”。在经历实例化和属性填充后，初始化工作从这里拉开序幕。</p>
@@ -414,8 +414,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>深入理解Spring初始化流程</div>
-      <div>https://johnjoyjzw.github.io/2025/01/01/深入理解Spring初始化流程/</div>
+      <div>深入理解Spring Bean初始化流程</div>
+      <div>https://johnjoyjzw.github.io/2025/01/01/深入理解Spring Bean初始化流程/</div>
     </div>
     <div class="license-meta">
       
