@@ -223,6 +223,90 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2025/11/08/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" target="_self">
+          Kafka消费者原理
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/11/08/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" target="_self">
+        <div>
+          Kafka消费者原理前言​	在Kafka生态中，消费者（Consumer）是数据流的出口，负责从Broker拉取消息并进行业务处理。相比于生产者相对线性的发送流程，消费者的实现要复杂得多。 ​	本文将深入剖析消费者的核心实现。我们将从一个KafkaConsumer实例的创建开始，跟随一次poll()调用的完整旅程，详细拆解消费者组初始化、分区订阅、协调器通信、消息拉取、反序列化、位移提交、再均
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2025-11-08 12:48" pubdate>
+              2025-11-08
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2025/09/12/%E7%BC%93%E5%AD%98%E6%B1%A0(Buffer%20Pool)/" target="_self">
+          缓存池(Buffer Pool)
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2025/09/12/%E7%BC%93%E5%AD%98%E6%B1%A0(Buffer%20Pool)/" target="_self">
+        <div>
+          缓存池(Buffer Pool)一、BufferPool 的概念​	BufferPool（缓冲池） 是数据库、消息队列等存储类中间件中常见的一种内存管理机制。其核心思想是在内存中划出一块区域，用于缓存数据页（或消息块），以加速读写操作，减少对磁盘的直接访问。由于内存的读写速度远高于磁盘，BufferPool 能显著提升系统的吞吐量和响应速度。 二、BufferPool 的核心功能 缓存数据页：
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2025-09-12 16:17" pubdate>
+              2025-09-12
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
+            
+              <a href="/tags/Java/">#Java</a>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2025/08/15/Kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%8E%9F%E7%90%86/" target="_self">
           kafka生产者原理解析
         </a>
@@ -231,7 +315,7 @@
       
       <a class="index-excerpt index-excerpt__noimg" href="/2025/08/15/Kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%8E%9F%E7%90%86/" target="_self">
         <div>
-          kafka生产者原理解析一、前言​	在分布式消息队列领域，Apache Kafka 已然成为事实标准。很多同学使用 Kafka 多年，对其生产者（Producer）的使用停留在 API 调用层面，一旦遇到消息发送超时、顺序混乱、性能瓶颈等问题，往往不知从何下手。 ​	本文将深入剖析生产者的实现细节。我们会从KafkaProducer的构建开始，跟随一条消息的“旅行”，详细拆解拦截器（Inter
+          kafka生产者原理解析一、前言​		kafka是目前最流行的消息队列之一，但很多同学使用 Kafka 多年，对其生产者（Producer）的使用停留在 API 调用层面，一旦遇到消息发送超时、顺序混乱、性能瓶颈等问题，往往不知从何下手。 ​	本文将深入剖析生产者的实现细节。详细拆解拦截器（Interceptor）-&gt; 序列化器（Serializer）-&gt; 分区器（Partitio
         </div>
       </a>
 
@@ -545,95 +629,11 @@
     </article>
   </div>
 
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2024/11/12/Spring%20Bean%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96-%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E8%BF%9B%E8%A1%8C%E5%85%A8%E8%A7%A3%E6%9E%90/" target="_self">
-          Spring Bean的实例化 - 从源码角度进行全解析
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2024/11/12/Spring%20Bean%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%8C%96-%E4%BB%8E%E6%BA%90%E7%A0%81%E8%A7%92%E5%BA%A6%E8%BF%9B%E8%A1%8C%E5%85%A8%E8%A7%A3%E6%9E%90/" target="_self">
-        <div>
-          Spring Bean的实例化 - 从源码角度进行全解析一、引言​	在Spring中，一个Bean的“一生”要经历定义解析、实例化、属性填充、初始化、销毁等多个阶段。而我们今天的主角——实例化，是指容器通过反射或工厂方法，为Bean分配内存空间，并创建一个原始对象的过程。 这个过程的宏观起点，通常是从ApplicationContext的refresh()方法开始的。对于非懒加载的单例Bean
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2024-11-12 15:38" pubdate>
-              2024-11-12
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
-            
-              <a href="/tags/Spring%E6%BA%90%E7%A0%81/">#Spring源码</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2024/11/08/SpringBean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F-%E4%BB%8E%E6%BA%90%E7%A0%81%E5%B1%82%E9%9D%A2%E8%BF%9B%E8%A1%8C%E5%85%A8%E8%A7%A3%E6%9E%90/" target="_self">
-          Spring Bean的生命周期：从源码层面进行全解析
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2024/11/08/SpringBean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F-%E4%BB%8E%E6%BA%90%E7%A0%81%E5%B1%82%E9%9D%A2%E8%BF%9B%E8%A1%8C%E5%85%A8%E8%A7%A3%E6%9E%90/" target="_self">
-        <div>
-          Spring Bean的生命周期：从源码层面进行全解析一、引言在Spring框架中，有一个核心概念贯穿始终——Bean。如果说Spring是一个微型的操作系统，那么Bean就是运行在这个系统里的进程。控制反转（IoC）使得Spring容器取代了开发者，成为对象的管理者。 对于很多开发者而言，“Bean生命周期”意味着背下一堆接口名和顺序。但仅仅记住顺序是苍白的，我们真正需要理解的是：  Bea
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2024-11-08 10:38" pubdate>
-              2024-11-08
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E6%A1%86%E6%9E%B6/">#框架</a>
-            
-              <a href="/tags/Spring%E6%BA%90%E7%A0%81/">#Spring源码</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
 
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/#board">8</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/#board">9</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 

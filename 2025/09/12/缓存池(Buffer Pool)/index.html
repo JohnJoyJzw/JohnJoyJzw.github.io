@@ -1,0 +1,716 @@
+
+
+<!DOCTYPE html>
+<html lang="en" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/fluid.png">
+  <link rel="icon" href="/img/fluid.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="JiangZW">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="缓存池(Buffer Pool)一、BufferPool 的概念​	BufferPool（缓冲池） 是数据库、消息队列等存储类中间件中常见的一种内存管理机制。其核心思想是在内存中划出一块区域，用于缓存数据页（或消息块），以加速读写操作，减少对磁盘的直接访问。由于内存的读写速度远高于磁盘，BufferPool 能显著提升系统的吞吐量和响应速度。 二、BufferPool 的核心功能 缓存数据页：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="缓存池(Buffer Pool)">
+<meta property="og:url" content="https://johnjoyjzw.github.io/2025/09/12/%E7%BC%93%E5%AD%98%E6%B1%A0(Buffer%20Pool)/index.html">
+<meta property="og:site_name" content="JohnJoy Blog">
+<meta property="og:description" content="缓存池(Buffer Pool)一、BufferPool 的概念​	BufferPool（缓冲池） 是数据库、消息队列等存储类中间件中常见的一种内存管理机制。其核心思想是在内存中划出一块区域，用于缓存数据页（或消息块），以加速读写操作，减少对磁盘的直接访问。由于内存的读写速度远高于磁盘，BufferPool 能显著提升系统的吞吐量和响应速度。 二、BufferPool 的核心功能 缓存数据页：">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-09-12T08:17:29.000Z">
+<meta property="article:modified_time" content="2026-02-22T08:18:55.706Z">
+<meta property="article:author" content="JiangZW">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="中间件">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>缓存池(Buffer Pool) - JohnJoy Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_hj8rtnfg7um.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_lbnruvf0jn.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"johnjoyjzw.github.io","root":"/","version":"1.9.3","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":null,"gtag":null,"tencent":{"sid":null,"cid":null},"woyaola":null,"cnzz":null,"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false}},"search_path":"/local-search.xml"};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Fluid</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/">
+                <i class="iconfont icon-home-fill"></i>
+                Home
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/">
+                <i class="iconfont icon-archive-fill"></i>
+                Archives
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/">
+                <i class="iconfont icon-category-fill"></i>
+                Categories
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/">
+                <i class="iconfont icon-tags-fill"></i>
+                Tags
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/about/">
+                <i class="iconfont icon-user-fill"></i>
+                About
+              </a>
+            </li>
+          
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" target="_self" href="javascript:;" data-toggle="modal" data-target="#modalSearch" aria-label="Search">
+              &nbsp;<i class="iconfont icon-search"></i>&nbsp;
+            </a>
+          </li>
+          
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">&nbsp;<i
+                class="iconfont icon-dark" id="color-toggle-icon"></i>&nbsp;</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/default.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="缓存池(Buffer Pool)"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2025-09-12 16:17" pubdate>
+          September 12, 2025 pm
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          2.2k words
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          19 mins
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <!-- SEO header -->
+            <h1 style="display: none">缓存池(Buffer Pool)</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <meta name="referrer" content="no-referrer" />
+
+<h2 id="缓存池-Buffer-Pool"><a href="#缓存池-Buffer-Pool" class="headerlink" title="缓存池(Buffer Pool)"></a>缓存池(Buffer Pool)</h2><h3 id="一、BufferPool-的概念"><a href="#一、BufferPool-的概念" class="headerlink" title="一、BufferPool 的概念"></a>一、BufferPool 的概念</h3><p>​	<strong>BufferPool（缓冲池）</strong> 是数据库、消息队列等存储类中间件中常见的一种内存管理机制。其核心思想是在内存中划出一块区域，用于缓存数据页（或消息块），以加速读写操作，减少对磁盘的直接访问。由于内存的读写速度远高于磁盘，BufferPool 能显著提升系统的吞吐量和响应速度。</p>
+<h3 id="二、BufferPool-的核心功能"><a href="#二、BufferPool-的核心功能" class="headerlink" title="二、BufferPool 的核心功能"></a>二、BufferPool 的核心功能</h3><ul>
+<li><strong>缓存数据页</strong>：将磁盘上的数据页（如 4KB、8KB、16KB 的块）缓存在内存中，后续读写优先操作内存。</li>
+<li><strong>减少磁盘 I&#x2F;O</strong>：读操作命中缓存则直接返回；写操作先写入缓存，再通过刷盘机制异步落盘（write-back）。</li>
+<li><strong>管理脏页</strong>：记录被修改但尚未写回磁盘的页，在适当时机刷盘（如 Checkpoint、缓存满、后台线程）。</li>
+<li><strong>淘汰策略</strong>：通常采用 LRU（最近最少使用）或其变种（如 MySQL 的 LRU 链表分区）来淘汰不常用的页，确保热点数据留在内存。</li>
+</ul>
+<h3 id="三、MySQL（InnoDB）中的-BufferPool"><a href="#三、MySQL（InnoDB）中的-BufferPool" class="headerlink" title="三、MySQL（InnoDB）中的 BufferPool"></a>三、MySQL（InnoDB）中的 BufferPool</h3><p>ySQL 的 InnoDB 存储引擎使用 BufferPool 来缓存表和索引数据。它是最重要的内存组件，对性能影响极大。</p>
+<h4 id="3-1-工作原理"><a href="#3-1-工作原理" class="headerlink" title="3.1 工作原理"></a>3.1 工作原理</h4><ul>
+<li><strong>数据页缓存</strong>：InnoDB 将数据划分为 16KB 的页，BufferPool 中缓存这些页。读操作首先查找 BufferPool，若存在则直接返回；否则从磁盘加载页到 BufferPool，再返回数据。</li>
+<li><strong>写操作</strong>：修改数据时，先在 BufferPool 中修改对应的页（标记为脏页），然后写入重做日志（Redo Log）保证持久性，最后在适当时机将脏页刷回磁盘。</li>
+<li><strong>链表结构</strong>：BufferPool 使用三种链表管理页：<ul>
+<li><strong>LRU 链表</strong>：维护所有页，按最近访问时间排序。InnoDB 对传统 LRU 做了优化，将链表分为 young 区和 old 区，防止一次性扫描大量数据把热点页挤出。</li>
+<li><strong>flush 链表</strong>：记录脏页，用于后台刷盘。</li>
+<li><strong>free 链表</strong>：记录空闲页，用于快速分配新页。</li>
+</ul>
+</li>
+<li><strong>刷盘机制</strong>：后台线程（如 Page Cleaner）定期将 flush 链表中的脏页刷回磁盘，同时也会在 BufferPool 满时触发刷盘。</li>
+</ul>
+<h4 id="3-2-配置与调优"><a href="#3-2-配置与调优" class="headerlink" title="3.2 配置与调优"></a>3.2 配置与调优</h4><ul>
+<li><code>innodb_buffer_pool_size</code>：设置缓冲池大小，通常建议为物理内存的 60%~80%。</li>
+<li><code>innodb_buffer_pool_instances</code>：将缓冲池划分为多个实例，减少并发竞争。</li>
+<li><code>SHOW ENGINE INNODB STATUS</code> 可查看 BufferPool 命中率等指标。</li>
+</ul>
+<h3 id="四、Kafka-中的-BufferPool"><a href="#四、Kafka-中的-BufferPool" class="headerlink" title="四、Kafka 中的 BufferPool"></a>四、Kafka 中的 BufferPool</h3><p>Kafka 是一款高吞吐的消息队列，其生产者和消费者端均使用了 BufferPool 来管理内存，主要用于网络发送和接收数据的缓冲。</p>
+<h4 id="4-1-生产者端的-BufferPool（RecordAccumulator）"><a href="#4-1-生产者端的-BufferPool（RecordAccumulator）" class="headerlink" title="4.1 生产者端的 BufferPool（RecordAccumulator）"></a>4.1 生产者端的 BufferPool（RecordAccumulator）</h4><ul>
+<li><strong>作用</strong>：生产者发送消息时，先将消息放入内存中的缓冲区（RecordAccumulator），当缓冲区满了或达到一定时间后，再批量发送给 Broker。这减少了网络请求次数，提高了吞吐量。</li>
+<li><strong>实现</strong>：Kafka 生产者使用 <code>BufferPool</code> 类管理内存块（ByteBuffer）。它维护一个由固定大小的 ByteBuffer 组成的池子（默认 32KB 每块），并支持复用已释放的缓冲区，避免频繁 GC。</li>
+<li><strong>工作流程</strong>：<ol>
+<li>每个分区对应一个双端队列（Deque<RecordBatch>），消息被追加到对应的 RecordBatch 中。</li>
+<li>当需要申请新的内存块时，从 BufferPool 获取 ByteBuffer。</li>
+<li>发送完成后，ByteBuffer 被清空并归还到 BufferPool。</li>
+</ol>
+</li>
+<li><strong>参数</strong>：<code>buffer.memory</code> 控制生产者可用于缓冲的总内存；<code>batch.size</code> 控制每个批次的大小。</li>
+</ul>
+<h4 id="4-2-消费者端的-BufferPool（消费网络接收）"><a href="#4-2-消费者端的-BufferPool（消费网络接收）" class="headerlink" title="4.2 消费者端的 BufferPool（消费网络接收）"></a>4.2 消费者端的 BufferPool（消费网络接收）</h4><ul>
+<li>消费者从 Broker 拉取消息时，也会使用内存缓冲区来暂存数据，然后供应用程序消费。这部分也涉及内存管理，但通常没有生产者那么复杂的池化实现。</li>
+</ul>
+<h4 id="4-3-Broker-端的-BufferPool"><a href="#4-3-Broker-端的-BufferPool" class="headerlink" title="4.3 Broker 端的 BufferPool"></a>4.3 Broker 端的 BufferPool</h4><ul>
+<li>Kafka Broker 在处理网络请求时，也使用池化的 ByteBuffer（如 <code>NetworkReceive</code>、<code>Send</code>）来管理读写缓冲区，减少内存分配开销。</li>
+</ul>
+<h3 id="五、对比"><a href="#五、对比" class="headerlink" title="五、对比"></a>五、对比</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>MySQL InnoDB BufferPool</th>
+<th>Kafka BufferPool（生产者）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>主要目的</strong></td>
+<td>缓存数据页，加速读写，减少磁盘 I&#x2F;O</td>
+<td>缓存消息批次，批量发送，减少网络 I&#x2F;O 和 GC</td>
+</tr>
+<tr>
+<td><strong>管理单位</strong></td>
+<td>数据页（16KB）</td>
+<td>ByteBuffer 块（默认 32KB）</td>
+</tr>
+<tr>
+<td><strong>数据来源</strong></td>
+<td>磁盘中的表和索引页</td>
+<td>生产者发送的消息</td>
+</tr>
+<tr>
+<td><strong>淘汰策略</strong></td>
+<td>LRU 变种，区分 young&#x2F;old 区</td>
+<td>无淘汰，直接申请&#x2F;释放</td>
+</tr>
+<tr>
+<td><strong>刷盘机制</strong></td>
+<td>后台线程将脏页刷回磁盘，配合 Redo Log 保证持久性</td>
+<td>无需刷盘，直接发送到 Broker 后清空</td>
+</tr>
+<tr>
+<td><strong>并发控制</strong></td>
+<td>多实例、链表锁等</td>
+<td>并发线程安全，使用锁或并发数据结构</td>
+</tr>
+</tbody></table>
+<h3 id="六、设计思想"><a href="#六、设计思想" class="headerlink" title="六、设计思想"></a>六、设计思想</h3><ul>
+<li><strong>空间换时间</strong>：利用内存的高性能来掩盖磁盘&#x2F;网络的延迟。</li>
+<li><strong>减少系统调用和分配开销</strong>：通过池化复用，避免频繁的内存分配和释放，降低 GC 压力。</li>
+<li><strong>批量处理</strong>：MySQL 通过缓存页批量刷盘，Kafka 通过批次发送，提升吞吐量。</li>
+</ul>
+<p>理解 BufferPool 的设计对于中间件的性能调优和问题排查至关重要。在 MySQL 中，BufferPool 的大小和命中率直接影响查询性能；在 Kafka 中，生产者缓冲区的配置决定了消息发送的延迟和吞吐量。</p>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
+      
+        <a href="/tags/Java/">#Java</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>缓存池(Buffer Pool)</div>
+      <div>https://johnjoyjzw.github.io/2025/09/12/缓存池(Buffer Pool)/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>Author</div>
+          <div>JiangZW</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>Posted on</div>
+          <div>September 12, 2025</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>Licensed under</div>
+          <div>
+            
+              
+              
+                <a target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - Attribution">
+                    <i class="iconfont icon-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2025/11/08/Kafka%E6%B6%88%E8%B4%B9%E8%80%85%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" title="Kafka消费者原理">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Kafka消费者原理</span>
+                        <span class="visible-mobile">Previous</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2025/08/15/Kafka%E7%94%9F%E4%BA%A7%E8%80%85%E5%8E%9F%E7%90%86/" title="kafka生产者原理解析">
+                        <span class="hidden-mobile">kafka生产者原理解析</span>
+                        <span class="visible-mobile">Next</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;Table of Contents</p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+      <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">Search</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v" for="local-search-input">Keyword</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a> 
+    </div>
+  
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.0/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.18.2/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    window.tocbot.init(Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc));
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/4.3.1/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+  <script  src="/js/local-search.js" ></script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">Blog works best with JavaScript enabled</div>
+  </noscript>
+</body>
+</html>
