@@ -223,6 +223,46 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
+        <a href="/2021/03/01/RabbitMQ/" target="_self">
+          RabbitMQ
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/03/01/RabbitMQ/" target="_self">
+        <div>
+          RabbitMQ1. RabbitMQ引言官方网站：https://www.rabbitmq.com/ 什么是MQMQ(Message Queue)：消息队列。通过典型的生产者和消费者模型，生产者不断的向消息队列中生产消息，消费者不断的从队列中获取消息。因为消息的生产和消费都是异步的，而且只关心消息的发送和接受。没有业务逻辑的侵入，轻松的实现系统间解耦。 别名：消息中间件，通过利用高效可靠的消
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2021-03-01 15:38" pubdate>
+              2021-03-01
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
         <a href="/2021/02/05/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%BA%E5%88%B6/" target="_self">
           垃圾回收机制
         </a>
@@ -265,15 +305,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
-          类加载器
+        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
+          类加载机制
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
         <div>
-          类加载器1.类加载器概述​		类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。 ClassLoader的作用123#
+          虚拟机类加载机制1.概述虚拟机把描述类的数据从Class文件加载到内存中，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。 12345在Java中数据类型分为基本数据类型和引用数据类型。基本数据类型有虚拟机预先定义，引用数据类型需要进行类的加载。在Java语言中，类型的加载、连接和初始化过程都是在程序运行期间完成的，这种策略虽然会令类加
         </div>
       </a>
 
@@ -307,15 +347,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
-          类加载机制
+        <a href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
+          类加载器
         </a>
       </h1>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2021/02/05/%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8/" target="_self">
         <div>
-          虚拟机类加载机制1.概述虚拟机把描述类的数据从Class文件加载到内存中，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这就是虚拟机的类加载机制。 12345在Java中数据类型分为基本数据类型和引用数据类型。基本数据类型有虚拟机预先定义，引用数据类型需要进行类的加载。在Java语言中，类型的加载、连接和初始化过程都是在程序运行期间完成的，这种策略虽然会令类加
+          类加载器1.类加载器概述​		类加载就是将磁盘上的class文件加载到内存中。虚拟机设计团队把类加载阶段的&quot;通过一个类的全限定名获取描述此类的二进制字节流&quot;这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需要的类。实现这个动作的代码模块称为&quot;类加载器&quot;。类加载器是JVM执行类加载机制的前提。 ClassLoader的作用123#
         </div>
       </a>
 
@@ -461,9 +501,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/Redis/">#Redis</a>
-            
               <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+              <a href="/tags/Redis/">#Redis</a>
             
               <a href="/tags/%E7%BC%93%E5%AD%98/">#缓存</a>
             
@@ -586,48 +626,6 @@
             <i class="iconfont icon-tags"></i>
             
               <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
-        <a href="/2021/01/06/%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" target="_self">
-          运行时数据区
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/01/06/%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA/" target="_self">
-        <div>
-          1.什么是运行时数据区 Java虚拟机在执行Java程序的过程中，会涉及的数据划分到不同的内存区域去管理，而这部分区域就是运行时数据区。   运行时数据区有5个区域。分别是：方法区，虚拟机栈，本地方法栈，堆，程序计数器。 其中：这5个区域可以分成两类：线程私有，线程共享  线程私有：虚拟机栈，本地方法栈，程序计数器 线程共享：方法区，堆  线程共享和线程私有的区别是：线程私有是跟随线程的启动而
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-01-06 15:38" pubdate>
-              2021-01-06
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/Java/">#Java</a>
-            
-              <a href="/tags/JVM/">#JVM</a>
             
           </div>
         
