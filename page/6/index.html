@@ -223,46 +223,6 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2021/01/20/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E5%92%8C%E9%94%81/" target="_self">
-          存储引擎和锁
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2021/01/20/%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E5%92%8C%E9%94%81/" target="_self">
-        <div>
-          1、MySQL存储引擎1.1、MySQL的体系结构 12345678# MySQL Server的组成部分1. Connection Pool      			连接池组件2. Management Services &amp; Utilities  管理服务和工具组件3. SQL Interface                    SQL接口组件4. Parser
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2021-01-20 10:38" pubdate>
-              2021-01-20
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/">#数据库</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
         <a href="/2021/01/20/%E7%B4%A2%E5%BC%95/" target="_self">
           索引
         </a>
@@ -553,48 +513,6 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h1 class="index-header">
         
-        <a href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98/" target="_self">
-          线程安全问题
-        </a>
-      </h1>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98/" target="_self">
-        <div>
-          线程安全问题1. 什么是线程安全要编写线程安全的代码，其核心在于要对状态访问操作进行管理，特别是对共享(Shared)的、可变(Mutable)的状态的访问。 共享：变量可以由多个线程同时访问。可变：变量的值在其生命周期内可以发生变化。 一个对象是否是线程安全的，取决于他是否被多个线程同时访问。这指的是程序中访问对象的方式，而不是对想要实现的功能。要使得对象是线程安全的，需要采用同步机制来协同
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2020-10-05 15:38" pubdate>
-              2020-10-05
-            </time>
-          </div>
-        
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
-            
-              <a href="/tags/Java/">#Java</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h1 class="index-header">
-        
         <a href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E6%B1%A0/" target="_self">
           线程池
         </a>
@@ -631,11 +549,95 @@
     </article>
   </div>
 
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E7%9A%84%E9%80%9A%E4%BF%A1/" target="_self">
+          线程的通信
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E7%9A%84%E9%80%9A%E4%BF%A1/" target="_self">
+        <div>
+          线程的其他方法1. 终止线程一般来说线程的执行完毕就会结束，无需手动关闭。但当我们需要手动杀死一个正在运行的线程。可以通过一些方法。 stop方法(废弃)12345# stop()方法不推荐使用因为stop()方法太暴力，会强制杀死线程。这就类似于: 你正在写文档，突然停电，文档没有保存。在程序运行过程中，强制杀死线程，线程还没有来得及保存上下文就结束了。  12345678910111213
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-10-05 15:38" pubdate>
+              2020-10-05
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
+            
+              <a href="/tags/Java/">#Java</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h1 class="index-header">
+        
+        <a href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98/" target="_self">
+          线程安全问题
+        </a>
+      </h1>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2020/10/05/%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98/" target="_self">
+        <div>
+          线程安全问题1. 什么是线程安全要编写线程安全的代码，其核心在于要对状态访问操作进行管理，特别是对共享(Shared)的、可变(Mutable)的状态的访问。 共享：变量可以由多个线程同时访问。可变：变量的值在其生命周期内可以发生变化。 一个对象是否是线程安全的，取决于他是否被多个线程同时访问。这指的是程序中访问对象的方式，而不是对想要实现的功能。要使得对象是线程安全的，需要采用同步机制来协同
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2020-10-05 15:38" pubdate>
+              2020-10-05
+            </time>
+          </div>
+        
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">#多线程</a>
+            
+              <a href="/tags/Java/">#Java</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
 
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <a class="extend prev" rel="prev" href="/page/5/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/#board">4</a><a class="page-number" href="/page/5/#board">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/#board">7</a><a class="page-number" href="/page/8/#board">8</a><a class="page-number" href="/page/9/#board">9</a><a class="extend next" rel="next" href="/page/7/#board"><i class="iconfont icon-arrowright"></i></a>
+      <a class="extend prev" rel="prev" href="/page/5/#board"><i class="iconfont icon-arrowleft"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/#board">4</a><a class="page-number" href="/page/5/#board">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/#board">7</a><a class="page-number" href="/page/8/#board">8</a><a class="extend next" rel="next" href="/page/7/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 
